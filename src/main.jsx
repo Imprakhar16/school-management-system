@@ -5,12 +5,20 @@ import App from "./App.jsx"
 import { Provider } from "react-redux"
 import store from "./store.js"
 import { Toaster } from "react-hot-toast"
+import "@fontsource/roboto/300.css"
+import "@fontsource/roboto/400.css"
+import "@fontsource/roboto/500.css"
+import "@fontsource/roboto/700.css"
+import { ThemeProvider, createTheme } from "@mui/material"
 
+const theme = createTheme()
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <Provider store={store}>
-      <Toaster position="top-right" reverseOrder={false} />
-      <App />
-    </Provider>
+    <ThemeProvider theme={theme}>
+      <Provider store={store}>
+        <Toaster position="top-right" reverseOrder={false} />
+        <App />
+      </Provider>
+    </ThemeProvider>
   </StrictMode>
 )

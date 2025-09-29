@@ -7,7 +7,7 @@ export default {
   useTabs: false, // Use spaces instead of tabs
   bracketSpacing: true, // Add space between brackets in object literals: { foo: bar }
   arrowParens: "always", // Always include parens in arrow functions: (x) => x
-  endOfLine: "auto", // Use system-specific EOL (helps avoid git diff issues)
+  endOfLine: "lf", // Use system-specific EOL (helps avoid git diff issues)
   jsxSingleQuote: false, // Use double quotes in JSX
   jsxBracketSameLine: false, // Put closing `>` of JSX elements on a new line (React-style)
   quoteProps: "as-needed", // Only quote object properties when required
