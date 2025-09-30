@@ -1,6 +1,6 @@
 const API_PATHS = {
   AUTH: {
-    LOGIN: "api/v1/auth/login",
+    LOGIN: "auth/login",
   },
   USER: {
     // users endpoint

@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useDispatch } from "react-redux"
 import {
   Box,
   Container,
@@ -10,17 +11,19 @@ import {
   IconButton,
   Link,
   Divider,
-  Checkbox,
-  FormControlLabel,
 } from "@mui/material"
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material"
+import { useNavigate } from "react-router-dom"
+import { loginUserThunk } from "../../features/auth/authThunk"
 
 const Login = () => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
   })
 
   const handleClickShowPassword = () => {
@@ -36,9 +39,8 @@ const Login = () => {
   }
 
   const handleSubmit = (e) => {
+    dispatch(loginUserThunk(formData)).then(() => navigate("/"))
     e.preventDefault()
-    // console.log("Login submitted:", formData)
-    // Add your login logic here
   }
 
   return (
@@ -130,18 +132,12 @@ const Login = () => {
                 mb: 2,
               }}
             >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="rememberMe"
-                    checked={formData.rememberMe}
-                    onChange={handleChange}
-                    color="primary"
-                  />
-                }
-                label="Remember me"
-              />
-              <Link href="#" variant="body2" underline="hover">
+              <Link
+                href="#"
+                variant="body2"
+                underline="hover"
+                onClick={() => navigate("/forgot-password")}
+              >
                 Forgot password?
               </Link>
             </Box>

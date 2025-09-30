@@ -5,6 +5,7 @@ import DummyHome from "../pages/dashboard/dummyHome.jsx"
 import LoginPage from "../pages/auth/loginPage.jsx"
 import PrivateRoute from "./privateRoutes.jsx"
 import PublicRoute from "./publicRoutes.jsx"
+import ForgotPassword from "../pages/auth/forgotPassword.jsx"
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPassword />,
       },
       // Add other public routes here as needed
     ],
