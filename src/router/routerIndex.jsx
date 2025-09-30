@@ -5,6 +5,7 @@ import DummyHome from "../pages/dashboard/dummyHome.jsx"
 import LoginPage from "../pages/auth/loginPage.jsx"
 import PrivateRoute from "./privateRoutes.jsx"
 import PublicRoute from "./publicRoutes.jsx"
+import TeacherRegistration from "../pages/teachers/addTeacher.jsx"
 
 const router = createBrowserRouter([
   {
@@ -24,7 +25,10 @@ const router = createBrowserRouter([
         path: "/login",
         element: <LoginPage />,
       },
-      // Add other public routes here as needed
+      {
+        path: "/teacherRegister",
+        element: <TeacherRegistration />,
+      },
     ],
   },
 ])
