@@ -1,13 +1,31 @@
-import React, { useState } from "react"
-import { Box, Container, TextField, Button, Typography, Paper, InputAdornment } from "@mui/material"
-import { Email } from "@mui/icons-material"
+import {
+  Box,
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  InputAdornment,
+} from "@mui/material";
+import { Email } from "@mui/icons-material";
+import { useFormik } from "formik";
+import { useDispatch } from "react-redux";
+import * as Yup from "yup";
+import { forgotPasswordThunk } from "../../features/auth/authThunk";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState("")
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-  }
+  const dispatch = useDispatch();
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().email("Invalid email").required("Email is required"),
+    }),
+    onSubmit: (values) => {
+      dispatch(forgotPasswordThunk(values));
+    },
+  });
 
   return (
     <Container component="main" maxWidth="xs">
@@ -37,7 +55,7 @@ const ForgotPassword = () => {
             Enter your registered email address and we’ll send you a link to reset your password.
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: "100%" }}>
+          <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1, width: "100%" }}>
             <TextField
               margin="normal"
               required
@@ -47,8 +65,8 @@ const ForgotPassword = () => {
               name="email"
               autoComplete="email"
               autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formik.values.email}
+              onChange={formik.handleChange}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -65,7 +83,7 @@ const ForgotPassword = () => {
         </Paper>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
-export default ForgotPassword
+export default ForgotPassword;

@@ -1,5 +1,6 @@
-import React, { useState } from "react"
-import { useDispatch } from "react-redux"
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useFormik } from "formik";
 import {
   Box,
   Container,
@@ -11,37 +12,35 @@ import {
   IconButton,
   Link,
   Divider,
-} from "@mui/material"
-import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material"
-import { useNavigate } from "react-router-dom"
-import { loginUserThunk } from "../../features/auth/authThunk"
+} from "@mui/material";
+import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
+import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
+import { loginUserThunk } from "../../features/auth/authThunk";
 
 const Login = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-
-  const [showPassword, setShowPassword] = useState(false)
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  })
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
-    setShowPassword(!showPassword)
-  }
+    setShowPassword(!showPassword);
+  };
 
-  const handleChange = (e) => {
-    const { name, value, checked } = e.target
-    setFormData({
-      ...formData,
-      [name]: name === "rememberMe" ? checked : value,
-    })
-  }
-
-  const handleSubmit = (e) => {
-    dispatch(loginUserThunk(formData)).then(() => navigate("/"))
-    e.preventDefault()
-  }
+  //formik:-
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().email("Invalid email").required("Email is required"),
+      password: Yup.string().min(6, "At least 6 characters").required("Password is required"),
+    }),
+    onSubmit: (values) => {
+      dispatch(loginUserThunk(values)).then(() => navigate("/"));
+    },
+  });
 
   return (
     <Container component="main" maxWidth="xs">
@@ -71,7 +70,7 @@ const Login = () => {
             Please login to your account
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: "100%" }}>
+          <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1, width: "100%" }}>
             <TextField
               margin="normal"
               required
@@ -81,8 +80,10 @@ const Login = () => {
               name="email"
               autoComplete="email"
               autoFocus
-              value={formData.email}
-              onChange={handleChange}
+              value={formik.values.email}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
+              onChange={formik.handleChange}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -101,8 +102,10 @@ const Login = () => {
               type={showPassword ? "text" : "password"}
               id="password"
               autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
+              value={formik.values.password}
+              error={formik.touched.password && Boolean(formik.errors.password)}
+              helperText={formik.touched.password && formik.errors.password}
+              onChange={formik.handleChange}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -164,7 +167,7 @@ const Login = () => {
         </Paper>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
