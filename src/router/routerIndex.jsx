@@ -1,12 +1,13 @@
-import React from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import React from "react"
+import { createBrowserRouter, RouterProvider } from "react-router-dom"
 
-import DummyHome from "../pages/dashboard/dummyHome.jsx";
-import LoginPage from "../pages/auth/loginPage.jsx";
-import PrivateRoute from "./privateRoutes.jsx";
-import PublicRoute from "./publicRoutes.jsx";
-import ForgotPassword from "../pages/auth/forgotPassword.jsx";
-import ResetPassword from "../pages/auth/resetPassword.jsx";
+import DummyHome from "../pages/dashboard/dummyHome.jsx"
+import LoginPage from "../pages/auth/loginPage.jsx"
+import PrivateRoute from "./privateRoutes.jsx"
+import PublicRoute from "./publicRoutes.jsx"
+import ForgotPassword from "../pages/auth/forgotPassword.jsx"
+import ResetPassword from "../pages/auth/resetPassword.jsx"
+import TeacherRegistration from "../pages/teachers/addTeacher.jsx"
 
 const router = createBrowserRouter([
   {
@@ -35,10 +36,11 @@ const router = createBrowserRouter([
         element: <ResetPassword />,
       },
       // Add other public routes here as needed
+      { path: "/teacherRegister", element: <TeacherRegistration /> },
     ],
   },
-]);
+])
 
-const AppRouter = () => <RouterProvider router={router} />;
+const AppRouter = () => <RouterProvider router={router} />
 
-export default AppRouter;
+export default AppRouter
