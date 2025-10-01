@@ -1,17 +1,17 @@
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
 
 export function showToast({ message, status }) {
   switch (status) {
     case "success":
-      toast.success(message)
-      break
+      toast.success(message);
+      break;
     case "error":
-      toast.error(message)
-      break
+      toast.error(message);
+      break;
     case "info":
-      toast(message, { icon: "ℹ️" })
-      break
+      toast(message, { icon: "ℹ️" });
+      break;
     default:
-      toast(message)
+      toast(message);
   }
 }

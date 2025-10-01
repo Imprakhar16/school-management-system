@@ -1,40 +1,70 @@
-import { createSlice } from "@reduxjs/toolkit"
-import { loginUserThunk } from "./authThunk"
+import { createSlice } from "@reduxjs/toolkit";
+import { forgotPasswordThunk, loginUserThunk, resetPasswordThunk } from "./authThunk";
 
 const initialState = {
   user: null,
   token: null,
   loading: false,
   error: null,
-}
+  message: null,
+};
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
     logout: (state) => {
-      state.user = null
+      state.user = null;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(loginUserThunk.pending, (state) => {
-        state.loading = true
-        state.error = null
+        state.loading = true;
+        state.error = null;
       })
       .addCase(loginUserThunk.fulfilled, (state, action) => {
-        state.loading = false
-        state.token = action.payload.data.token
-        state.user = action.payload.data.user
+        state.loading = false;
+        state.token = action.payload.data.token;
+        state.user = action.payload.data.user;
       })
       .addCase(loginUserThunk.rejected, (state, action) => {
-        state.loading = false
+        state.loading = false;
 
-        state.error = action.payload || "Login failed"
+        state.error = action.payload || "Login failed";
       })
+
+      //forgot-password slice:
+      .addCase(forgotPasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(forgotPasswordThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.message = action.payload?.message || "Password has been sent to your email";
+      })
+      .addCase(forgotPasswordThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.error;
+      })
+
+      //reset-password slice:
+      .addCase(resetPasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPasswordThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.payload?.message;
+      })
+      .addCase(resetPasswordThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.message = action.payload.error;
+      });
   },
-})
+});
 
-export const { logout } = authSlice.actions
+export const { logout } = authSlice.actions;
 
-export default authSlice.reducer
+export default authSlice.reducer;
