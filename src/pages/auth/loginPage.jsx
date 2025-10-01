@@ -1,6 +1,6 @@
-import React, { useState } from "react"
-import { useDispatch } from "react-redux"
-import { useFormik } from "formik"
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useFormik } from "formik";
 import {
   Box,
   Container,
@@ -12,20 +12,20 @@ import {
   IconButton,
   Link,
   Divider,
-} from "@mui/material"
-import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material"
-import * as Yup from "yup"
-import { useNavigate } from "react-router-dom"
-import { loginUserThunk } from "../../features/auth/authThunk"
+} from "@mui/material";
+import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
+import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
+import { loginUserThunk } from "../../features/auth/authThunk";
 
 const Login = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const [showPassword, setShowPassword] = useState(false)
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
-    setShowPassword(!showPassword)
-  }
+    setShowPassword(!showPassword);
+  };
 
   //formik:-
   const formik = useFormik({
@@ -38,9 +38,9 @@ const Login = () => {
       password: Yup.string().min(6, "At least 6 characters").required("Password is required"),
     }),
     onSubmit: (values) => {
-      dispatch(loginUserThunk(values)).then(() => navigate("/"))
+      dispatch(loginUserThunk(values)).then(() => navigate("/"));
     },
-  })
+  });
 
   return (
     <Container component="main" maxWidth="xs">
@@ -167,7 +167,7 @@ const Login = () => {
         </Paper>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

@@ -1,6 +1,6 @@
-import React from "react"
-import { useFormik } from "formik"
-import * as Yup from "yup"
+import React from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import {
   Box,
   Button,
@@ -10,10 +10,9 @@ import {
   FormControlLabel,
   Radio,
   Divider,
-} from "@mui/material"
-import { registerTeacher } from "../../services/teacherServices"
+} from "@mui/material";
+import { registerTeacher } from "../../services/teacherServices";
 
-// ✅ Yup Schema
 const validationSchema = Yup.object({
   firstName: Yup.string().required("First Name is required"),
   lastName: Yup.string().required("Last Name is required"),
@@ -32,7 +31,7 @@ const validationSchema = Yup.object({
   experienceDetails: Yup.string().required("Experience details are required"),
   identityVerification: Yup.mixed().required("Aadhar file is required"),
   subject: Yup.string().required("Subject is required"),
-})
+});
 
 const TeacherRegistration = () => {
   const formik = useFormik({
@@ -53,15 +52,15 @@ const TeacherRegistration = () => {
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
-      const formData = new FormData()
+      const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value)
-      })
+        formData.append(key, value);
+      });
 
-      await registerTeacher(formData)
-      resetForm()
+      await registerTeacher(formData);
+      resetForm();
     },
-  })
+  });
 
   return (
     <div>
@@ -222,7 +221,7 @@ const TeacherRegistration = () => {
                     formik.setFieldValue(
                       "photo",
                       event.currentTarget.files ? event.currentTarget.files[0] : null
-                    )
+                    );
                   }}
                 />
                 {formik.touched.photo && formik.errors.photo && (
@@ -243,7 +242,7 @@ const TeacherRegistration = () => {
                     formik.setFieldValue(
                       "experienceCertificate",
                       event.currentTarget.files ? event.currentTarget.files[0] : null
-                    )
+                    );
                   }}
                 />
                 {formik.touched.experienceCertificate && formik.errors.experienceCertificate && (
@@ -264,7 +263,7 @@ const TeacherRegistration = () => {
                     formik.setFieldValue(
                       "identityVerification",
                       event.currentTarget.files ? event.currentTarget.files[0] : null
-                    )
+                    );
                   }}
                 />
                 {formik.touched.identityVerification && formik.errors.identityVerification && (
@@ -283,7 +282,7 @@ const TeacherRegistration = () => {
         </form>
       </Box>
     </div>
-  )
-}
+  );
+};
 
-export default TeacherRegistration
+export default TeacherRegistration;
