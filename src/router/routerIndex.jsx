@@ -1,10 +1,11 @@
-import React from "react"
-import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import DummyHome from "../pages/dashboard/dummyHome.jsx"
-import LoginPage from "../pages/auth/loginPage.jsx"
-import PrivateRoute from "./privateRoutes.jsx"
-import PublicRoute from "./publicRoutes.jsx"
+import DummyHome from "../pages/dashboard/dummyHome.jsx";
+import LoginPage from "../pages/auth/loginPage.jsx";
+import PrivateRoute from "./privateRoutes.jsx";
+import PublicRoute from "./publicRoutes.jsx";
+import StudentForm from "../pages/students/createStudents.jsx";
 
 const router = createBrowserRouter([
   {
@@ -24,11 +25,15 @@ const router = createBrowserRouter([
         path: "/login",
         element: <LoginPage />,
       },
+      {
+        path: "/add-student",
+        element: <StudentForm />,
+      },
       // Add other public routes here as needed
     ],
   },
-])
+]);
 
-const AppRouter = () => <RouterProvider router={router} />
+const AppRouter = () => <RouterProvider router={router} />;
 
-export default AppRouter
+export default AppRouter;

@@ -5,6 +5,6 @@ const API_PATHS = {
   USER: {
     // users endpoint
   },
-}
+};
 
-export default API_PATHS
+export default API_PATHS;

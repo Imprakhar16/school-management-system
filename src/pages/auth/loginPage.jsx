@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 import {
   Box,
   Container,
@@ -12,34 +12,34 @@ import {
   Divider,
   Checkbox,
   FormControlLabel,
-} from "@mui/material"
-import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material"
+} from "@mui/material";
+import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false,
-  })
+  });
 
   const handleClickShowPassword = () => {
-    setShowPassword(!showPassword)
-  }
+    setShowPassword(!showPassword);
+  };
 
   const handleChange = (e) => {
-    const { name, value, checked } = e.target
+    const { name, value, checked } = e.target;
     setFormData({
       ...formData,
       [name]: name === "rememberMe" ? checked : value,
-    })
-  }
+    });
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     // console.log("Login submitted:", formData)
     // Add your login logic here
-  }
+  };
 
   return (
     <Container component="main" maxWidth="xs">
@@ -168,7 +168,7 @@ const Login = () => {
         </Paper>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
