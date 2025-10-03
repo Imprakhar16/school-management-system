@@ -25,3 +25,35 @@ export const loginUser = async (body) => {
     }
   }
 };
+
+export const forgotPassword = async (email) => {
+  try {
+    const response = await axiosInstance.post(API_PATHS.AUTH.FORGOT_PASSWORD, email);
+    showToast({
+      message: `${response.data.message}`,
+      status: "success",
+    });
+    return response;
+  } catch (error) {
+    showToast({
+      message: `${error.message}`,
+      status: "error",
+    });
+  }
+};
+
+export const resetPassword = async (credentials) => {
+  try {
+    const response = await axiosInstance.post(API_PATHS.AUTH.RESET_PASSWORD, credentials);
+    showToast({
+      message: `${response.data.message}`,
+      status: "success",
+    });
+    return response.data;
+  } catch (error) {
+    showToast({
+      message: `${error.message}`,
+      status: "error",
+    });
+  }
+};

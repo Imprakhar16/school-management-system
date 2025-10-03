@@ -1,6 +1,8 @@
 const API_PATHS = {
   AUTH: {
-    LOGIN: "api/v1/auth/login",
+    LOGIN: "auth/login",
+    FORGOT_PASSWORD: "auth/forgot-password",
+    RESET_PASSWORD: "auth/reset-password",
   },
   USER: {
     // users endpoint

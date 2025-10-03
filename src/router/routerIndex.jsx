@@ -6,6 +6,8 @@ import LoginPage from "../pages/auth/loginPage.jsx";
 import PrivateRoute from "./privateRoutes.jsx";
 import PublicRoute from "./publicRoutes.jsx";
 import StudentForm from "../pages/students/createStudents.jsx";
+import ForgotPassword from "../pages/auth/forgotPassword.jsx";
+import ResetPassword from "../pages/auth/resetPassword.jsx";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +16,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <DummyHome />,
+      },
+      {
+        path: "/add-student",
+        element: <StudentForm />,
       },
       // Add other private routes here as needed
     ],
@@ -26,8 +32,12 @@ const router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
-        path: "/add-student",
-        element: <StudentForm />,
+        path: "/forgot-password",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "/reset-password/:token",
+        element: <ResetPassword />,
       },
       // Add other public routes here as needed
     ],
