@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { privateRoutes } from "../router/routerIndex";
+import { privateRoutes } from "../components/routes";
 import {
   Drawer,
   List,

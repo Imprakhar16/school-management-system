@@ -41,7 +41,7 @@ export const privateRoutes = [
     name: "Section",
     path: "/section",
     element: <h1>Section</h1>,
-    showInSidebar: true,
+    showInSidebar: false,
   },
   {
     name: "About",
