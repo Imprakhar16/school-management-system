@@ -18,6 +18,9 @@ import { useNavigate } from "react-router-dom";
 import { loginUserThunk } from "../../features/auth/authThunk";
 import { loginSchema } from "../../validations/validation";
 
+import { useNavigate } from "react-router-dom";
+import { loginUserThunk } from "../../features/auth/authThunk";
+
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
