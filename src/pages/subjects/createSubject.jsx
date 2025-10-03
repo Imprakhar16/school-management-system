@@ -4,15 +4,18 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createSubjectThunk } from "../../features/subjects/subjectThunk";
 import { resetSubjectState } from "../../features/subjects/subjectSlice";
+import { useNavigate } from "react-router-dom";
+import { showToast } from "../../components/toaster";
 
 export default function AddSubject() {
   const dispatch = useDispatch();
   const { loading, success, error } = useSelector((state) => state.subject);
+  const navigate = useNavigate();
 
-  // Check token on mount
+  // Token check once
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    if (!token) alert("⚠️ Please login first to add subjects");
+    if (!token) showToast({ message: "Please login first to add subjects", status: "info" });
   }, []);
 
   // Formik + Yup setup
@@ -34,24 +37,27 @@ export default function AddSubject() {
     }),
     onSubmit: (values) => {
       const token = localStorage.getItem("authToken");
-      if (!token) return alert("⚠️ Please login first to add subjects");
+      if (!token)
+        return showToast({ message: "Please login first to add subjects", status: "info" });
+
       dispatch(createSubjectThunk(values));
     },
   });
 
-  // Handle success/error
+  // Handle success/error with toast
   useEffect(() => {
     if (success) {
-      alert("✅ Subject created successfully!");
+      showToast({ message: "Subject created successfully!", status: "success" });
       formik.resetForm();
       dispatch(resetSubjectState());
+      navigate("/allSubjects");
     }
     if (error) {
       const errorMessage =
         typeof error === "string" ? error : error.message || error.error || JSON.stringify(error);
-      alert(`❌ Failed: ${errorMessage}`);
+      showToast({ message: `Failed: ${errorMessage}`, status: "error" });
     }
-  }, [success, error]);
+  }, [success, error, dispatch, formik, navigate]);
 
   const inputStyle = (field) => ({
     width: "100%",
@@ -80,7 +86,14 @@ export default function AddSubject() {
           padding: "32px",
         }}
       >
-        <h1 style={{ fontSize: "24px", fontWeight: 600, marginBottom: "24px", color: "#1976d2" }}>
+        <h1
+          style={{
+            fontSize: "24px",
+            fontWeight: 600,
+            marginBottom: "24px",
+            color: "#1976d2",
+          }}
+        >
           Add New Subject
         </h1>
 
