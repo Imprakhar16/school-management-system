@@ -65,7 +65,7 @@ const classSlice = createSlice({
       })
       .addCase(deleteClassThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.classes = state.classes.filter((c) => c._id !== action.payload.id);
+        state.classes = state.classes.filter((c) => c._id !== action.payload);
       })
       .addCase(deleteClassThunk.rejected, (state, action) => {
         state.loading = false;

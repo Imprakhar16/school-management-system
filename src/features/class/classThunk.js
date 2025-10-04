@@ -41,8 +41,8 @@ export const deleteClassThunk = createAsyncThunk(
   "class/deleteClass",
   async (id, { rejectWithValue }) => {
     try {
-      const response = await deleteClass(id);
-      return response;
+      await deleteClass(id);
+      return id;
     } catch (err) {
       return rejectWithValue(err);
     }

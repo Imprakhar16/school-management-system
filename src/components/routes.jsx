@@ -34,14 +34,14 @@ export const privateRoutes = [
   {
     name: "Subjects",
     path: "/subjects",
-    element: <SubjectsList/>,
+    element: <SubjectsList />,
     showInSidebar: true,
   },
   {
     name: "AddSubject",
     path: "/addSubject",
-    element: <AddSubject/>,
-    showInSidebar: false
+    element: <AddSubject />,
+    showInSidebar: false,
   },
   {
     name: "Classes",
@@ -49,7 +49,7 @@ export const privateRoutes = [
     element: <ClassList />,
     showInSidebar: true,
   },
-   {
+  {
     name: "AddClass",
     path: "/addClass",
     element: <AddClass />,
@@ -58,13 +58,13 @@ export const privateRoutes = [
   {
     name: "Section",
     path: "/section",
-    element: <SectionHome/>,
-    showInSidebar: false,
+    element: <SectionHome />,
+    showInSidebar: true,
   },
   {
     name: "AddSection",
     path: "/create-section",
-    element: <SectionForm/>,
+    element: <SectionForm />,
     showInSidebar: false,
   },
   {
@@ -73,7 +73,7 @@ export const privateRoutes = [
     element: <h1>About</h1>,
     showInSidebar: true,
   },
- 
+
   // Add other private routes here as needed
 ];
 

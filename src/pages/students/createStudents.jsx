@@ -56,12 +56,7 @@ const StudentForm = () => {
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: (values) => {
-      console.log("Submitting:", {
-        ...values,
-        aadhar: aadharFile,
-        photo: photoFile,
-        certificates: certificatesFiles,
-      });
+      console.log(values);
       alert("Form submitted successfully! Check console for data.");
     },
   });

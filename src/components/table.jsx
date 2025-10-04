@@ -58,7 +58,7 @@ const TableComponent = ({
               <TableRow key={row?._id ?? Math.random()}>
                 {columns.map((col) => (
                   <TableCell key={col?.field ?? Math.random()}>
-                    {col?.render ? col.render(row?.[col.field], row) : row?.[col.field]}
+                    {col?.render ? col.render(row) : (row?.[col.field] ?? "—")}
                   </TableCell>
                 ))}
                 {customRowActions && <TableCell>{customRowActions(row)}</TableCell>}
