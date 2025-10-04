@@ -1,11 +1,20 @@
+import { Button } from "@mui/material";
 import React from "react";
 
-const Button = ({ className, title, type, disabled, onClick }) => {
+const ButtonComp = ({ className, title, type, disabled, onClick, color, variant, fullwidth }) => {
   return (
-    <button type={type} className={className} disabled={disabled} onClick={onClick}>
+    <Button
+      type={type}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      color={color}
+      variant={variant}
+      fullWidth={fullwidth}
+    >
       {title}
-    </button>
+    </Button>
   );
 };
 
-export default Button;
+export default ButtonComp;
