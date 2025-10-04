@@ -26,6 +26,10 @@ import {
   MenuItem,
   Pagination,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
@@ -41,8 +45,9 @@ const SubjectsList = () => {
   const [searchName, setSearchName] = useState("");
   const [searchCode, setSearchCode] = useState("");
 
-  // Inline editing state
-  const [editSubjectId, setEditSubjectId] = useState(null);
+  // Modal state
+  const [openModal, setOpenModal] = useState(false);
+  const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
 
   // Fetch data on mount/page/limit change
@@ -85,31 +90,35 @@ const SubjectsList = () => {
     }
   };
 
-  // Start editing a row
-  const handleEditStart = (subject) => {
-    setEditSubjectId(subject._id);
+  // Open edit modal
+  const handleEditOpen = (subject) => {
+    setEditSubject(subject);
     setEditValues({ name: subject.name, code: subject.code });
+    setOpenModal(true);
   };
 
-  // Cancel editing
-  const handleCancelEdit = () => {
-    setEditSubjectId(null);
+  // Close modal
+  const handleModalClose = () => {
+    setOpenModal(false);
+    setEditSubject(null);
     setEditValues({ name: "", code: "" });
   };
 
   // Save edited subject
-  const handleEditSave = async (_id) => {
+  const handleEditSave = async () => {
+    if (!editSubject?._id) return;
+
     try {
       await dispatch(
         updateSubjectThunk({
-          _id,
+          _id: editSubject._id,
           updatedData: { name: editValues.name, code: editValues.code },
         })
       ).unwrap();
 
       showToast({ message: "✅ Subject updated successfully!", status: "success" });
-      setEditSubjectId(null);
-      setEditValues({ name: "", code: "" });
+      handleModalClose();
+      dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
     } catch (err) {
       showToast({ message: `❌ Failed to update: ${err}`, status: "error" });
     }
@@ -176,77 +185,21 @@ const SubjectsList = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredData.map((subject, index) => {
-                const isEditing = editSubjectId === subject._id;
-                return (
-                  <TableRow key={subject._id || index}>
-                    <TableCell>{(currentPage - 1) * itemsPerPage + (index + 1)}</TableCell>
-
-                    {/* Subject Name */}
-                    <TableCell>
-                      {isEditing ? (
-                        <TextField
-                          size="small"
-                          value={editValues.name}
-                          onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
-                        />
-                      ) : (
-                        subject.name
-                      )}
-                    </TableCell>
-
-                    {/* Subject Code */}
-                    <TableCell>
-                      {isEditing ? (
-                        <TextField
-                          size="small"
-                          value={editValues.code}
-                          onChange={(e) => setEditValues({ ...editValues, code: e.target.value })}
-                        />
-                      ) : (
-                        subject.code
-                      )}
-                    </TableCell>
-
-                    {/* Actions */}
-                    <TableCell>
-                      {isEditing ? (
-                        <>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleEditSave(subject._id)}
-                            sx={{ mr: 1 }}
-                          >
-                            Save
-                          </Button>
-                          <Button size="small" color="secondary" onClick={handleCancelEdit}>
-                            Cancel
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            size="small"
-                            onClick={() => handleEditStart(subject)}
-                            sx={{ mr: 1 }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="small"
-                            color="error"
-                            onClick={() => handleDelete(subject._id)}
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
+              filteredData.map((subject, index) => (
+                <TableRow key={subject._id || index}>
+                  <TableCell>{(currentPage - 1) * itemsPerPage + (index + 1)}</TableCell>
+                  <TableCell>{subject.name}</TableCell>
+                  <TableCell>{subject.code}</TableCell>
+                  <TableCell>
+                    <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
+                      Edit
+                    </Button>
+                    <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
@@ -283,6 +236,35 @@ const SubjectsList = () => {
           />
         </Box>
       )}
+
+      {/* Edit Modal */}
+      <Dialog open={openModal} onClose={handleModalClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Subject</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+            <TextField
+              label="Subject Name"
+              fullWidth
+              value={editValues.name}
+              onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
+            />
+            <TextField
+              label="Subject Code"
+              fullWidth
+              value={editValues.code}
+              onChange={(e) => setEditValues({ ...editValues, code: e.target.value })}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleModalClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleEditSave} variant="contained" color="primary">
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
