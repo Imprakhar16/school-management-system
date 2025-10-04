@@ -145,12 +145,6 @@ const Login = () => {
               Sign In
             </Button>
 
-            <Divider sx={{ my: 2 }}>OR</Divider>
-
-            <Button fullWidth variant="outlined" sx={{ mb: 2 }}>
-              Sign in with Google
-            </Button>
-
             <Box sx={{ textAlign: "center", mt: 2 }}>
               <Typography variant="body2" color="text.secondary">
                 Don't have an account?{" "}
