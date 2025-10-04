@@ -27,10 +27,7 @@ export const loginTeacher = async (body) => {
 };
 export const registerTeacher = async (body) => {
   try {
-    console.log("Register Teacher Body:", body); // dummy log
-    // simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
     showToast({
       message: `Teacher ${body.firstName} ${body.lastName} registered successfully!`,
       status: "success",

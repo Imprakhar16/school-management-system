@@ -70,7 +70,7 @@ const SectionForm = () => {
     if (isEditMode && !existingSection) {
       dispatch(fetchSectionsThunk({ page: 1, limit: 100 }));
     }
-  }, [isEditMode, existingSection]);
+  }, [dispatch, isEditMode, existingSection]);
 
   return (
     <Box

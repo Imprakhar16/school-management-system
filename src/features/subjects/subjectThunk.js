@@ -22,7 +22,6 @@ export const fetchAllSubjectsThunk = createAsyncThunk(
   async ({ page, limit, search }, { rejectWithValue }) => {
     try {
       const response = await fetchAllSubjects({ page, limit, search });
-
       return response;
     } catch (error) {
       return rejectWithValue(

@@ -51,11 +51,10 @@ export default function SideBar({ open, onClose }) {
 
   return (
     <Drawer
-      variant="temporary"
+      variant="persistent"
       open={open}
       onClose={onClose}
       sx={{
-        width: drawerWidth,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           width: drawerWidth,
