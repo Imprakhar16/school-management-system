@@ -1,9 +1,8 @@
 const API_PATHS = {
   AUTH: {
-    LOGIN: "auth/login",
-    LOGIN_TEACHER: "teacher/login",
-    FORGOT_PASSWORD: "auth/forgot-password",
-    RESET_PASSWORD: "auth/reset-password",
+    LOGIN: "/auth/login",
+    FORGOT_PASSWORD: "/auth/forgot-password",
+    RESET_PASSWORD: "/auth/reset-password",
   },
   USER: {
     // users endpoint
@@ -19,6 +18,12 @@ const API_PATHS = {
     CREATE: "section/create",
     DELETE: "section/delete",
     UPDATE: "section/update",
+  },
+  ClASS: {
+    CLASS_LIST: "/class/classes",
+    CREATE_CLASS: "/class/create",
+    EDIT_CLASS: "/class/update",
+    DELETE_CLASS: "/class/delete",
   },
 };
 
