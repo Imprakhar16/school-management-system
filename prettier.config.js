@@ -1,5 +1,6 @@
 export default {
   // No semicolons
+  semi: true,
   singleQuote: false, // Use double quotes (you can switch to true if you prefer single)
   trailingComma: "es5", // Add trailing commas where valid in ES5 (objects, arrays, etc.)
   printWidth: 100, // Line wrap at 100 characters

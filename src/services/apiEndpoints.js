@@ -7,6 +7,11 @@ const API_PATHS = {
   USER: {
     // users endpoint
   },
+  SUBJECT: {
+    CREATE_SUBJECT: "subject/create",
+    ALL_SUBJECTS: "subject/subjects",
+    UPDATE_SUBJECT: "subject/update",
+    DELETE_SUBJECT: "subject/delete",
   SECTION: {
     GET: "section/sections",
     CREATE: "section/create",
