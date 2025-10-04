@@ -5,9 +5,9 @@ import API_PATHS from "./apiEndpoints";
 export const loginUser = async (body) => {
   try {
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, body);
-    localStorage.setItem("authToken", JSON.stringify(response.data.token));
+    localStorage.setItem("authToken", response.data.token);
     showToast({
-      message: `Welcome Back ${response.data.user.firstName}`,
+      message: `Welcome Back ${response.data.user.role}`,
       status: "success",
     });
     return response;
