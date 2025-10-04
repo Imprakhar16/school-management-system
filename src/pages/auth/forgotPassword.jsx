@@ -12,6 +12,7 @@ import { useFormik } from "formik";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
 import { forgotPasswordThunk } from "../../features/auth/authThunk";
+import { forgotPassSchema } from "../../validations/validation";
 
 const ForgotPassword = () => {
   const dispatch = useDispatch();
@@ -19,9 +20,7 @@ const ForgotPassword = () => {
     initialValues: {
       email: "",
     },
-    validationSchema: Yup.object({
-      email: Yup.string().email("Invalid email").required("Email is required"),
-    }),
+    validationSchema: forgotPassSchema,
     onSubmit: (values) => {
       dispatch(forgotPasswordThunk(values));
     },

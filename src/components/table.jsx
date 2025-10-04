@@ -5,43 +5,80 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  TableContainer,
-  Paper,
+  CircularProgress,
+  TablePagination,
   Typography,
 } from "@mui/material";
 
-const ReusableTable = ({ columns, rows, title }) => {
+const TableComponent = ({
+  columns = [],
+  data = [],
+  loading = false,
+  totalCount = 0,
+  page = 1,
+  rowsPerPage = 10,
+  onPageChange,
+  onRowsPerPageChange,
+  customRowActions,
+  emptyMessage = "No data found.",
+}) => {
   return (
-    <TableContainer component={Paper} sx={{ marginTop: 2 }}>
-      {title && (
-        <Typography variant="h6" component="div" sx={{ p: 2 }}>
-          {title}
-        </Typography>
-      )}
-      <Table size="small">
+    <>
+      <Table>
         <TableHead>
           <TableRow>
             {columns.map((col) => (
-              <TableCell key={col.id} align={col.align || "left"}>
-                {col}
+              <TableCell key={col?.field ?? Math.random()} sx={{ fontWeight: "bold" }}>
+                {col?.headerName ?? ""}
               </TableCell>
             ))}
+            {customRowActions && <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>}
           </TableRow>
         </TableHead>
+
         <TableBody>
-          {rows.map((row, rowIndex) => (
-            <TableRow key={row.id || rowIndex}>
-              {columns.map((col) => (
-                <TableCell key={col.id} align={col.align || "left"}>
-                  {col.render ? col.render(row[col.id], row) : row[col.id]}
-                </TableCell>
-              ))}
+          {loading ? (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length + (customRowActions ? 1 : 0)}
+                align="center"
+                sx={{ py: 5 }}
+              >
+                <CircularProgress />
+              </TableCell>
             </TableRow>
-          ))}
+          ) : !data || data.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length + (customRowActions ? 1 : 0)} align="center">
+                <Typography>{emptyMessage}</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            data.map((row) => (
+              <TableRow key={row?._id ?? Math.random()}>
+                {columns.map((col) => (
+                  <TableCell key={col?.field ?? Math.random()}>
+                    {col?.render ? col.render(row?.[col.field], row) : row?.[col.field]}
+                  </TableCell>
+                ))}
+                {customRowActions && <TableCell>{customRowActions(row)}</TableCell>}
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
-    </TableContainer>
+
+      <TablePagination
+        component="div"
+        count={totalCount || 0}
+        page={Math.max(page - 1, 0)}
+        onPageChange={(e, newPage) => onPageChange(newPage + 1)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(e) => onRowsPerPageChange(parseInt(e.target.value, 10))}
+        rowsPerPageOptions={[5, 10, 25]}
+      />
+    </>
   );
 };
 
-export default ReusableTable;
+export default TableComponent;
