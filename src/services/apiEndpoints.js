@@ -7,6 +7,12 @@ const API_PATHS = {
   USER: {
     // users endpoint
   },
+  SECTION: {
+    GET: "section/sections",
+    CREATE: "section/create",
+    DELETE: "section/delete",
+    UPDATE: "section/update",
+  },
 };
 
 export default API_PATHS;

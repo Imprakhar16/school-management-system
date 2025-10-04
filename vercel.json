@@ -4,5 +4,7 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "outputDirectory": "dist",
+  "ignoreCommand": "if [ \"$VERCEL_GIT_BRANCH\" != \"main\" ] && [ \"$VERCEL_GIT_BRANCH\" != \"dev\" ]; then echo 'Skipping deploy for $VERCEL_GIT_BRANCH'; exit 1; fi"
 }
