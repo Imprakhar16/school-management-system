@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -10,42 +10,98 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import useDebounce from "../../hooks/useDebounce";
-import { deleteSectionThunk, fetchSectionsThunk } from "../../features/section/sectionThunk";
+import {
+  deleteSectionThunk,
+  fetchSectionsThunk,
+  updateSectionThunk,
+} from "../../features/section/sectionThunk";
 import { showToast } from "../../components/toaster";
 import Button from "../../components/button";
 import TableComponent from "../../components/table";
-import EditIcon from "@mui/icons-material/Edit";
+import ReusableModal from "../../components/modal";
+import SectionForm from "./createSection"; // Adjust path
 
 const SectionHome = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const { sections, loading, totalCount } = useSelector((state) => state.sections);
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedSectionId, setSelectedSectionId] = useState(null);
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({ sectionId: "", name: "" });
+
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
   const debouncedSearch = useDebounce(search, 500);
 
   useEffect(() => {
     dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
-  }, [page, rowsPerPage, debouncedSearch]);
+  }, [page, rowsPerPage, debouncedSearch, dispatch]);
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = useCallback((e) => {
     setSearch(e.target.value);
     setPage(1);
+  }, []);
+
+  const handleDeleteClick = (id) => {
+    setSelectedSectionId(id);
+    setDeleteModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this section?")) {
-      dispatch(deleteSectionThunk(id)).then(() => {
+  const handleConfirmDelete = () => {
+    if (!selectedSectionId) return;
+
+    dispatch(deleteSectionThunk(selectedSectionId))
+      .unwrap()
+      .then(() => {
         showToast({ status: "success", message: "Section deleted successfully" });
         dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
+      })
+      .catch((error) => {
+        showToast({ status: "error", message: error?.message || "Failed to delete section" });
+      })
+      .finally(() => {
+        setDeleteModalOpen(false);
+        setSelectedSectionId(null);
       });
+  };
+
+  const handleEditClick = (id) => {
+    const section = sections.find((sec) => sec._id === id);
+    if (section) {
+      setEditFormData({ sectionId: section.sectionId || "", name: section.name || "" });
+      setEditModalOpen(true);
+      setSelectedSectionId(id);
     }
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleConfirmEdit = () => {
+    if (!selectedSectionId) return;
+
+    dispatch(updateSectionThunk({ sectionId: selectedSectionId, data: editFormData }))
+      .unwrap()
+      .then(() => {
+        showToast({ status: "success", message: "Section updated successfully" });
+        dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
+        setEditModalOpen(false);
+        setSelectedSectionId(null);
+      })
+      .catch((error) => {
+        showToast({ status: "error", message: error?.message || "Failed to update section" });
+      });
   };
 
   const columns = [
@@ -64,7 +120,7 @@ const SectionHome = () => {
             title="Create Section"
             variant="contained"
             color="primary"
-            onClick={() => navigate("/create-section")}
+            onClick={() => setCreateModalOpen(true)}
           />
         </Box>
 
@@ -99,13 +155,21 @@ const SectionHome = () => {
           customRowActions={(row) => (
             <>
               <Tooltip title="Edit Section">
-                <IconButton color="primary" onClick={() => navigate(`/edit-section/${row._id}`)}>
+                <IconButton
+                  color="primary"
+                  onClick={() => handleEditClick(row._id)}
+                  aria-label="Edit Section"
+                >
                   <EditIcon />
                 </IconButton>
               </Tooltip>
 
               <Tooltip title="Delete Section">
-                <IconButton color="error" onClick={() => handleDelete(row._id)}>
+                <IconButton
+                  color="error"
+                  onClick={() => handleDeleteClick(row._id)}
+                  aria-label="Delete Section"
+                >
                   <DeleteIcon />
                 </IconButton>
               </Tooltip>
@@ -113,6 +177,80 @@ const SectionHome = () => {
           )}
         />
       </Paper>
+
+      {/* Delete Modal */}
+      <ReusableModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title="Confirm Deletion"
+        actions={
+          <>
+            <Button title="Cancel" variant="outlined" onClick={() => setDeleteModalOpen(false)} />
+            <Button
+              title="Delete"
+              variant="contained"
+              color="error"
+              onClick={handleConfirmDelete}
+            />
+          </>
+        }
+      >
+        <Typography>Are you sure you want to delete this section?</Typography>
+      </ReusableModal>
+
+      {/* Edit Modal */}
+      <ReusableModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title="Edit Section"
+        actions={
+          <>
+            <Button title="Cancel" variant="outlined" onClick={() => setEditModalOpen(false)} />
+            <Button title="Save" variant="contained" color="primary" onClick={handleConfirmEdit} />
+          </>
+        }
+      >
+        <Box
+          component="form"
+          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+          noValidate
+          autoComplete="off"
+        >
+          <TextField
+            label="Section ID"
+            name="sectionId"
+            value={editFormData.sectionId}
+            onChange={handleEditInputChange}
+            variant="outlined"
+            fullWidth
+            disabled
+          />
+          <TextField
+            label="Section Name"
+            name="name"
+            value={editFormData.name}
+            onChange={handleEditInputChange}
+            variant="outlined"
+            fullWidth
+          />
+        </Box>
+      </ReusableModal>
+
+      {/* Create Section Modal */}
+      <ReusableModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        title="Create Section"
+        // no actions here because SectionForm handles buttons
+      >
+        <SectionForm
+          onSuccess={() => {
+            setCreateModalOpen(false);
+            dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
+          }}
+          onCancel={() => setCreateModalOpen(false)}
+        />
+      </ReusableModal>
     </Box>
   );
 };
