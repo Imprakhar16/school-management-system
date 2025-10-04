@@ -5,6 +5,12 @@ import ResetPassword from "../pages/auth/resetPassword.jsx";
 
 //PrivateRoutes:-
 import DummyHome from "../pages/dashboard/dummyHome.jsx";
+import ClassList from "../pages/class/classList.jsx";
+import AddClass from "../pages/class/addClass.jsx";
+import SubjectsList from "../pages/subjects/subjectsList.jsx";
+import AddSubject from "../pages/subjects/createSubject.jsx";
+import SectionHome from "../pages/section/sectionsHome.jsx";
+import SectionForm from "../pages/section/createSection.jsx";
 
 export const privateRoutes = [
   {
@@ -28,19 +34,37 @@ export const privateRoutes = [
   {
     name: "Subjects",
     path: "/subjects",
-    element: <h1>Subjects</h1>,
+    element: <SubjectsList/>,
     showInSidebar: true,
+  },
+  {
+    name: "AddSubject",
+    path: "/addSubject",
+    element: <AddSubject/>,
+    showInSidebar: false
   },
   {
     name: "Classes",
     path: "/classes",
-    element: <h1>Classes</h1>,
+    element: <ClassList />,
     showInSidebar: true,
+  },
+   {
+    name: "AddClass",
+    path: "/addClass",
+    element: <AddClass />,
+    showInSidebar: false,
   },
   {
     name: "Section",
     path: "/section",
-    element: <h1>Section</h1>,
+    element: <SectionHome/>,
+    showInSidebar: false,
+  },
+  {
+    name: "AddSection",
+    path: "/create-section",
+    element: <SectionForm/>,
     showInSidebar: false,
   },
   {
@@ -49,6 +73,7 @@ export const privateRoutes = [
     element: <h1>About</h1>,
     showInSidebar: true,
   },
+ 
   // Add other private routes here as needed
 ];
 
