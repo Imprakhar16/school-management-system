@@ -7,7 +7,7 @@ export const loginUser = async (body) => {
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, body);
     localStorage.setItem("authToken", response.data.token);
     showToast({
-      message: `Welcome Back ${response.data.user.firstName}`,
+      message: `Welcome Back ${response.data.user.role}`,
       status: "success",
     });
     return response;
