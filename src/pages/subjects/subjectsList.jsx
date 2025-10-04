@@ -21,6 +21,10 @@ import {
   Paper,
   Typography,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
@@ -28,7 +32,7 @@ import Pagination from "../../components/pagination";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
-  const { data, pagination, loading, error } = useSelector((state) => state.subject);
+  const { data = [], pagination = {}, loading, error } = useSelector((state) => state.subject);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -37,38 +41,26 @@ const SubjectsList = () => {
   const [searchName, setSearchName] = useState("");
   const [searchCode, setSearchCode] = useState("");
 
-  // Inline editing state
-  const [editSubjectId, setEditSubjectId] = useState(null);
+  // Modal state
+  const [openModal, setOpenModal] = useState(false);
+  const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
 
-  // Fetch data on mount/page/limit change
+  // Fetch subjects when page or limit changes
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
   }, [dispatch, currentPage, itemsPerPage]);
 
-  // Filter data locally
-  const filteredData = data
-    ? data?.filter(
-        (subject) =>
-          subject?.name?.toLowerCase().includes(searchName.toLowerCase()) &&
-          subject?.code?.toLowerCase().includes(searchCode.toLowerCase())
-      )
-    : [];
-
-  if (error) {
-    return (
-      <Box display="flex" justifyContent="center" mt={5}>
-        <Typography color="error">Error: {error}</Typography>
-      </Box>
-    );
-  }
+  // Local filter
+  const filteredData = data.filter(
+    (subject) =>
+      subject?.name?.toLowerCase().includes(searchName.toLowerCase()) &&
+      subject?.code?.toLowerCase().includes(searchCode.toLowerCase())
+  );
 
   // Delete subject
   const handleDelete = async (_id) => {
-    if (!_id) {
-      showToast({ message: "❌ Invalid subject ID!", status: "error" });
-      return;
-    }
+    if (!_id) return showToast({ message: "❌ Invalid subject ID!", status: "error" });
 
     if (window.confirm("⚠️ Are you sure you want to delete this subject?")) {
       try {
@@ -81,40 +73,52 @@ const SubjectsList = () => {
     }
   };
 
-  // Start editing a row
-  const handleEditStart = (subject) => {
-    setEditSubjectId(subject._id);
+  // Open edit modal
+  const handleEditOpen = (subject) => {
+    setEditSubject(subject);
     setEditValues({ name: subject.name, code: subject.code });
+    setOpenModal(true);
   };
 
-  // Cancel editing
-  const handleCancelEdit = () => {
-    setEditSubjectId(null);
+  // Close modal
+  const handleModalClose = () => {
+    setOpenModal(false);
+    setEditSubject(null);
     setEditValues({ name: "", code: "" });
   };
 
-  // Save edited subject
-  const handleEditSave = async (_id) => {
+  // Save updated subject
+  const handleEditSave = async () => {
+    if (!editSubject?._id) return;
+
     try {
       await dispatch(
         updateSubjectThunk({
-          _id,
+          _id: editSubject._id,
           updatedData: { name: editValues.name, code: editValues.code },
         })
       ).unwrap();
 
       showToast({ message: "✅ Subject updated successfully!", status: "success" });
-      setEditSubjectId(null);
-      setEditValues({ name: "", code: "" });
+      handleModalClose();
+      dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
     } catch (err) {
       showToast({ message: `❌ Failed to update: ${err}`, status: "error" });
     }
   };
 
+  // Handle page change properly
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    dispatch(fetchAllSubjectsThunk(newPage, itemsPerPage));
   };
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <Typography color="error">Error: {error}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box p={3}>
@@ -123,7 +127,7 @@ const SubjectsList = () => {
         <Typography variant="h5" fontWeight="bold">
           Subjects List
         </Typography>
-        <Link to={"/addSubject"}>
+        <Link to="/addSubject">
           <Button variant="contained" color="primary" startIcon={<AddIcon />}>
             Add Subject
           </Button>
@@ -170,98 +174,71 @@ const SubjectsList = () => {
                   <CircularProgress />
                 </TableCell>
               </TableRow>
-            ) : !filteredData || filteredData.length === 0 ? (
+            ) : filteredData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} align="center">
                   No subjects found
                 </TableCell>
               </TableRow>
             ) : (
-              filteredData.map((subject, index) => {
-                const isEditing = editSubjectId === subject._id;
-                return (
-                  <TableRow key={subject._id || index}>
-                    <TableCell>{(currentPage - 1) * itemsPerPage + (index + 1)}</TableCell>
-
-                    {/* Subject Name */}
-                    <TableCell>
-                      {isEditing ? (
-                        <TextField
-                          size="small"
-                          value={editValues.name}
-                          onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
-                        />
-                      ) : (
-                        subject.name
-                      )}
-                    </TableCell>
-
-                    {/* Subject Code */}
-                    <TableCell>
-                      {isEditing ? (
-                        <TextField
-                          size="small"
-                          value={editValues.code}
-                          onChange={(e) => setEditValues({ ...editValues, code: e.target.value })}
-                        />
-                      ) : (
-                        subject.code
-                      )}
-                    </TableCell>
-
-                    {/* Actions */}
-                    <TableCell>
-                      {isEditing ? (
-                        <>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleEditSave(subject._id)}
-                            sx={{ mr: 1 }}
-                          >
-                            Save
-                          </Button>
-                          <Button size="small" color="secondary" onClick={handleCancelEdit}>
-                            Cancel
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            size="small"
-                            onClick={() => handleEditStart(subject)}
-                            sx={{ mr: 1 }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="small"
-                            color="error"
-                            onClick={() => handleDelete(subject._id)}
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
+              filteredData.map((subject, index) => (
+                <TableRow key={subject._id}>
+                  <TableCell>{(currentPage - 1) * itemsPerPage + (index + 1)}</TableCell>
+                  <TableCell>{subject.name}</TableCell>
+                  <TableCell>{subject.code}</TableCell>
+                  <TableCell>
+                    <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
+                      Edit
+                    </Button>
+                    <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
       </TableContainer>
 
       {/* Pagination */}
-      <Pagination
-        page={currentPage}
-        limit={itemsPerPage}
-        setLimit={setItemsPerPage}
-        onPageChange={handlePageChange}
-        totalPage={pagination.totalPages}
-        total={pagination.totalSubjects}
-      />
+      {pagination?.totalPages > 1 && (
+        <Pagination
+          page={currentPage}
+          limit={itemsPerPage}
+          setLimit={setItemsPerPage}
+          onPageChange={handlePageChange}
+          totalPage={pagination.totalPages || 1}
+          total={pagination.totalSubjects || 0}
+        />
+      )}
+
+      {/* Edit Modal */}
+      <Dialog open={openModal} onClose={handleModalClose}>
+        <DialogTitle>Edit Subject</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Subject Name"
+            fullWidth
+            margin="dense"
+            value={editValues.name}
+            onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
+          />
+          <TextField
+            label="Subject Code"
+            fullWidth
+            margin="dense"
+            value={editValues.code}
+            onChange={(e) => setEditValues({ ...editValues, code: e.target.value })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleModalClose}>Cancel</Button>
+          <Button onClick={handleEditSave} variant="contained" color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
