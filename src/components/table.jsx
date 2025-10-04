@@ -9,17 +9,14 @@ import {
   TablePagination,
   Typography,
 } from "@mui/material";
+import Pagination from "./pagination";
 
 const TableComponent = ({
   columns = [],
   data = [],
   loading = false,
-  totalCount = 0,
-  page = 1,
-  rowsPerPage = 10,
-  onPageChange,
-  onRowsPerPageChange,
   customRowActions,
+  filterRow,
   emptyMessage = "No data found.",
 }) => {
   return (
@@ -34,6 +31,18 @@ const TableComponent = ({
             ))}
             {customRowActions && <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>}
           </TableRow>
+
+          {/* 🔽 Filter row just under the headers */}
+          {filterRow && (
+            <TableRow>
+              {columns.map((col) => (
+                <TableCell key={col?.field ?? Math.random()}>
+                  {filterRow[col.field] || null}
+                </TableCell>
+              ))}
+              {customRowActions && <TableCell />}
+            </TableRow>
+          )}
         </TableHead>
 
         <TableBody>
@@ -58,7 +67,7 @@ const TableComponent = ({
               <TableRow key={row?._id ?? Math.random()}>
                 {columns.map((col) => (
                   <TableCell key={col?.field ?? Math.random()}>
-                    {col?.render ? col.render(row?.[col.field], row) : row?.[col.field]}
+                    {col?.render ? col.render(row) : (row?.[col.field] ?? "—")}
                   </TableCell>
                 ))}
                 {customRowActions && <TableCell>{customRowActions(row)}</TableCell>}
@@ -67,16 +76,6 @@ const TableComponent = ({
           )}
         </TableBody>
       </Table>
-
-      <TablePagination
-        component="div"
-        count={totalCount || 0}
-        page={Math.max(page - 1, 0)}
-        onPageChange={(e, newPage) => onPageChange(newPage + 1)}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={(e) => onRowsPerPageChange(parseInt(e.target.value, 10))}
-        rowsPerPageOptions={[5, 10, 25]}
-      />
     </>
   );
 };

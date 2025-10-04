@@ -4,9 +4,10 @@ import SideBar from "./components/sideBar";
 import Header from "./components/header";
 
 const headerHeight = 80;
+const drawerWidth = 280;
 
 export default function Layout() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const toggleBar = () => setOpen(!open);
 
@@ -18,10 +19,11 @@ export default function Layout() {
         style={{
           flex: 1,
           marginTop: `${headerHeight}px`,
-          marginLeft: open ? "280px" : "0px",
+          marginLeft: open ? `${drawerWidth}px` : "0px",
           padding: "10px",
-          background: "#e4d3d3b6",
+          background: "#ffffffda",
           minHeight: `calc(100vh - ${headerHeight}px)`,
+          transition: "margin-left 0.3s ease",
         }}
       >
         <Outlet />

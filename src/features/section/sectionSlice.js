@@ -13,15 +13,9 @@ const sectionSlice = createSlice({
     loading: false,
     error: null,
     totalCount: null,
+    totalPages: null,
   },
-  reducers: {
-    setPage(state, action) {
-      state.page = action.payload;
-    },
-    setRowsPerPage(state, action) {
-      state.rowsPerPage = action.payload;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchSectionsThunk.pending, (state) => {
@@ -31,7 +25,8 @@ const sectionSlice = createSlice({
       .addCase(fetchSectionsThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.sections = action.payload.sections || [];
-        state.totalCount = action.payload.meta.totalSubjects || 0;
+        state.totalCount = action.payload.meta.totalSections || 0;
+        state.totalPages = action.payload.meta.totalPages || 0;
       })
       .addCase(fetchSectionsThunk.rejected, (state, action) => {
         state.loading = false;

@@ -1,28 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { classListThunk, deleteClassThunk } from "../../features/class/classThunk";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Box,
-  Button,
-  IconButton,
-} from "@mui/material";
-import { Delete, Edit } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { Tooltip, Paper, Typography, Box, IconButton, TextField } from "@mui/material";
+import { Delete, Edit } from "@mui/icons-material";
+import { classListThunk, deleteClassThunk } from "../../features/class/classThunk";
+import ButtonComp from "../../components/button";
+import TableComponent from "../../components/table";
+import { renderArrayChips } from "../../helper/renderHelper";
+import Pagination from "../../components/pagination";
 
 export default function ClassList() {
-  const [page] = useState(1);
-  const [limit] = useState(10);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { classes, loading, error } = useSelector((state) => state.class);
+  const { classes, loading, totalPages, totalCount } = useSelector((state) => state.class);
+
+  const [search, setSearch] = useState({
+    searchClass: "",
+    searchSubject: "",
+    searchSection: "",
+    searchIncharge: "",
+  });
 
   useEffect(() => {
     dispatch(classListThunk(page, limit));
@@ -32,151 +31,138 @@ export default function ClassList() {
     dispatch(deleteClassThunk(id));
   };
 
-  if (loading) return <p> Loading... </p>;
-  if (error) return <p> {error} </p>;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSearch((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  console.log(totalPages, totalCount);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    dispatch(classListThunk({ page: newPage, limit }));
+  };
+
+  const columns = [
+    { field: "name", headerName: "CLASSNAME" },
+    {
+      field: "subjects",
+      headerName: "SUBJECTS",
+      render: (row) => renderArrayChips(row.subjects, (sub) => sub.name || sub.code),
+    },
+    {
+      field: "sections",
+      headerName: "SECTIONS",
+      render: (row) => renderArrayChips(row.sections, (sec) => sec.name),
+    },
+    {
+      field: "classIncharge",
+      headerName: "CLASSINCHARGE",
+      render: (row) =>
+        row.classIncharge ? `${row.classIncharge.firstname} ${row.classIncharge.lastname}` : "N/A",
+    },
+  ];
+
+  const filteredData = classes?.filter(
+    (e) =>
+      String(e.name)?.includes(search.searchClass) &&
+      e.subjects?.some((sub) => String(sub.code).includes(search.searchSubject)) &&
+      e.sections?.some((sec) =>
+        sec.name?.toLowerCase().includes(search.searchSection.toLowerCase())
+      ) &&
+      e.classIncharge?.firstname?.toLowerCase().includes(search.searchIncharge.toLowerCase())
+  );
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header with Title + Button */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 700,
-            background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
+    <Paper sx={{ p: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
           Class List
         </Typography>
-
-        <Button
+        <ButtonComp
+          title="Create Class"
           variant="contained"
-          sx={{
-            borderRadius: "8px",
-            px: 3,
-            py: 1,
-            background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
-            fontWeight: 600,
-            textTransform: "none",
-            boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
-            "&:hover": {
-              background: "linear-gradient(135deg, #2a5298 0%, #1e3c72 100%)",
-            },
-          }}
+          color="primary"
           onClick={() => navigate("/addClass")}
-        >
-          + Create Class
-        </Button>
+        />
       </Box>
 
-      {/* Table */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          borderRadius: 3,
-          boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-          overflow: "hidden",
+      <TableComponent
+        columns={columns}
+        data={filteredData}
+        loading={loading}
+        onChange={handleChange}
+        filterRow={{
+          name: (
+            <TextField
+              placeholder="Search Class"
+              name="searchClass"
+              value={search.searchClass}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+            />
+          ),
+          subjects: (
+            <TextField
+              placeholder="Search Subject"
+              name="searchSubject"
+              value={search.searchSubject}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+            />
+          ),
+          sections: (
+            <TextField
+              placeholder="Search Section"
+              name="searchSection"
+              value={search.searchSection}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+            />
+          ),
+          classIncharge: (
+            <TextField
+              placeholder="Search Incharge"
+              name="searchIncharge"
+              value={search.searchIncharge}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+            />
+          ),
         }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: "#1e3c72" }}>
-              {["Class Name", "Subjects", "Sections", "Created At", "Updated At", "Actions"].map(
-                (head) => (
-                  <TableCell
-                    key={head}
-                    sx={{
-                      color: "#fff",
-                      fontWeight: 600,
-                      textTransform: "uppercase",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    {head}
-                  </TableCell>
-                )
-              )}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {classes?.map((e) => (
-              <TableRow
-                key={e._id}
-                hover
-                sx={{
-                  "&:hover": { backgroundColor: "rgba(30,60,114,0.06)" },
-                  transition: "0.2s ease-in-out",
-                }}
-              >
-                <TableCell sx={{ fontWeight: 500 }}>{e.name}</TableCell>
-                <TableCell>
-                  {e.subjects?.length > 0
-                    ? e.subjects.map((s) => (
-                        <Box
-                          key={s._id}
-                          sx={{
-                            display: "inline-block",
-                            background: "#f0f4ff",
-                            color: "#1e3c72",
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: "12px",
-                            fontSize: "0.8rem",
-                            fontWeight: 500,
-                            mr: 0.5,
-                          }}
-                        >
-                          {s.code || s.name}
-                        </Box>
-                      ))
-                    : "—"}
-                </TableCell>
-                <TableCell>
-                  {e.sections?.length > 0
-                    ? e.sections.map((sec, idx) => (
-                        <Box
-                          key={idx}
-                          sx={{
-                            display: "inline-block",
-                            background: "#e6f7f1",
-                            color: "#0f5132",
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: "12px",
-                            fontSize: "0.8rem",
-                            fontWeight: 500,
-                            mr: 0.5,
-                          }}
-                        >
-                          {sec}
-                        </Box>
-                      ))
-                    : "—"}
-                </TableCell>
-                <TableCell>{new Date(e.createdAt).toLocaleDateString("en-GB")}</TableCell>
-                <TableCell>{new Date(e.updatedAt).toLocaleDateString("en-GB")}</TableCell>
-                <TableCell>
-                  <IconButton color="primary" size="small">
-                    <Edit fontSize="small" />
-                  </IconButton>
-                  <IconButton color="error" size="small">
-                    <Delete fontSize="small" onClick={() => handleDelete(e._id)} />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+        customRowActions={(row) => (
+          <>
+            <Box sx={{ display: "flex", columnGap: 2 }}>
+              <Tooltip title="Edit Section">
+                <IconButton color="primary">
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Delete Section">
+                <IconButton color="error" onClick={() => handleDelete(row._id)}>
+                  <Delete />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </>
+        )}
+      />
+
+      <Pagination
+        page={page}
+        limit={limit}
+        setLimit={setLimit}
+        onPageChange={handlePageChange}
+        totalPage={totalPages}
+        total={totalCount}
+      />
+    </Paper>
   );
 }
