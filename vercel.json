@@ -4,5 +4,6 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "buildCommand": "if [ \"$VERCEL_GIT_BRANCH\" = \"main\" ] || [ \"$VERCEL_GIT_BRANCH\" = \"dev\" ]; then npm run build; else echo 'Skipping build for branch $VERCEL_GIT_BRANCH'; exit 0; fi"
 }
