@@ -14,9 +14,9 @@ import {
   Divider,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
-import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { loginUserThunk } from "../../features/auth/authThunk";
+import { loginSchema } from "../../validations/validation";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -27,16 +27,12 @@ const Login = () => {
     setShowPassword(!showPassword);
   };
 
-  //formik:-
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
     },
-    validationSchema: Yup.object({
-      email: Yup.string().email("Invalid email").required("Email is required"),
-      password: Yup.string().min(6, "At least 6 characters").required("Password is required"),
-    }),
+    validationSchema: loginSchema,
     onSubmit: (values) => {
       dispatch(loginUserThunk(values)).then(() => navigate("/"));
     },
@@ -147,12 +143,6 @@ const Login = () => {
 
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, mb: 2, py: 1.5 }}>
               Sign In
-            </Button>
-
-            <Divider sx={{ my: 2 }}>OR</Divider>
-
-            <Button fullWidth variant="outlined" sx={{ mb: 2 }}>
-              Sign in with Google
             </Button>
 
             <Box sx={{ textAlign: "center", mt: 2 }}>

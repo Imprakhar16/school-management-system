@@ -15,6 +15,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { resetPasswordThunk } from "../../features/auth/authThunk";
 import { useParams } from "react-router-dom";
+import { resetPassSchema } from "../../validations/validation";
 
 export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,12 +27,7 @@ export default function ResetPassword() {
       newPassword: "",
       confirmPassword: "",
     },
-    validationSchema: Yup.object({
-      newPassword: Yup.string().min(6, "At least six characters").required("Password is required"),
-      confirmPassword: Yup.string()
-        .oneOf([Yup.ref("newPassword"), null], "Passwords must match")
-        .required("Confirm Password is required"),
-    }),
+    validationSchema: resetPassSchema,
     onSubmit: (values) => {
       dispatch(resetPasswordThunk({ token, newPassword: values.newPassword }));
     },

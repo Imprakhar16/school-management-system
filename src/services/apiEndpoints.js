@@ -13,6 +13,12 @@ const API_PATHS = {
     UPDATE_SUBJECT: "subject/update",
     DELETE_SUBJECT: "subject/delete",
   },
+  SECTION: {
+    GET: "section/sections",
+    CREATE: "section/create",
+    DELETE: "section/delete",
+    UPDATE: "section/update",
+  },
 };
 
 export default API_PATHS;
