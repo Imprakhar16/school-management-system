@@ -6,7 +6,7 @@ const store = configureStore({
   reducer: {
     auth: authReducer,
     subject: subjectReducer,
-     sections: sectionReducer,   
+    sections: sectionReducer,
   },
 });
 
