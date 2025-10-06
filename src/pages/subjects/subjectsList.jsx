@@ -11,15 +11,16 @@ import {
   Button,
   CircularProgress,
   Typography,
-  TextField,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
 import TableComponent from "../../components/table";
+import SearchInput from "../../components/searchInput";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
@@ -28,19 +29,21 @@ const SubjectsList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
+  // 🔍 Search states
   const [searchName, setSearchName] = useState("");
   const [searchCode, setSearchCode] = useState("");
 
+  // ✏️ Edit modal states
   const [openModal, setOpenModal] = useState(false);
   const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
 
-  // Fetch data
+  // 📦 Fetch subjects
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
   }, [dispatch, currentPage, itemsPerPage]);
 
-  // Filtered subjects
+  // 🔍 Filtered data with memoization
   const filteredData = useMemo(() => {
     if (!data) return [];
     return data.filter(
@@ -50,7 +53,7 @@ const SubjectsList = () => {
     );
   }, [data, searchName, searchCode]);
 
-  // Handle Delete
+  // 🗑️ Delete handler
   const handleDelete = async (_id) => {
     if (!_id) return showToast({ message: "❌ Invalid subject ID!", status: "error" });
 
@@ -65,7 +68,7 @@ const SubjectsList = () => {
     }
   };
 
-  // Edit Handlers
+  // ✏️ Edit handlers
   const handleEditOpen = (subject) => {
     setEditSubject(subject);
     setEditValues({ name: subject.name, code: subject.code });
@@ -80,7 +83,6 @@ const SubjectsList = () => {
 
   const handleEditSave = async () => {
     if (!editSubject?._id) return;
-
     try {
       await dispatch(
         updateSubjectThunk({
@@ -96,7 +98,7 @@ const SubjectsList = () => {
     }
   };
 
-  // Table Columns
+  // 🧱 Table columns with reusable SearchInput
   const columns = [
     {
       field: "slNo",
@@ -108,12 +110,11 @@ const SubjectsList = () => {
       headerName: (
         <Box>
           <Typography variant="subtitle2">Subject Name</Typography>
-          <TextField
-            size="small"
-            placeholder="Search Name"
+          <SearchInput
             value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-            fullWidth
+            onChange={(val) => setSearchName(val)}
+            placeholder="Search Name"
+            debounceTime={300}
           />
         </Box>
       ),
@@ -124,12 +125,11 @@ const SubjectsList = () => {
       headerName: (
         <Box>
           <Typography variant="subtitle2">Sub-Code</Typography>
-          <TextField
-            size="small"
-            placeholder="Search Code"
+          <SearchInput
             value={searchCode}
-            onChange={(e) => setSearchCode(e.target.value)}
-            fullWidth
+            onChange={(val) => setSearchCode(val)}
+            placeholder="Search Code"
+            debounceTime={300}
           />
         </Box>
       ),
@@ -137,7 +137,7 @@ const SubjectsList = () => {
     },
   ];
 
-  // Row Actions
+  // ⚙️ Row actions
   const rowActions = (subject) => (
     <>
       <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
@@ -164,7 +164,7 @@ const SubjectsList = () => {
         <Typography variant="h5" fontWeight="bold">
           Subjects List
         </Typography>
-        <Link to={"/addSubject"}>
+        <Link to="/addSubject">
           <Button variant="contained" color="primary" startIcon={<AddIcon />}>
             Add Subject
           </Button>
