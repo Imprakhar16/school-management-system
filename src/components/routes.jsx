@@ -13,6 +13,7 @@ import SectionForm from "../pages/section/createSection.jsx";
 import StudentsHome from "../pages/students/studentsHome.jsx";
 import StudentForm from "../pages/students/createStudents.jsx";
 import TeacherRegistration from "../pages/teachers/addTeacher.jsx";
+import TeachersList from "../pages/teachers/teachersList.jsx";
 
 export const privateRoutes = [
   {
@@ -36,7 +37,7 @@ export const privateRoutes = [
   {
     name: "Teachers",
     path: "/teachers",
-    element: <h1>Teachers</h1>,
+    element: <TeachersList />,
     showInSidebar: true,
   },
   {

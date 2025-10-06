@@ -26,7 +26,7 @@ import Pagination from "../../components/pagination";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
-  const { data, pagination, loading, error } = useSelector((state) => state.subject);
+  const { data, pagination, loading } = useSelector((state) => state.subject);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);

@@ -1,18 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { loginTeacher, registerTeacher } from "../../services/teacherServices";
-
-//Login
-export const loginTeacherThunk = createAsyncThunk(
-  "teacher/loginTeacher",
-  async (body, { rejectWithValue }) => {
-    try {
-      const data = await loginTeacher(body); // returns response.data
-      return data;
-    } catch (error) {
-      return rejectWithValue(error.message || "Teacher login failed");
-    }
-  }
-);
+import { fetchAllTeachers, registerTeacher } from "../../services/teacherServices";
 
 //Register
 export const registerTeacherThunk = createAsyncThunk(
@@ -23,6 +10,22 @@ export const registerTeacherThunk = createAsyncThunk(
       return data;
     } catch (error) {
       return rejectWithValue(error.message || "Teacher registration failed");
+    }
+  }
+);
+
+//Fetch All Tearchers
+export const fetchAllTeachersThunk = createAsyncThunk(
+  "subject/fetchAllTeachers",
+  async ({ page, limit, search }, { rejectWithValue }) => {
+    try {
+      const response = await fetchAllTeachers({ page, limit, search });
+
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Failed to fetch subjects"
+      );
     }
   }
 );
