@@ -8,7 +8,6 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +18,6 @@ import {
   updateSectionThunk,
 } from "../../features/section/sectionThunk";
 import { showToast } from "../../components/toaster";
-import Button from "../../components/button";
 import TableComponent from "../../components/table";
 import ReusableModal from "../../components/modal";
 import SectionForm from "./createSection"; // Adjust path
@@ -28,6 +26,7 @@ import Pagination from "../../components/pagination";
 
 const SectionHome = () => {
   const dispatch = useDispatch();
+
   const { sections, loading, totalCount, totalPages } = useSelector((state) => state.sections);
 
   const [page, setPage] = useState(1);
@@ -51,6 +50,14 @@ const SectionHome = () => {
   const handleDeleteClick = (id) => {
     setSelectedSectionId(id);
     setDeleteModalOpen(true);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSearch((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleConfirmDelete = () => {
@@ -104,14 +111,6 @@ const SectionHome = () => {
   const handlePageChange = (newPage) => {
     setPage(newPage);
     dispatch(fetchSectionsThunk(newPage, rowsPerPage));
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setSearch((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
   };
 
   const columns = [

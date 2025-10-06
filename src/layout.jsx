@@ -22,7 +22,7 @@ export default function Layout() {
           marginLeft: open ? `${drawerWidth}px` : "0px",
           padding: "10px",
           background: "#ffffffda",
-          minHeight: `calc(100vh - ${headerHeight}px)`,
+          minHeight: `calc(90vh - ${headerHeight}px)`,
           transition: "margin-left 0.3s ease",
         }}
       >

@@ -57,11 +57,7 @@ const Pagination = ({ page, total, limit, setLimit, onPageChange }) => {
 
       {/* Right side: Navigation */}
       <Stack direction="row" spacing={1} alignItems="center">
-        <IconButton
-          onClick={() => onPageChange(page - 1)}
-          disabled={page <= 1}
-          color="primary"
-        >
+        <IconButton onClick={() => onPageChange(page - 1)} disabled={page <= 1} color="primary">
           <ArrowBack />
         </IconButton>
         <Typography variant="body2">
@@ -78,5 +74,3 @@ const Pagination = ({ page, total, limit, setLimit, onPageChange }) => {
     </Box>
   );
 };
-
-export default Pagination;

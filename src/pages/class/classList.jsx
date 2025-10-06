@@ -38,7 +38,6 @@ export default function ClassList() {
       [name]: value,
     }));
   };
-  console.log(totalPages, totalCount);
 
   const handlePageChange = (newPage) => {
     setPage(newPage);

@@ -14,7 +14,10 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { loginPrincipalThunk, loginTeacherThunk } from "../../features/auth/authThunk";
+import {
+  loginPrincipalThunk,
+  loginTeacherThunk,
+} from "../../features/auth/authThunk";
 import { loginSchema } from "../../validations/validation";
 
 const Login = () => {
@@ -74,13 +77,13 @@ const Login = () => {
         }}
       >
         <Grid container>
+          {/* Left side - illustration */}
           <Grid
             item
             xs={12}
             md={6}
             sx={{
               display: { xs: "none", md: "flex" },
-
               alignItems: "center",
               justifyContent: "center",
               padding: 4,
@@ -103,6 +106,7 @@ const Login = () => {
               <Typography variant="h6" sx={{ mt: 2, opacity: 0.9 }}>
                 Streamline your educational institution
               </Typography>
+
               <Box
                 sx={{
                   mt: 4,
@@ -126,6 +130,7 @@ const Login = () => {
             </Box>
           </Grid>
 
+          {/* Right side - form */}
           <Grid
             item
             xs={12}
@@ -137,6 +142,7 @@ const Login = () => {
               justifyContent: "center",
             }}
           >
+            {/* User type tabs */}
             <Box
               sx={{
                 display: "flex",
@@ -159,13 +165,17 @@ const Login = () => {
                     textTransform: "none",
                     fontWeight: 600,
                     fontSize: "0.95rem",
-                    backgroundColor: userType === type.value ? "#1e3a8a" : "transparent",
+                    backgroundColor:
+                      userType === type.value ? "#1e3a8a" : "transparent",
                     color: userType === type.value ? "#ffffff" : "#64748b",
                     boxShadow:
-                      userType === type.value ? "0 2px 8px rgba(30, 58, 138, 0.3)" : "none",
+                      userType === type.value
+                        ? "0 2px 8px rgba(30, 58, 138, 0.3)"
+                        : "none",
                     transition: "all 0.3s ease",
                     "&:hover": {
-                      backgroundColor: userType === type.value ? "#1e40af" : "#e0e7ff",
+                      backgroundColor:
+                        userType === type.value ? "#1e40af" : "#e0e7ff",
                       color: userType === type.value ? "#ffffff" : "#475569",
                     },
                   }}
@@ -175,6 +185,7 @@ const Login = () => {
               ))}
             </Box>
 
+            {/* Title */}
             <Typography
               component="h1"
               variant="h4"
@@ -184,14 +195,23 @@ const Login = () => {
             >
               Welcome Back
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, color: "#64748b" }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 3, color: "#64748b" }}
+            >
               Please login to your account
             </Typography>
 
-            <Box component="form" onSubmit={formik.handleSubmit} sx={{ width: "100%" }}>
+            {/* Form */}
+            <Box
+              component="form"
+              onSubmit={formik.handleSubmit}
+              sx={{ width: "100%" }}
+            >
+              {/* Email */}
               <TextField
                 margin="normal"
-                required
                 fullWidth
                 id="email"
                 label="Email Address"
@@ -212,22 +232,16 @@ const Login = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                    "&:hover fieldset": {
-                      borderColor: "#1e3a8a",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#1e3a8a",
-                    },
+                    "&:hover fieldset": { borderColor: "#1e3a8a" },
+                    "&.Mui-focused fieldset": { borderColor: "#1e3a8a" },
                   },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#1e3a8a",
-                  },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#1e3a8a" },
                 }}
               />
 
+              {/* Password */}
               <TextField
                 margin="normal"
-                required
                 fullWidth
                 name="password"
                 label="Password"
@@ -235,7 +249,9 @@ const Login = () => {
                 id="password"
                 autoComplete="current-password"
                 value={formik.values.password}
-                error={formik.touched.password && Boolean(formik.errors.password)}
+                error={
+                  formik.touched.password && Boolean(formik.errors.password)
+                }
                 helperText={formik.touched.password && formik.errors.password}
                 onChange={formik.handleChange}
                 InputProps={{
@@ -260,19 +276,14 @@ const Login = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                    "&:hover fieldset": {
-                      borderColor: "#1e3a8a",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#1e3a8a",
-                    },
+                    "&:hover fieldset": { borderColor: "#1e3a8a" },
+                    "&.Mui-focused fieldset": { borderColor: "#1e3a8a" },
                   },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#1e3a8a",
-                  },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#1e3a8a" },
                 }}
               />
 
+              {/* Forgot password link */}
               <Box
                 sx={{
                   display: "flex",
@@ -290,34 +301,19 @@ const Login = () => {
                   sx={{
                     color: "#1e3a8a",
                     fontWeight: 600,
-                    "&:hover": {
-                      color: "#1e40af",
-                    },
+                    "&:hover": { color: "#1e40af" },
                   }}
                 >
                   Forgot password?
                 </Link>
               </Box>
 
+              {/* Submit button */}
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
-                sx={{
-                  mt: 2,
-                  mb: 2,
-                  py: 1.5,
-                  borderRadius: 2.5,
-                  backgroundColor: "#1e3a8a",
-                  textTransform: "none",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  boxShadow: "0 4px 12px rgba(30, 58, 138, 0.3)",
-                  "&:hover": {
-                    backgroundColor: "#1e40af",
-                    boxShadow: "0 6px 16px rgba(30, 58, 138, 0.4)",
-                  },
-                }}
+                sx={{ mt: 2, mb: 2, py: 1.5 }}
               >
                 Sign In
               </Button>

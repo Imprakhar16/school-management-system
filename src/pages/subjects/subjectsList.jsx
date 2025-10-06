@@ -253,6 +253,7 @@ const SubjectsList = () => {
         </Table>
       </TableContainer>
 
+      {/* Pagination */}
       <Pagination
         page={currentPage}
         limit={itemsPerPage}

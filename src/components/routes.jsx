@@ -10,6 +10,8 @@ import SubjectsList from "../pages/subjects/subjectsList.jsx";
 import AddSubject from "../pages/subjects/createSubject.jsx";
 import SectionHome from "../pages/section/sectionsHome.jsx";
 import SectionForm from "../pages/section/createSection.jsx";
+import StudentsHome from "../pages/students/studentsHome.jsx";
+import StudentForm from "../pages/students/createStudents.jsx";
 
 export const privateRoutes = [
   {
@@ -21,8 +23,14 @@ export const privateRoutes = [
   {
     name: "Students",
     path: "/students",
-    element: <h1>Students</h1>,
+    element: <StudentsHome />,
     showInSidebar: true,
+  },
+  {
+    name: "CreateStudents",
+    path: "/create-student",
+    element: <StudentForm />,
+    showInSidebar: false,
   },
   {
     name: "Teachers",

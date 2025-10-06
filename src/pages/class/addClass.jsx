@@ -13,6 +13,7 @@ import {
   Select,
   OutlinedInput,
   Chip,
+  Button,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useDispatch, useSelector } from "react-redux";
@@ -33,11 +34,13 @@ export default function AddClass() {
       name: "",
       subjects: [],
       sections: [],
+      classIncharge: "",
     },
     validationSchema: Yup.object({
       name: Yup.string().required("Class name is required"),
       subjects: Yup.array().min(1, "Select at least one subject"),
       sections: Yup.array().min(1, "Select at least one section"),
+      classIncharge: Yup.object().required("Teacher name is requred"),
     }),
     onSubmit: (values) => {
       dispatch(createClassThunk(values));
@@ -51,8 +54,17 @@ export default function AddClass() {
   }, [dispatch]);
 
   return (
-    <Box sx={{ maxWidth: 600, margin: "auto", padding: 4, mt: 8 }}>
+    <Box sx={{ maxWidth: 600, margin: "auto", padding: 4, mt: 2 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{ textTransform: "none" }}
+          >
+            Back
+          </Button>
+        </Box>
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <ButtonComp
             startIcon={<ArrowBackIcon />}
@@ -111,6 +123,37 @@ export default function AddClass() {
             {formik.touched.subjects && formik.errors.subjects && (
               <Typography color="error" variant="caption">
                 {formik.errors.subjects}
+              </Typography>
+            )}
+          </FormControl>
+
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="classIncharge-label">Class Incharge</InputLabel>
+            <Select
+              labelId="classIncharge-label"
+              id="classincharge"
+              name="classIncharge"
+              value={formik.values.classIncharge}
+              onChange={formik.handleChange}
+              input={<OutlinedInput label="Class Incharge" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((id) => {
+                    const sub = data.find((s) => s._id === id);
+                    return <Chip key={id} label={sub?.name || ""} />;
+                  })}
+                </Box>
+              )}
+            >
+              {data.map((s) => (
+                <MenuItem key={s._id} value={s._id}>
+                  {s.name} ({s.code})
+                </MenuItem>
+              ))}
+            </Select>
+            {formik.touched.classIncharge && formik.errors.classIncharge && (
+              <Typography color="error" variant="caption">
+                {formik.errors.classIncharge}
               </Typography>
             )}
           </FormControl>
