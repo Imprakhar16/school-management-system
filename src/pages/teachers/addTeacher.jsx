@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -23,6 +23,7 @@ import { registerTeacher } from "../../services/teacherServices";
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
 import { fetchSectionsThunk } from "../../features/section/sectionThunk";
 
+// ✅ Validation Schema
 const validationSchema = Yup.object({
   EmpId: Yup.number().typeError("Employee ID must be a number").required("Employee ID is required"),
   firstname: Yup.string().required("First Name is required"),
@@ -77,11 +78,6 @@ const TeacherRegistration = () => {
     })();
   }, [dispatch]);
 
-  const subjectMap = useMemo(
-    () => Object.fromEntries(subjectsList.map((subj) => [subj._id, subj.name])),
-    [subjectsList]
-  );
-
   const formik = useFormik({
     initialValues: {
       EmpId: "",
@@ -117,7 +113,9 @@ const TeacherRegistration = () => {
             formData.append("EmpId", Number(val));
           } else if (key === "experienceDuration") {
             formData.append("experienceDuration", new Date(val).toISOString());
-          } else {
+          } else if (key === "classincharge" && val) {
+            formData.append(key, val);
+          } else if (key !== "classincharge") {
             formData.append(key, val);
           }
         });
@@ -165,28 +163,34 @@ const TeacherRegistration = () => {
             </Typography>
             <Divider sx={{ mb: 2 }} />
             <TextField
+              fullWidth
               label="Employee ID"
               name="EmpId"
               value={formik.values.EmpId}
               onChange={formik.handleChange}
               error={!!formik.errors.EmpId}
               helperText={formik.errors.EmpId}
+              sx={{ mb: 2 }}
             />
             <TextField
+              fullWidth
               label="First Name"
               name="firstname"
               value={formik.values.firstname}
               onChange={formik.handleChange}
               error={!!formik.errors.firstname}
               helperText={formik.errors.firstname}
+              sx={{ mb: 2 }}
             />
             <TextField
+              fullWidth
               label="Last Name"
               name="lastname"
               value={formik.values.lastname}
               onChange={formik.handleChange}
               error={!!formik.errors.lastname}
               helperText={formik.errors.lastname}
+              sx={{ mb: 2 }}
             />
             <Typography variant="body1" sx={{ mt: 1 }}>
               Gender
@@ -220,20 +224,23 @@ const TeacherRegistration = () => {
                 input={<OutlinedInput label="Select Subjects" />}
                 renderValue={(selected) => (
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {selected.map((id) => (
-                      <Chip key={id} label={subjectMap[id] || id} />
-                    ))}
+                    {selected.map((id) => {
+                      const subj = subjectsList.find((s) => s._id === id);
+                      return <Chip key={id} label={subj ? `${subj.name} (${subj.code})` : id} />;
+                    })}
                   </Box>
                 )}
               >
                 {subjectsList.map((subj) => (
                   <MenuItem key={subj._id} value={subj._id}>
-                    {subj.name}
+                    {subj.name} ({subj.code})
                   </MenuItem>
                 ))}
               </Select>
               {formik.errors.subjects && (
-                <Typography color="error">{formik.errors.subjects}</Typography>
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.subjects}
+                </Typography>
               )}
             </FormControl>
           </Box>
@@ -245,22 +252,27 @@ const TeacherRegistration = () => {
             </Typography>
             <Divider sx={{ mb: 2 }} />
             <TextField
+              fullWidth
               label="Email"
               name="email"
               value={formik.values.email}
               onChange={formik.handleChange}
               error={!!formik.errors.email}
               helperText={formik.errors.email}
+              sx={{ mb: 2 }}
             />
             <TextField
+              fullWidth
               label="Phone Number"
               name="phoneNumber"
               value={formik.values.phoneNumber}
               onChange={formik.handleChange}
               error={!!formik.errors.phoneNumber}
               helperText={formik.errors.phoneNumber}
+              sx={{ mb: 2 }}
             />
             <TextField
+              fullWidth
               label="Password"
               name="password"
               type="password"
@@ -268,6 +280,7 @@ const TeacherRegistration = () => {
               onChange={formik.handleChange}
               error={!!formik.errors.password}
               helperText={formik.errors.password}
+              sx={{ mb: 2 }}
             />
             <FormControl fullWidth error={!!formik.errors.classincharge}>
               <InputLabel id="classincharge-label">Class Incharge</InputLabel>
@@ -275,6 +288,7 @@ const TeacherRegistration = () => {
                 labelId="classincharge-label"
                 value={formik.values.classincharge}
                 onChange={(e) => formik.setFieldValue("classincharge", e.target.value)}
+                label="Class Incharge"
               >
                 {sectionsList.map((sec) => (
                   <MenuItem key={sec._id} value={sec._id}>
@@ -283,7 +297,9 @@ const TeacherRegistration = () => {
                 ))}
               </Select>
               {formik.errors.classincharge && (
-                <Typography color="error">{formik.errors.classincharge}</Typography>
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.classincharge}
+                </Typography>
               )}
             </FormControl>
           </Box>
@@ -304,6 +320,7 @@ const TeacherRegistration = () => {
               onChange={formik.handleChange}
               error={!!formik.errors.experienceDuration}
               helperText={formik.errors.experienceDuration}
+              sx={{ mb: 2 }}
             />
             <TextField
               fullWidth
@@ -324,24 +341,47 @@ const TeacherRegistration = () => {
               Upload Documents
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            <input type="file" accept="image/*" onChange={handleFileChange("photo")} />
-            {formik.errors.photo && <Typography color="error">{formik.errors.photo}</Typography>}
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={handleFileChange("experienceCertificate")}
-            />
-            {formik.errors.experienceCertificate && (
-              <Typography color="error">{formik.errors.experienceCertificate}</Typography>
-            )}
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={handleFileChange("identityVerification")}
-            />
-            {formik.errors.identityVerification && (
-              <Typography color="error">{formik.errors.identityVerification}</Typography>
-            )}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Photo *
+              </Typography>
+              <input type="file" accept="image/*" onChange={handleFileChange("photo")} />
+              {formik.errors.photo && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.photo}
+                </Typography>
+              )}
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Experience Certificate *
+              </Typography>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={handleFileChange("experienceCertificate")}
+              />
+              {formik.errors.experienceCertificate && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.experienceCertificate}
+                </Typography>
+              )}
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Identity Verification *
+              </Typography>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={handleFileChange("identityVerification")}
+              />
+              {formik.errors.identityVerification && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.identityVerification}
+                </Typography>
+              )}
+            </Box>
           </Box>
 
           <Button variant="contained" type="submit" color="primary" size="large">
