@@ -47,9 +47,16 @@ const ForgotPassword = () => {
             width: "100%",
           }}
         >
-          <Typography component="h1" variant="h4" fontWeight="bold" gutterBottom>
+          <Typography
+            component="h1"
+            variant="h4"
+            fontWeight="bold"
+            gutterBottom
+            sx={{ color: "#1e3a8a" }}
+          >
             Forgot Password
           </Typography>
+
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: "center" }}>
             Enter your registered email address and we’ll send you a link to reset your password.
           </Typography>
@@ -75,7 +82,26 @@ const ForgotPassword = () => {
               }}
             />
 
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2, py: 1.5 }}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                borderRadius: 2.5,
+                backgroundColor: "#1e3a8a",
+                textTransform: "none",
+                fontSize: "1rem",
+                fontWeight: 600,
+                boxShadow: "0 4px 12px rgba(30, 58, 138, 0.3)",
+                "&:hover": {
+                  backgroundColor: "#1e40af",
+                  boxShadow: "0 6px 16px rgba(30, 58, 138, 0.4)",
+                },
+              }}
+            >
               Send Reset Link
             </Button>
           </Box>

@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import { resetPasswordThunk } from "../../features/auth/authThunk";
 import { useParams } from "react-router-dom";
 import { resetPassSchema } from "../../validations/validation";
@@ -58,11 +57,21 @@ export default function ResetPassword() {
             width: "100%",
           }}
         >
-          <Typography component="h1" variant="h4" fontWeight="bold" gutterBottom>
+          <Typography
+            component="h1"
+            variant="h4"
+            fontWeight="bold"
+            gutterBottom
+            sx={{ color: "#1e3a8a" }}
+          >
             Reset Password
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: "center" }}>
-            Enter your New Password
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 3, textAlign: "center", color: "#64748b" }}
+          >
+            Enter your new password below.
           </Typography>
 
           <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1, width: "100%" }}>
@@ -88,6 +97,7 @@ export default function ResetPassword() {
                       aria-label="toggle password visibility"
                       onClick={handleClickShowPassword}
                       edge="end"
+                      sx={{ color: "#1e3a8a" }}
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
@@ -112,7 +122,26 @@ export default function ResetPassword() {
               helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
             />
 
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2, py: 1.5 }}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                borderRadius: 2.5,
+                backgroundColor: "#1e3a8a",
+                textTransform: "none",
+                fontSize: "1rem",
+                fontWeight: 600,
+                boxShadow: "0 4px 12px rgba(30, 58, 138, 0.3)",
+                "&:hover": {
+                  backgroundColor: "#1e40af",
+                  boxShadow: "0 6px 16px rgba(30, 58, 138, 0.4)",
+                },
+              }}
+            >
               Save Password
             </Button>
           </Box>
