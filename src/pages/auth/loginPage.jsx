@@ -14,10 +14,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import {
-  loginPrincipalThunk,
-  loginTeacherThunk,
-} from "../../features/auth/authThunk";
+import { loginPrincipalThunk, loginTeacherThunk } from "../../features/auth/authThunk";
 import { loginSchema } from "../../validations/validation";
 
 const Login = () => {
@@ -165,17 +162,13 @@ const Login = () => {
                     textTransform: "none",
                     fontWeight: 600,
                     fontSize: "0.95rem",
-                    backgroundColor:
-                      userType === type.value ? "#1e3a8a" : "transparent",
+                    backgroundColor: userType === type.value ? "#1e3a8a" : "transparent",
                     color: userType === type.value ? "#ffffff" : "#64748b",
                     boxShadow:
-                      userType === type.value
-                        ? "0 2px 8px rgba(30, 58, 138, 0.3)"
-                        : "none",
+                      userType === type.value ? "0 2px 8px rgba(30, 58, 138, 0.3)" : "none",
                     transition: "all 0.3s ease",
                     "&:hover": {
-                      backgroundColor:
-                        userType === type.value ? "#1e40af" : "#e0e7ff",
+                      backgroundColor: userType === type.value ? "#1e40af" : "#e0e7ff",
                       color: userType === type.value ? "#ffffff" : "#475569",
                     },
                   }}
@@ -195,20 +188,12 @@ const Login = () => {
             >
               Welcome Back
             </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: 3, color: "#64748b" }}
-            >
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, color: "#64748b" }}>
               Please login to your account
             </Typography>
 
             {/* Form */}
-            <Box
-              component="form"
-              onSubmit={formik.handleSubmit}
-              sx={{ width: "100%" }}
-            >
+            <Box component="form" onSubmit={formik.handleSubmit} sx={{ width: "100%" }}>
               {/* Email */}
               <TextField
                 margin="normal"
@@ -249,9 +234,7 @@ const Login = () => {
                 id="password"
                 autoComplete="current-password"
                 value={formik.values.password}
-                error={
-                  formik.touched.password && Boolean(formik.errors.password)
-                }
+                error={formik.touched.password && Boolean(formik.errors.password)}
                 helperText={formik.touched.password && formik.errors.password}
                 onChange={formik.handleChange}
                 InputProps={{
@@ -309,12 +292,7 @@ const Login = () => {
               </Box>
 
               {/* Submit button */}
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 2, mb: 2, py: 1.5 }}
-              >
+              <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, mb: 2, py: 1.5 }}>
                 Sign In
               </Button>
             </Box>

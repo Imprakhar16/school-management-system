@@ -74,3 +74,5 @@ const Pagination = ({ page, total, limit, setLimit, onPageChange }) => {
     </Box>
   );
 };
+
+export default Pagination;
