@@ -1,36 +1,29 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
-import DummyHome from "../pages/dashboard/dummyHome.jsx";
-import LoginPage from "../pages/auth/loginPage.jsx";
+import Layout from "../layout.jsx";
 import PrivateRoute from "./privateRoutes.jsx";
 import PublicRoute from "./publicRoutes.jsx";
-import StudentForm from "../pages/students/createStudents.jsx";
+import { privateRoutes, publicRoutes } from "../components/routes.jsx";
 
 const router = createBrowserRouter([
   {
-    element: <PrivateRoute></PrivateRoute>,
+    element: <PrivateRoute />,
     children: [
       {
-        path: "/",
-        element: <DummyHome />,
+        element: <Layout />,
+        children: privateRoutes.map((route) => ({
+          path: route.path,
+          element: route.element,
+        })),
       },
-      // Add other private routes here as needed
     ],
   },
   {
-    element: <PublicRoute></PublicRoute>,
-    children: [
-      {
-        path: "/login",
-        element: <LoginPage />,
-      },
-      {
-        path: "/add-student",
-        element: <StudentForm />,
-      },
-      // Add other public routes here as needed
-    ],
+    element: <PublicRoute />,
+    children: publicRoutes.map((route) => ({
+      path: route.path,
+      element: route.element,
+    })),
   },
 ]);
 

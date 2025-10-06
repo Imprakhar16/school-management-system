@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useFormik } from "formik";
 import {
   Box,
   Container,
@@ -10,36 +12,31 @@ import {
   IconButton,
   Link,
   Divider,
-  Checkbox,
-  FormControlLabel,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { loginUserThunk } from "../../features/auth/authThunk";
+import { loginSchema } from "../../validations/validation";
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  });
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleChange = (e) => {
-    const { name, value, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === "rememberMe" ? checked : value,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // console.log("Login submitted:", formData)
-    // Add your login logic here
-  };
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: loginSchema,
+    onSubmit: (values) => {
+      dispatch(loginUserThunk(values)).then(() => navigate("/"));
+    },
+  });
 
   return (
     <Container component="main" maxWidth="xs">
@@ -69,7 +66,7 @@ const Login = () => {
             Please login to your account
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: "100%" }}>
+          <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1, width: "100%" }}>
             <TextField
               margin="normal"
               required
@@ -79,8 +76,10 @@ const Login = () => {
               name="email"
               autoComplete="email"
               autoFocus
-              value={formData.email}
-              onChange={handleChange}
+              value={formik.values.email}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
+              onChange={formik.handleChange}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -99,8 +98,10 @@ const Login = () => {
               type={showPassword ? "text" : "password"}
               id="password"
               autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
+              value={formik.values.password}
+              error={formik.touched.password && Boolean(formik.errors.password)}
+              helperText={formik.touched.password && formik.errors.password}
+              onChange={formik.handleChange}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -130,30 +131,18 @@ const Login = () => {
                 mb: 2,
               }}
             >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="rememberMe"
-                    checked={formData.rememberMe}
-                    onChange={handleChange}
-                    color="primary"
-                  />
-                }
-                label="Remember me"
-              />
-              <Link href="#" variant="body2" underline="hover">
+              <Link
+                href="#"
+                variant="body2"
+                underline="hover"
+                onClick={() => navigate("/forgot-password")}
+              >
                 Forgot password?
               </Link>
             </Box>
 
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, mb: 2, py: 1.5 }}>
               Sign In
-            </Button>
-
-            <Divider sx={{ my: 2 }}>OR</Divider>
-
-            <Button fullWidth variant="outlined" sx={{ mb: 2 }}>
-              Sign in with Google
             </Button>
 
             <Box sx={{ textAlign: "center", mt: 2 }}>

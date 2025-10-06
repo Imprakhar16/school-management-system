@@ -32,6 +32,7 @@ export default defineConfig([
       "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],
       "prettier/prettier": "error",
       "no-console": ["warn", { allow: ["warn"] }],
+      semi: ["error", "always"],
     },
   },
 ]);

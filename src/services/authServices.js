@@ -5,9 +5,9 @@ import API_PATHS from "./apiEndpoints";
 export const loginUser = async (body) => {
   try {
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, body);
-    localStorage.setItem("authToken", JSON.stringify(response.data.token));
+    localStorage.setItem("authToken", response.data.token);
     showToast({
-      message: `Welcome Back ${response.data.user.firstName}`,
+      message: `Welcome Back ${response.data.user.role}`,
       status: "success",
     });
     return response;
@@ -23,5 +23,37 @@ export const loginUser = async (body) => {
         status: "error",
       });
     }
+  }
+};
+
+export const forgotPassword = async (email) => {
+  try {
+    const response = await axiosInstance.post(API_PATHS.AUTH.FORGOT_PASSWORD, email);
+    showToast({
+      message: `${response.data.message}`,
+      status: "success",
+    });
+    return response;
+  } catch (error) {
+    showToast({
+      message: `${error.message}`,
+      status: "error",
+    });
+  }
+};
+
+export const resetPassword = async (credentials) => {
+  try {
+    const response = await axiosInstance.post(API_PATHS.AUTH.RESET_PASSWORD, credentials);
+    showToast({
+      message: `${response.data.message}`,
+      status: "success",
+    });
+    return response.data;
+  } catch (error) {
+    showToast({
+      message: `${error.message}`,
+      status: "error",
+    });
   }
 };
