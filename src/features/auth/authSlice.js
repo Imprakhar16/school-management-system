@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { forgotPasswordThunk, loginUserThunk, resetPasswordThunk } from "./authThunk";
+import {
+  forgotPasswordThunk,
+  loginPrincipalThunk,
+  loginTeacherThunk,
+  resetPasswordThunk,
+} from "./authThunk";
 
 const initialState = {
   user: null,
@@ -19,21 +24,34 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginUserThunk.pending, (state) => {
+      .addCase(loginPrincipalThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(loginUserThunk.fulfilled, (state, action) => {
+      .addCase(loginPrincipalThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.token = action.payload.data.token;
         state.user = action.payload.data.user;
       })
-      .addCase(loginUserThunk.rejected, (state, action) => {
+      .addCase(loginPrincipalThunk.rejected, (state, action) => {
         state.loading = false;
 
         state.error = action.payload || "Login failed";
       })
+      .addCase(loginTeacherThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginTeacherThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.token = action.payload.data.token;
+        state.user = action.payload.data.user;
+      })
+      .addCase(loginTeacherThunk.rejected, (state, action) => {
+        state.loading = false;
 
+        state.error = action.payload || "Login failed";
+      })
       //forgot-password slice:
       .addCase(forgotPasswordThunk.pending, (state) => {
         state.loading = true;

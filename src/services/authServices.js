@@ -2,7 +2,7 @@ import { showToast } from "../components/toaster";
 import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 
-export const loginUser = async (body) => {
+export const loginPrincipal = async (body) => {
   try {
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, body);
     localStorage.setItem("authToken", response.data.token);
@@ -12,17 +12,57 @@ export const loginUser = async (body) => {
     });
     return response;
   } catch (error) {
-    if (error.response.data.message === "Password incorrect") {
+    const message = error.response?.data?.message || "Login Failed";
+
+    if (message === "Incorrect password") {
       showToast({
         message: "Invalid Credentials",
         status: "error",
       });
+    } else if (message === "User not found") {
+      showToast({
+        message: "You are trying to login as pricipal , Please login as diffrent module.",
+        status: "error",
+      });
     } else {
       showToast({
-        message: "Login Failled",
+        message: "Login Failed",
         status: "error",
       });
     }
+
+    throw error;
+  }
+};
+
+export const loginTeacher = async (body) => {
+  try {
+    const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN_TEACHER, body);
+    localStorage.setItem("authToken", response.data.token);
+    showToast({
+      message: `Welcome Back ${response.data.teacher.firstname} (Teacher)`,
+      status: "success",
+    });
+    return response;
+  } catch (error) {
+    const message = error.response?.data?.message || "Login Failed";
+    if (message === "Incorrect password") {
+      showToast({
+        message: "Invalid Credentials",
+        status: "error",
+      });
+    } else if (message === "teacher not found") {
+      showToast({
+        message: "You are not a Teacher !!!",
+        status: "error",
+      });
+    } else {
+      showToast({
+        message: "Login Failed",
+        status: "error",
+      });
+    }
+    throw error;
   }
 };
 
