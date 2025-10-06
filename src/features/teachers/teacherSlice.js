@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loginTeacherThunk } from "./teacherThunk";
+import { loginTeacherThunk, registerTeacherThunk } from "./teacherThunk";
 
 const initialState = {
   teacher: null,
   token: null,
   loading: false,
   error: null,
+  success: false,
 };
 
 const teacherSlice = createSlice({
@@ -17,6 +18,11 @@ const teacherSlice = createSlice({
       state.token = null;
       localStorage.removeItem("authToken");
     },
+    resetTeacherState: (state) => {
+      state.loading = false;
+      state.error = null;
+      state.success = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -26,15 +32,31 @@ const teacherSlice = createSlice({
       })
       .addCase(loginTeacherThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.data.token;
-        state.teacher = action.payload.data.teacher;
+        state.success = true;
+        state.token = action.payload.token;
+        state.teacher = action.payload.teacher;
       })
       .addCase(loginTeacherThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Login failed";
+        state.error = action.payload;
+      });
+
+    builder
+      .addCase(registerTeacherThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerTeacherThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.teacher = action.payload.teacher;
+      })
+      .addCase(registerTeacherThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { logout } = teacherSlice.actions;
+export const { logout, resetTeacherState } = teacherSlice.actions;
 export default teacherSlice.reducer;

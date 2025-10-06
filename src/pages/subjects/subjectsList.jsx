@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllSubjectsThunk,
@@ -6,25 +6,11 @@ import {
   updateSubjectThunk,
 } from "../../features/subjects/subjectThunk";
 import { Link } from "react-router-dom";
-
-// Material UI
 import {
   Box,
   Button,
   CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Pagination,
   TextField,
   Dialog,
   DialogTitle,
@@ -33,6 +19,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
+import TableComponent from "../../components/table";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
@@ -41,43 +28,31 @@ const SubjectsList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
-  // Column-specific search state
   const [searchName, setSearchName] = useState("");
   const [searchCode, setSearchCode] = useState("");
 
-  // Modal state
   const [openModal, setOpenModal] = useState(false);
   const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
 
-  // Fetch data on mount/page/limit change
+  // Fetch data
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
   }, [dispatch, currentPage, itemsPerPage]);
 
-  // Filter data locally
-  const filteredData = data
-    ? data?.filter(
-        (subject) =>
-          subject?.name?.toLowerCase().includes(searchName.toLowerCase()) &&
-          subject?.code?.toLowerCase().includes(searchCode.toLowerCase())
-      )
-    : [];
-
-  if (error) {
-    return (
-      <Box display="flex" justifyContent="center" mt={5}>
-        <Typography color="error">Error: {error}</Typography>
-      </Box>
+  // Filtered subjects
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    return data.filter(
+      (subject) =>
+        subject?.name?.toLowerCase().includes(searchName.toLowerCase()) &&
+        subject?.code?.toLowerCase().includes(searchCode.toLowerCase())
     );
-  }
+  }, [data, searchName, searchCode]);
 
-  // Delete subject
+  // Handle Delete
   const handleDelete = async (_id) => {
-    if (!_id) {
-      showToast({ message: "❌ Invalid subject ID!", status: "error" });
-      return;
-    }
+    if (!_id) return showToast({ message: "❌ Invalid subject ID!", status: "error" });
 
     if (window.confirm("⚠️ Are you sure you want to delete this subject?")) {
       try {
@@ -90,21 +65,19 @@ const SubjectsList = () => {
     }
   };
 
-  // Open edit modal
+  // Edit Handlers
   const handleEditOpen = (subject) => {
     setEditSubject(subject);
     setEditValues({ name: subject.name, code: subject.code });
     setOpenModal(true);
   };
 
-  // Close modal
   const handleModalClose = () => {
     setOpenModal(false);
     setEditSubject(null);
     setEditValues({ name: "", code: "" });
   };
 
-  // Save edited subject
   const handleEditSave = async () => {
     if (!editSubject?._id) return;
 
@@ -115,7 +88,6 @@ const SubjectsList = () => {
           updatedData: { name: editValues.name, code: editValues.code },
         })
       ).unwrap();
-
       showToast({ message: "✅ Subject updated successfully!", status: "success" });
       handleModalClose();
       dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
@@ -123,6 +95,67 @@ const SubjectsList = () => {
       showToast({ message: `❌ Failed to update: ${err}`, status: "error" });
     }
   };
+
+  // Table Columns
+  const columns = [
+    {
+      field: "slNo",
+      headerName: "SL.No",
+      render: (value, row) => (currentPage - 1) * itemsPerPage + (filteredData.indexOf(row) + 1),
+    },
+    {
+      field: "name",
+      headerName: (
+        <Box>
+          <Typography variant="subtitle2">Subject Name</Typography>
+          <TextField
+            size="small"
+            placeholder="Search Name"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+            fullWidth
+          />
+        </Box>
+      ),
+      render: (value) => value,
+    },
+    {
+      field: "code",
+      headerName: (
+        <Box>
+          <Typography variant="subtitle2">Sub-Code</Typography>
+          <TextField
+            size="small"
+            placeholder="Search Code"
+            value={searchCode}
+            onChange={(e) => setSearchCode(e.target.value)}
+            fullWidth
+          />
+        </Box>
+      ),
+      render: (value) => value,
+    },
+  ];
+
+  // Row Actions
+  const rowActions = (subject) => (
+    <>
+      <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
+        Edit
+      </Button>
+      <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
+        Delete
+      </Button>
+    </>
+  );
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <Typography color="error">Error: {error}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box p={3}>
@@ -138,103 +171,24 @@ const SubjectsList = () => {
         </Link>
       </Box>
 
-      {/* Table */}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>SL.No</TableCell>
-
-              <TableCell>
-                <Typography variant="subtitle2">Subject Name</Typography>
-                <TextField
-                  size="small"
-                  placeholder="Search Name"
-                  value={searchName}
-                  onChange={(e) => setSearchName(e.target.value)}
-                  fullWidth
-                />
-              </TableCell>
-
-              <TableCell>
-                <Typography variant="subtitle2">Sub-Code</Typography>
-                <TextField
-                  size="small"
-                  placeholder="Search Code"
-                  value={searchCode}
-                  onChange={(e) => setSearchCode(e.target.value)}
-                  fullWidth
-                />
-              </TableCell>
-
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
-                  <CircularProgress />
-                </TableCell>
-              </TableRow>
-            ) : !filteredData || filteredData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} align="center">
-                  No subjects found
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredData.map((subject, index) => (
-                <TableRow key={subject._id || index}>
-                  <TableCell>{(currentPage - 1) * itemsPerPage + (index + 1)}</TableCell>
-                  <TableCell>{subject.name}</TableCell>
-                  <TableCell>{subject.code}</TableCell>
-                  <TableCell>
-                    <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
-                      Edit
-                    </Button>
-                    <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Bottom controls */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} px={1}>
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Rows per page</InputLabel>
-          <Select
-            value={itemsPerPage}
-            label="Rows per page"
-            onChange={(e) => {
-              setItemsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-          >
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={15}>15</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
-      {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={3}>
-          <Pagination
-            count={pagination.totalPages}
-            page={currentPage}
-            onChange={(e, value) => setCurrentPage(value)}
-            color="primary"
-          />
+      {/* ✅ Reusable Table Component */}
+      {loading && !data ? (
+        <Box display="flex" justifyContent="center" alignItems="center" mt={5}>
+          <CircularProgress />
         </Box>
+      ) : (
+        <TableComponent
+          columns={columns}
+          data={filteredData}
+          loading={loading}
+          totalCount={pagination?.totalDocs || filteredData.length}
+          page={currentPage}
+          rowsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onRowsPerPageChange={setItemsPerPage}
+          customRowActions={rowActions}
+          emptyMessage="No subjects found."
+        />
       )}
 
       {/* Edit Modal */}

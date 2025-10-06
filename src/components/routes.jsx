@@ -2,9 +2,12 @@
 import LoginPage from "../pages/auth/loginPage.jsx";
 import ForgotPassword from "../pages/auth/forgotPassword.jsx";
 import ResetPassword from "../pages/auth/resetPassword.jsx";
+import AddSubject from "../pages/subjects/createSubject.jsx";
 
 //PrivateRoutes:-
 import DummyHome from "../pages/dashboard/dummyHome.jsx";
+import SubjectsList from "../pages/subjects/subjectsList.jsx";
+import TeacherRegistration from "../pages/teachers/addTeacher.jsx";
 
 export const privateRoutes = [
   {
@@ -28,7 +31,7 @@ export const privateRoutes = [
   {
     name: "Subjects",
     path: "/subjects",
-    element: <h1>Subjects</h1>,
+    element: <SubjectsList />,
     showInSidebar: true,
   },
   {
@@ -48,6 +51,18 @@ export const privateRoutes = [
     path: "/about",
     element: <h1>About</h1>,
     showInSidebar: true,
+  },
+  {
+    name: "Register-Teacher",
+    path: "/registerTeacher",
+    element: <TeacherRegistration />,
+    showInSidebar: false,
+  },
+  {
+    name: "Add-Subject",
+    path: "/addSubject",
+    element: <AddSubject />,
+    showInSidebar: false,
   },
   // Add other private routes here as needed
 ];
@@ -71,5 +86,6 @@ export const publicRoutes = [
     element: <ResetPassword />,
     showInSidebar: false,
   },
+
   // Add other public routes here as needed
 ];

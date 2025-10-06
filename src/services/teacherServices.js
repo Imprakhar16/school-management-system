@@ -2,46 +2,57 @@ import { showToast } from "../components/toaster";
 import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 
+//TEACHER LOGIN --->
 export const loginTeacher = async (body) => {
   try {
     const response = await axiosInstance.post(API_PATHS.TEACHER.LOGIN, body);
-    localStorage.setItem("teacherAuthToken", JSON.stringify(response.data.token));
-    showToast({
-      message: `Welcome Back ${response.data.teacher.firstName}`,
-      status: "success",
-    });
-    return response;
-  } catch (error) {
-    if (error.response?.data?.message === "Password incorrect") {
-      showToast({
-        message: "Invalid Credentials",
-        status: "error",
-      });
-    } else {
-      showToast({
-        message: "Teacher Login Failed",
-        status: "error",
-      });
-    }
-  }
-};
-export const registerTeacher = async (body) => {
-  try {
-    console.log("Register Teacher Body:", body); // dummy log
-    // simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
+    // Save token in localStorage
+    localStorage.setItem("authToken", JSON.stringify(response.data.token));
+
+    // Success toast
     showToast({
-      message: `Teacher ${body.firstName} ${body.lastName} registered successfully!`,
+      message: `Welcome Back ${response.data.teacher?.firstName || "Teacher"}`,
       status: "success",
     });
 
-    return { data: body };
+    return response.data;
   } catch (error) {
+    const message =
+      error.response?.data?.message === "Password incorrect"
+        ? "Invalid Credentials"
+        : error.response?.data?.message || "Teacher Login Failed";
+
     showToast({
-      message: "Teacher Registration Failed",
+      message,
       status: "error",
     });
-    throw error;
+
+    throw error.response?.data || error;
+  }
+};
+
+//TEACHER REGISTRATION --->
+export const registerTeacher = async (body) => {
+  try {
+    const response = await axiosInstance.post(API_PATHS.TEACHER.REGISTER, body, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    showToast({
+      message: `Teacher ${response.data.teacher?.firstname || body.get("firstname")} registered successfully!`,
+      status: "success",
+    });
+
+    return response.data;
+  } catch (error) {
+    showToast({
+      message: error.response?.data?.message || "Teacher Registration Failed",
+      status: "error",
+    });
+
+    throw error.response?.data || error;
   }
 };
