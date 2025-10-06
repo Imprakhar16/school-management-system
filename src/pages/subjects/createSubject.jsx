@@ -50,7 +50,7 @@ export default function AddSubject() {
       showToast({ message: "Subject created successfully!", status: "success" });
       formik.resetForm();
       dispatch(resetSubjectState());
-      navigate("/allSubjects");
+      navigate("/subjects");
     }
     if (error) {
       const errorMessage =

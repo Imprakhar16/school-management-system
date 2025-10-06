@@ -8,6 +8,7 @@ import AddSubject from "../pages/subjects/createSubject.jsx";
 import DummyHome from "../pages/dashboard/dummyHome.jsx";
 import SubjectsList from "../pages/subjects/subjectsList.jsx";
 import TeacherRegistration from "../pages/teachers/addTeacher.jsx";
+import TeachersList from "../pages/teachers/teachersList.jsx";
 
 export const privateRoutes = [
   {
@@ -25,7 +26,7 @@ export const privateRoutes = [
   {
     name: "Teachers",
     path: "/teachers",
-    element: <h1>Teachers</h1>,
+    element: <TeachersList />,
     showInSidebar: true,
   },
   {
