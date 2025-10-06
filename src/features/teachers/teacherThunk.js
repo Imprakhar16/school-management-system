@@ -1,15 +1,28 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { loginTeacher } from "../../services/teacherServices";
+import { loginTeacher, registerTeacher } from "../../services/teacherServices";
 
+//Login
 export const loginTeacherThunk = createAsyncThunk(
   "teacher/loginTeacher",
   async (body, { rejectWithValue }) => {
     try {
-      const response = await loginTeacher(body);
-      return response;
+      const data = await loginTeacher(body); // returns response.data
+      return data;
     } catch (error) {
-      // ✅ rejectWithValue only accepts one argument
-      return rejectWithValue(error.response?.data?.message || "Login Failed");
+      return rejectWithValue(error.message || "Teacher login failed");
+    }
+  }
+);
+
+//Register
+export const registerTeacherThunk = createAsyncThunk(
+  "teacher/registerTeacher",
+  async (body, { rejectWithValue }) => {
+    try {
+      const data = await registerTeacher(body); // returns response.data
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message || "Teacher registration failed");
     }
   }
 );

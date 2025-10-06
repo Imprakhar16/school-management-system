@@ -32,7 +32,7 @@ import Pagination from "../../components/pagination";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
-  const { data = [], pagination = {}, loading, error } = useSelector((state) => state.subject);
+  const { data, pagination, loading, error } = useSelector((state) => state.subject);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -46,21 +46,34 @@ const SubjectsList = () => {
   const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
 
-  // Fetch subjects when page or limit changes
+  // Fetch data on mount/page/limit change
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
   }, [dispatch, currentPage, itemsPerPage]);
 
-  // Local filter
-  const filteredData = data.filter(
-    (subject) =>
-      subject?.name?.toLowerCase().includes(searchName.toLowerCase()) &&
-      subject?.code?.toLowerCase().includes(searchCode.toLowerCase())
-  );
+  // Filter data locally
+  const filteredData = data
+    ? data?.filter(
+        (subject) =>
+          subject?.name?.toLowerCase().includes(searchName.toLowerCase()) &&
+          subject?.code?.toLowerCase().includes(searchCode.toLowerCase())
+      )
+    : [];
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <Typography color="error">Error: {error}</Typography>
+      </Box>
+    );
+  }
 
   // Delete subject
   const handleDelete = async (_id) => {
-    if (!_id) return showToast({ message: "❌ Invalid subject ID!", status: "error" });
+    if (!_id) {
+      showToast({ message: "❌ Invalid subject ID!", status: "error" });
+      return;
+    }
 
     if (window.confirm("⚠️ Are you sure you want to delete this subject?")) {
       try {
@@ -87,7 +100,7 @@ const SubjectsList = () => {
     setEditValues({ name: "", code: "" });
   };
 
-  // Save updated subject
+  // Save edited subject
   const handleEditSave = async () => {
     if (!editSubject?._id) return;
 
@@ -107,18 +120,10 @@ const SubjectsList = () => {
     }
   };
 
-  // Handle page change properly
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
+    dispatch(fetchAllSubjectsThunk(newPage, itemsPerPage));
   };
-
-  if (error) {
-    return (
-      <Box display="flex" justifyContent="center" mt={5}>
-        <Typography color="error">Error: {error}</Typography>
-      </Box>
-    );
-  }
 
   return (
     <Box p={3}>
@@ -127,7 +132,7 @@ const SubjectsList = () => {
         <Typography variant="h5" fontWeight="bold">
           Subjects List
         </Typography>
-        <Link to="/addSubject">
+        <Link to={"/addSubject"}>
           <Button variant="contained" color="primary" startIcon={<AddIcon />}>
             Add Subject
           </Button>
@@ -174,7 +179,7 @@ const SubjectsList = () => {
                   <CircularProgress />
                 </TableCell>
               </TableRow>
-            ) : filteredData.length === 0 ? (
+            ) : !filteredData || filteredData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} align="center">
                   No subjects found
@@ -182,7 +187,7 @@ const SubjectsList = () => {
               </TableRow>
             ) : (
               filteredData.map((subject, index) => (
-                <TableRow key={subject._id}>
+                <TableRow key={subject._id || index}>
                   <TableCell>{(currentPage - 1) * itemsPerPage + (index + 1)}</TableCell>
                   <TableCell>{subject.name}</TableCell>
                   <TableCell>{subject.code}</TableCell>
@@ -202,43 +207,14 @@ const SubjectsList = () => {
       </TableContainer>
 
       {/* Pagination */}
-      {pagination?.totalPages > 1 && (
-        <Pagination
-          page={currentPage}
-          limit={itemsPerPage}
-          setLimit={setItemsPerPage}
-          onPageChange={handlePageChange}
-          totalPage={pagination.totalPages || 1}
-          total={pagination.totalSubjects || 0}
-        />
-      )}
-
-      {/* Edit Modal */}
-      <Dialog open={openModal} onClose={handleModalClose}>
-        <DialogTitle>Edit Subject</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Subject Name"
-            fullWidth
-            margin="dense"
-            value={editValues.name}
-            onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
-          />
-          <TextField
-            label="Subject Code"
-            fullWidth
-            margin="dense"
-            value={editValues.code}
-            onChange={(e) => setEditValues({ ...editValues, code: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleModalClose}>Cancel</Button>
-          <Button onClick={handleEditSave} variant="contained" color="primary">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Pagination
+        page={currentPage}
+        limit={itemsPerPage}
+        setLimit={setItemsPerPage}
+        onPageChange={handlePageChange}
+        totalPage={pagination.totalPages}
+        total={pagination.totalSubjects}
+      />
     </Box>
   );
 };

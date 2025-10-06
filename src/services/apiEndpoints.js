@@ -25,6 +25,10 @@ const API_PATHS = {
     EDIT_CLASS: "/class/update",
     DELETE_CLASS: "/class/delete",
   },
+  TEACHER: {
+    LOGIN: "teacher/login",
+    REGISTER: "teacher/create",
+  },
 };
 
 export default API_PATHS;

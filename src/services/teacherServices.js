@@ -1,19 +1,40 @@
 import { showToast } from "../components/toaster";
+import { axiosInstance } from "../helper/axiosInterceptors";
+import API_PATHS from "./apiEndpoints";
 
+//TEACHER REGISTRATION --->
 export const registerTeacher = async (body) => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await axiosInstance.post(API_PATHS.TEACHER.REGISTER, body, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
     showToast({
-      message: `Teacher ${body.firstName} ${body.lastName} registered successfully!`,
+      message: `Teacher ${response.data.teacher?.firstname || body.get("firstname")} registered successfully!`,
       status: "success",
     });
 
-    return { data: body };
+    return response.data;
   } catch (error) {
     showToast({
-      message: "Teacher Registration Failed",
+      message: error.response?.data?.message || "Teacher Registration Failed",
       status: "error",
     });
-    throw error;
+
+    throw error.response?.data || error;
+  }
+};
+
+// fetch all teachers -->
+export const fetchAllTeachers = async ({ page, limit, search }) => {
+  try {
+    const params = { page, limit };
+    if (search) params.search = search;
+    const response = await axiosInstance.get(API_PATHS.TEACHER.ALL_TEACHERS, { params });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
   }
 };

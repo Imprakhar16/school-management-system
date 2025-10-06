@@ -12,6 +12,7 @@ import SectionHome from "../pages/section/sectionsHome.jsx";
 import SectionForm from "../pages/section/createSection.jsx";
 import StudentsHome from "../pages/students/studentsHome.jsx";
 import StudentForm from "../pages/students/createStudents.jsx";
+import TeacherRegistration from "../pages/teachers/addTeacher.jsx";
 
 export const privateRoutes = [
   {
@@ -81,6 +82,18 @@ export const privateRoutes = [
     showInSidebar: true,
   },
 
+  {
+    name: "Register-Teacher",
+    path: "/registerTeacher",
+    element: <TeacherRegistration />,
+    showInSidebar: false,
+  },
+  {
+    name: "Add-Subject",
+    path: "/addSubject",
+    element: <AddSubject />,
+    showInSidebar: false,
+  },
   // Add other private routes here as needed
 ];
 
@@ -103,5 +116,6 @@ export const publicRoutes = [
     element: <ResetPassword />,
     showInSidebar: false,
   },
+
   // Add other public routes here as needed
 ];
