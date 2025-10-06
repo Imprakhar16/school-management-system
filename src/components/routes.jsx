@@ -4,12 +4,14 @@ import ResetPassword from "../pages/auth/resetPassword.jsx";
 
 //PrivateRoutes:-
 import DummyHome from "../pages/dashboard/dummyHome.jsx";
-// import ClassList from "../pages/class/classList.jsx";
-// import AddClass from "../pages/class/addClass.jsx";
+import ClassList from "../pages/class/classList.jsx";
+import AddClass from "../pages/class/addClass.jsx";
 import SubjectsList from "../pages/subjects/subjectsList.jsx";
 import AddSubject from "../pages/subjects/createSubject.jsx";
 import SectionHome from "../pages/section/sectionsHome.jsx";
 import SectionForm from "../pages/section/createSection.jsx";
+import StudentsHome from "../pages/students/studentsHome.jsx";
+import StudentForm from "../pages/students/createStudents.jsx";
 
 export const privateRoutes = [
   {
@@ -21,8 +23,14 @@ export const privateRoutes = [
   {
     name: "Students",
     path: "/students",
-    element: <h1>Students</h1>,
+    element: <StudentsHome />,
     showInSidebar: true,
+  },
+  {
+    name: "CreateStudents",
+    path: "/create-student",
+    element: <StudentForm />,
+    showInSidebar: false,
   },
   {
     name: "Teachers",
@@ -42,18 +50,18 @@ export const privateRoutes = [
     element: <AddSubject />,
     showInSidebar: false,
   },
-  // {
-  //   name: "Classes",
-  //   path: "/classes",
-  //   element: <ClassList />,
-  //   showInSidebar: true,
-  // },
-  //  {
-  //   name: "AddClass",
-  //   path: "/addClass",
-  //   element: <AddClass />,
-  //   showInSidebar: false,
-  // },
+  {
+    name: "Classes",
+    path: "/classes",
+    element: <ClassList />,
+    showInSidebar: true,
+  },
+  {
+    name: "AddClass",
+    path: "/addClass",
+    element: <AddClass />,
+    showInSidebar: false,
+  },
   {
     name: "Section",
     path: "/section",

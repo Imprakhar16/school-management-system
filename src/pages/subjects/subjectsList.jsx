@@ -20,15 +20,11 @@ import {
   TableRow,
   Paper,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Pagination,
   TextField,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
+import Pagination from "../../components/pagination";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
@@ -113,6 +109,11 @@ const SubjectsList = () => {
     } catch (err) {
       showToast({ message: `❌ Failed to update: ${err}`, status: "error" });
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    dispatch(fetchAllSubjectsThunk(newPage, itemsPerPage));
   };
 
   return (
@@ -252,37 +253,15 @@ const SubjectsList = () => {
         </Table>
       </TableContainer>
 
-      {/* Bottom controls */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} px={1}>
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Rows per page</InputLabel>
-          <Select
-            value={itemsPerPage}
-            label="Rows per page"
-            onChange={(e) => {
-              setItemsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-          >
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={15}>15</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={3}>
-          <Pagination
-            count={pagination.totalPages}
-            page={currentPage}
-            onChange={(e, value) => setCurrentPage(value)}
-            color="primary"
-          />
-        </Box>
-      )}
+      <Pagination
+        page={currentPage}
+        limit={itemsPerPage}
+        setLimit={setItemsPerPage}
+        onPageChange={handlePageChange}
+        totalPage={pagination.totalPages}
+        total={pagination.totalSubjects}
+      />
     </Box>
   );
 };

@@ -59,11 +59,13 @@ export default function Header({ onMenuClick }) {
             </Box>
           </Box>
 
+          {/* Center - Logo */}
           <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
             <img
               src="https://play-lh.googleusercontent.com/INY4vfQNUb6DmvSAmEDqcZAJzYbDkPa9WORf0AdZMeJQDBXkPeQypC-25Cl1Rc1XLzA=w600-h300-pc0xffffff-pd"
               alt="School Logo"
               style={{ height: "55px", width: "auto", objectFit: "contain" }}
+              onClick={() => navigate("/")}
             />
           </Box>
 

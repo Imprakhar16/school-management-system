@@ -77,7 +77,6 @@ export default function ResetPassword() {
           <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1, width: "100%" }}>
             <TextField
               margin="normal"
-              required
               fullWidth
               id="newPassword"
               label="New Password"
@@ -108,7 +107,6 @@ export default function ResetPassword() {
 
             <TextField
               margin="normal"
-              required
               fullWidth
               id="confirmPassword"
               label="Confirm Password"

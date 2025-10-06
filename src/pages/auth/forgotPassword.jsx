@@ -7,15 +7,18 @@ import {
   Paper,
   InputAdornment,
 } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Email } from "@mui/icons-material";
 import { useFormik } from "formik";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
 import { forgotPasswordThunk } from "../../features/auth/authThunk";
 import { forgotPassSchema } from "../../validations/validation";
+import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -64,7 +67,6 @@ const ForgotPassword = () => {
           <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1, width: "100%" }}>
             <TextField
               margin="normal"
-              required
               fullWidth
               id="email"
               label="Email Address"
@@ -73,6 +75,8 @@ const ForgotPassword = () => {
               autoFocus
               value={formik.values.email}
               onChange={formik.handleChange}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -103,6 +107,14 @@ const ForgotPassword = () => {
               }}
             >
               Send Reset Link
+            </Button>
+            <Button
+              type="submit"
+              fullWidth
+              sx={{ mb: 2, py: 1.5, border: "1px solid" }}
+              onClick={() => navigate("/login")}
+            >
+              Go to Login
             </Button>
           </Box>
         </Paper>

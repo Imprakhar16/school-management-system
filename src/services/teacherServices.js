@@ -2,10 +2,7 @@ import { showToast } from "../components/toaster";
 
 export const registerTeacher = async (body) => {
   try {
-    // dummy log
-    // simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
     showToast({
       message: `Teacher ${body.firstName} ${body.lastName} registered successfully!`,
       status: "success",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -7,8 +7,8 @@ import {
   InputAdornment,
   IconButton,
   Tooltip,
+  Button,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,18 +19,20 @@ import {
   updateSectionThunk,
 } from "../../features/section/sectionThunk";
 import { showToast } from "../../components/toaster";
-import Button from "../../components/button";
 import TableComponent from "../../components/table";
 import ReusableModal from "../../components/modal";
 import SectionForm from "./createSection"; // Adjust path
+import ButtonComp from "../../components/button";
+import Pagination from "../../components/pagination";
 
 const SectionHome = () => {
   const dispatch = useDispatch();
-  const { sections, loading, totalCount } = useSelector((state) => state.sections);
+
+  const { sections, loading, totalCount, totalPages } = useSelector((state) => state.sections);
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState({ sectionId: "", sectionName: "" });
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
@@ -46,14 +48,17 @@ const SectionHome = () => {
     dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
   }, [page, rowsPerPage, debouncedSearch, dispatch]);
 
-  const handleSearchChange = useCallback((e) => {
-    setSearch(e.target.value);
-    setPage(1);
-  }, []);
-
   const handleDeleteClick = (id) => {
     setSelectedSectionId(id);
     setDeleteModalOpen(true);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSearch((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleConfirmDelete = () => {
@@ -104,10 +109,21 @@ const SectionHome = () => {
       });
   };
 
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    dispatch(fetchSectionsThunk(newPage, rowsPerPage));
+  };
+
   const columns = [
     { field: "sectionId", headerName: "Section ID" },
     { field: "name", headerName: "Section Name" },
   ];
+
+  const filteredData = sections?.filter(
+    (sec) =>
+      String(sec.sectionId)?.includes(search.sectionId) &&
+      sec.name?.toLowerCase().includes(search.sectionName)
+  );
 
   return (
     <Box sx={{ p: 4, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
@@ -124,33 +140,31 @@ const SectionHome = () => {
           />
         </Box>
 
-        <TextField
-          variant="outlined"
-          placeholder="Search by section name"
-          value={search}
-          onChange={handleSearchChange}
-          fullWidth
-          sx={{ mb: 3 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
-
         <TableComponent
           columns={columns}
-          data={sections}
+          data={filteredData}
           loading={loading}
-          totalCount={totalCount}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={(newPage) => setPage(newPage)}
-          onRowsPerPageChange={(newRows) => {
-            setRowsPerPage(newRows);
-            setPage(1);
+          filterRow={{
+            sectionId: (
+              <TextField
+                placeholder="Search Section Id"
+                name="sectionId"
+                value={search.sectionId}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+              />
+            ),
+            name: (
+              <TextField
+                placeholder="Search Section Name"
+                name="sectionName"
+                value={search.sectionName}
+                onChange={handleChange}
+                size="small"
+                fullWidth
+              />
+            ),
           }}
           customRowActions={(row) => (
             <>
@@ -175,6 +189,15 @@ const SectionHome = () => {
               </Tooltip>
             </>
           )}
+        />
+
+        <Pagination
+          page={page}
+          limit={rowsPerPage}
+          setLimit={setRowsPerPage}
+          onPageChange={handlePageChange}
+          totalPage={totalPages}
+          total={totalCount}
         />
       </Paper>
 

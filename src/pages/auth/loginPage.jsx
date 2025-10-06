@@ -74,13 +74,13 @@ const Login = () => {
         }}
       >
         <Grid container>
+          {/* Left side - illustration */}
           <Grid
             item
             xs={12}
             md={6}
             sx={{
               display: { xs: "none", md: "flex" },
-
               alignItems: "center",
               justifyContent: "center",
               padding: 4,
@@ -103,6 +103,7 @@ const Login = () => {
               <Typography variant="h6" sx={{ mt: 2, opacity: 0.9 }}>
                 Streamline your educational institution
               </Typography>
+
               <Box
                 sx={{
                   mt: 4,
@@ -126,6 +127,7 @@ const Login = () => {
             </Box>
           </Grid>
 
+          {/* Right side - form */}
           <Grid
             item
             xs={12}
@@ -137,6 +139,7 @@ const Login = () => {
               justifyContent: "center",
             }}
           >
+            {/* User type tabs */}
             <Box
               sx={{
                 display: "flex",
@@ -175,6 +178,7 @@ const Login = () => {
               ))}
             </Box>
 
+            {/* Title */}
             <Typography
               component="h1"
               variant="h4"
@@ -188,10 +192,11 @@ const Login = () => {
               Please login to your account
             </Typography>
 
+            {/* Form */}
             <Box component="form" onSubmit={formik.handleSubmit} sx={{ width: "100%" }}>
+              {/* Email */}
               <TextField
                 margin="normal"
-                required
                 fullWidth
                 id="email"
                 label="Email Address"
@@ -212,22 +217,16 @@ const Login = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                    "&:hover fieldset": {
-                      borderColor: "#1e3a8a",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#1e3a8a",
-                    },
+                    "&:hover fieldset": { borderColor: "#1e3a8a" },
+                    "&.Mui-focused fieldset": { borderColor: "#1e3a8a" },
                   },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#1e3a8a",
-                  },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#1e3a8a" },
                 }}
               />
 
+              {/* Password */}
               <TextField
                 margin="normal"
-                required
                 fullWidth
                 name="password"
                 label="Password"
@@ -260,19 +259,14 @@ const Login = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                    "&:hover fieldset": {
-                      borderColor: "#1e3a8a",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#1e3a8a",
-                    },
+                    "&:hover fieldset": { borderColor: "#1e3a8a" },
+                    "&.Mui-focused fieldset": { borderColor: "#1e3a8a" },
                   },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#1e3a8a",
-                  },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#1e3a8a" },
                 }}
               />
 
+              {/* Forgot password link */}
               <Box
                 sx={{
                   display: "flex",
@@ -290,35 +284,15 @@ const Login = () => {
                   sx={{
                     color: "#1e3a8a",
                     fontWeight: 600,
-                    "&:hover": {
-                      color: "#1e40af",
-                    },
+                    "&:hover": { color: "#1e40af" },
                   }}
                 >
                   Forgot password?
                 </Link>
               </Box>
 
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{
-                  mt: 2,
-                  mb: 2,
-                  py: 1.5,
-                  borderRadius: 2.5,
-                  backgroundColor: "#1e3a8a",
-                  textTransform: "none",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  boxShadow: "0 4px 12px rgba(30, 58, 138, 0.3)",
-                  "&:hover": {
-                    backgroundColor: "#1e40af",
-                    boxShadow: "0 6px 16px rgba(30, 58, 138, 0.4)",
-                  },
-                }}
-              >
+              {/* Submit button */}
+              <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, mb: 2, py: 1.5 }}>
                 Sign In
               </Button>
             </Box>
