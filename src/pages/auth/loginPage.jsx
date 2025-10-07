@@ -14,8 +14,13 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { loginPrincipalThunk, loginTeacherThunk } from "../../features/auth/authThunk";
+import {
+  loginPrincipalThunk,
+  loginStudentThunk,
+  loginTeacherThunk,
+} from "../../features/auth/authThunk";
 import { loginSchema } from "../../validations/validation";
+import ButtonComp from "../../components/button";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -42,6 +47,8 @@ const Login = () => {
         dispatch(loginPrincipalThunk(values)).then(() => navigate("/"));
       } else if (userType === "teacher") {
         dispatch(loginTeacherThunk(values)).then(() => navigate("/"));
+      } else if (userType === "student") {
+        dispatch(loginStudentThunk(values)).then(() => navigate("/"));
       }
     },
   });
@@ -74,7 +81,6 @@ const Login = () => {
         }}
       >
         <Grid container>
-          {/* Left side - illustration */}
           <Grid
             item
             xs={12}
@@ -127,7 +133,6 @@ const Login = () => {
             </Box>
           </Grid>
 
-          {/* Right side - form */}
           <Grid
             item
             xs={12}
@@ -139,7 +144,6 @@ const Login = () => {
               justifyContent: "center",
             }}
           >
-            {/* User type tabs */}
             <Box
               sx={{
                 display: "flex",
@@ -178,7 +182,6 @@ const Login = () => {
               ))}
             </Box>
 
-            {/* Title */}
             <Typography
               component="h1"
               variant="h4"
@@ -192,9 +195,7 @@ const Login = () => {
               Please login to your account
             </Typography>
 
-            {/* Form */}
             <Box component="form" onSubmit={formik.handleSubmit} sx={{ width: "100%" }}>
-              {/* Email */}
               <TextField
                 margin="normal"
                 fullWidth
@@ -224,7 +225,6 @@ const Login = () => {
                 }}
               />
 
-              {/* Password */}
               <TextField
                 margin="normal"
                 fullWidth
@@ -266,7 +266,6 @@ const Login = () => {
                 }}
               />
 
-              {/* Forgot password link */}
               <Box
                 sx={{
                   display: "flex",
@@ -291,10 +290,19 @@ const Login = () => {
                 </Link>
               </Box>
 
-              {/* Submit button */}
-              <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, mb: 2, py: 1.5 }}>
-                Sign In
-              </Button>
+              <ButtonComp
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  backgroundColor: "#1e3a8a",
+                  mt: 2,
+                  mb: 2,
+                  py: 1.5,
+                  "&:hover": { backgroundColor: "#1e40af" },
+                }}
+                title="Sign In"
+              />
             </Box>
           </Grid>
         </Grid>

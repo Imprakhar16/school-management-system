@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   forgotPasswordThunk,
   loginPrincipalThunk,
+  loginStudentThunk,
   loginTeacherThunk,
   resetPasswordThunk,
 } from "./authThunk";
@@ -48,6 +49,21 @@ const authSlice = createSlice({
         state.user = action.payload.data.user;
       })
       .addCase(loginTeacherThunk.rejected, (state, action) => {
+        state.loading = false;
+
+        state.error = action.payload || "Login failed";
+      })
+
+      .addCase(loginStudentThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginStudentThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.token = action.payload.data.token;
+        state.user = action.payload.data.user;
+      })
+      .addCase(loginStudentThunk.rejected, (state, action) => {
         state.loading = false;
 
         state.error = action.payload || "Login failed";
