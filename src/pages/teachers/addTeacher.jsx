@@ -23,6 +23,7 @@ import { registerTeacher } from "../../services/teacherServices";
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
 import { classListThunk } from "../../features/class/classThunk";
 
+// ✅ Validation Schema
 const validationSchema = Yup.object({
   EmpId: Yup.number().typeError("Employee ID must be a number").required("Employee ID is required"),
   firstname: Yup.string().required("First Name is required"),
