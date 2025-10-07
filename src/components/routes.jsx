@@ -1,17 +1,13 @@
 import LoginPage from "../pages/auth/loginPage.jsx";
 import ForgotPassword from "../pages/auth/forgotPassword.jsx";
 import ResetPassword from "../pages/auth/resetPassword.jsx";
+import AddSubject from "../pages/subjects/createSubject.jsx";
 
 //PrivateRoutes:-
 import DummyHome from "../pages/dashboard/dummyHome.jsx";
-import ClassList from "../pages/class/classList.jsx";
-import AddClass from "../pages/class/addClass.jsx";
 import SubjectsList from "../pages/subjects/subjectsList.jsx";
-import AddSubject from "../pages/subjects/createSubject.jsx";
-import SectionHome from "../pages/section/sectionsHome.jsx";
-import SectionForm from "../pages/section/createSection.jsx";
-import StudentsHome from "../pages/students/studentsHome.jsx";
-import StudentForm from "../pages/students/createStudents.jsx";
+import TeacherRegistration from "../pages/teachers/addTeacher.jsx";
+import TeachersList from "../pages/teachers/teachersList.jsx";
 
 export const privateRoutes = [
   {
@@ -35,7 +31,7 @@ export const privateRoutes = [
   {
     name: "Teachers",
     path: "/teachers",
-    element: <h1>Teachers</h1>,
+    element: <TeachersList />,
     showInSidebar: true,
   },
   {
@@ -80,7 +76,18 @@ export const privateRoutes = [
     element: <h1>About</h1>,
     showInSidebar: true,
   },
-
+  {
+    name: "Register-Teacher",
+    path: "/registerTeacher",
+    element: <TeacherRegistration />,
+    showInSidebar: false,
+  },
+  {
+    name: "Add-Subject",
+    path: "/addSubject",
+    element: <AddSubject />,
+    showInSidebar: false,
+  },
   // Add other private routes here as needed
 ];
 
@@ -103,5 +110,6 @@ export const publicRoutes = [
     element: <ResetPassword />,
     showInSidebar: false,
   },
+
   // Add other public routes here as needed
 ];

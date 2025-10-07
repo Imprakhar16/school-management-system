@@ -24,7 +24,7 @@ const TableComponent = ({
       <Table>
         <TableHead>
           <TableRow>
-            {columns.map((col) => (
+            {columns?.map((col) => (
               <TableCell key={col?.field ?? Math.random()} sx={{ fontWeight: "bold" }}>
                 {col?.headerName ?? ""}
               </TableCell>
@@ -35,7 +35,7 @@ const TableComponent = ({
           {/* 🔽 Filter row just under the headers */}
           {filterRow && (
             <TableRow>
-              {columns.map((col) => (
+              {columns?.map((col) => (
                 <TableCell key={col?.field ?? Math.random()}>
                   {filterRow[col.field] || null}
                 </TableCell>
@@ -65,7 +65,7 @@ const TableComponent = ({
           ) : (
             data.map((row) => (
               <TableRow key={row?._id ?? Math.random()}>
-                {columns.map((col) => (
+                {columns?.map((col) => (
                   <TableCell key={col?.field ?? Math.random()}>
                     {col?.render ? col.render(row) : (row?.[col.field] ?? "—")}
                   </TableCell>

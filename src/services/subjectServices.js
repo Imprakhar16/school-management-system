@@ -7,10 +7,10 @@ export const createSubject = async (body) => {
 };
 
 // Fetch all subjects
-export const fetchAllSubjects = async ({ page = 1, limit = 5, search = "" }) => {
+export const fetchAllSubjects = async ({ page, limit, search }) => {
   try {
     const params = { page, limit };
-    if (search) params.search = search; // only add search if not empty
+    if (search) params.search = search;
 
     const response = await axiosInstance.get(API_PATHS.SUBJECT.ALL_SUBJECTS, { params });
     return response.data;

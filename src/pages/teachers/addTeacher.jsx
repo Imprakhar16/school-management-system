@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -10,278 +11,369 @@ import {
   FormControlLabel,
   Radio,
   Divider,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Chip,
+  OutlinedInput,
+  CircularProgress,
 } from "@mui/material";
 import { registerTeacher } from "../../services/teacherServices";
+import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
+import { classListThunk } from "../../features/class/classThunk";
 
+// ✅ Validation Schema
 const validationSchema = Yup.object({
-  firstName: Yup.string().required("First Name is required"),
-  lastName: Yup.string().required("Last Name is required"),
-  gender: Yup.string().required("Gender is required"),
+  EmpId: Yup.number().typeError("Employee ID must be a number").required("Employee ID is required"),
+  firstname: Yup.string().required("First Name is required"),
+  lastname: Yup.string().required("Last Name is required"),
+  gender: Yup.string()
+    .oneOf(["male", "female", "other"], "Invalid gender")
+    .required("Gender is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
-  phone: Yup.string()
-    .matches(/^[0-9]{10}$/, "Phone must be 10 digits")
-    .required("Phone is required"),
+  phoneNumber: Yup.string()
+    .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
+    .required("Phone number is required"),
   password: Yup.string()
     .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
-  classIncharge: Yup.string().required("Class Incharge is required"),
-  experience: Yup.number().min(0, "Experience must be positive").required("Experience is required"),
-  photo: Yup.mixed().required("Photo is required"),
-  experienceCertificate: Yup.mixed().required("Certificate file is required"),
+  classincharge: Yup.string()
+    .length(24, "Please select a valid class")
+    .required("Class Incharge is required"),
+  experienceDuration: Yup.date()
+    .typeError("Invalid date")
+    .required("Experience duration is required"),
   experienceDetails: Yup.string().required("Experience details are required"),
-  identityVerification: Yup.mixed().required("Aadhar file is required"),
-  subject: Yup.string().required("Subject is required"),
+  photo: Yup.mixed().required("Photo is required"),
+  experienceCertificate: Yup.mixed().required("Experience certificate is required"),
+  identityVerification: Yup.mixed().required("Identity verification document is required"),
+  subjects: Yup.array()
+    .of(Yup.string())
+    .min(1, "At least one subject must be selected")
+    .required("Subjects are required"),
 });
 
 const TeacherRegistration = () => {
+  const dispatch = useDispatch();
+
+  const { data: subjectsList = [], loading: subjectsLoading } = useSelector(
+    (state) => state.subject
+  );
+  const { data: classesList = [], loading: classesLoading } = useSelector((state) => state.class);
+
+  useEffect(() => {
+    dispatch(fetchAllSubjectsThunk({ page: 1, limit: 100 }));
+    dispatch(classListThunk({ page: 1, limit: 100 }));
+  }, [dispatch]);
+
   const formik = useFormik({
     initialValues: {
-      firstName: "",
-      lastName: "",
+      EmpId: "",
+      firstname: "",
+      lastname: "",
       gender: "",
       email: "",
-      phone: "",
+      phoneNumber: "",
       password: "",
-      classIncharge: "",
-      experience: "",
+      classincharge: "",
+      experienceDuration: "",
+      experienceDetails: "",
       photo: null,
       experienceCertificate: null,
-      experienceDetails: "",
       identityVerification: null,
-      subject: "",
+      subjects: [],
     },
     validationSchema,
+    validateOnChange: false,
     onSubmit: async (values, { resetForm }) => {
-      const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
+      try {
+        const formData = new FormData();
+        Object.entries(values).forEach(([key, val]) => {
+          if (key === "subjects" && Array.isArray(val)) {
+            val.forEach((subId) => formData.append("subjects", subId));
+          } else if (
+            key === "photo" ||
+            key === "experienceCertificate" ||
+            key === "identityVerification"
+          ) {
+            if (val) formData.append(key, val, val.name);
+          } else if (key === "EmpId") {
+            formData.append("EmpId", Number(val));
+          } else if (key === "experienceDuration") {
+            formData.append("experienceDuration", new Date(val).toISOString());
+          } else if (key === "classincharge" && val) {
+            formData.append(key, val);
+          } else if (key !== "classincharge") {
+            formData.append(key, val);
+          }
+        });
 
-      await registerTeacher(formData);
-      resetForm();
+        const response = await registerTeacher(formData);
+        console.log(response);
+
+        alert("Teacher registered successfully!");
+        resetForm();
+      } catch (error) {
+        alert(error?.response?.data?.message || "Failed to register teacher");
+      }
     },
   });
 
-  return (
-    <div>
-      <Box
-        maxWidth="700px"
-        mx="auto"
-        mt={4}
-        p={4}
-        boxShadow={3}
-        borderRadius={3}
-        bgcolor="white"
-        display="flex"
-        flexDirection="column"
-        gap={2}
-      >
-        <Typography variant="h4" mb={2} textAlign="center" color="primary">
-          Teacher Registration
-        </Typography>
+  const handleFileChange = useCallback(
+    (field) => (event) => {
+      const file = event.currentTarget.files?.[0] || null;
+      formik.setFieldValue(field, file);
+    },
+    [formik]
+  );
 
+  const isLoading = subjectsLoading || classesLoading;
+
+  return (
+    <Box maxWidth="700px" mx="auto" mt={4} p={4} boxShadow={3} borderRadius={3} bgcolor="white">
+      <Typography variant="h4" mb={2} textAlign="center" color="primary">
+        Teacher Registration
+      </Typography>
+
+      {isLoading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+          <CircularProgress />
+        </Box>
+      ) : (
         <form
           onSubmit={formik.handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+          style={{ display: "flex", flexDirection: "column", gap: 20 }}
         >
-          {/* Personal Information Section */}
           <Box>
-            <Typography variant="h6" color="primary" gutterBottom>
+            <Typography variant="h6" color="primary">
               Personal Information
             </Typography>
             <Divider sx={{ mb: 2 }} />
-
-            <Box display="flex" flexDirection="column" gap={2}>
-              <TextField
-                fullWidth
-                label="First Name"
-                {...formik.getFieldProps("firstName")}
-                error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                helperText={formik.touched.firstName && formik.errors.firstName}
-              />
-
-              <TextField
-                fullWidth
-                label="Last Name"
-                {...formik.getFieldProps("lastName")}
-                error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-                helperText={formik.touched.lastName && formik.errors.lastName}
-              />
-
-              <div>
-                <Typography variant="body1" gutterBottom>
-                  Gender
-                </Typography>
-                <RadioGroup
-                  row
-                  name="gender"
-                  value={formik.values.gender}
-                  onChange={(e) => formik.setFieldValue("gender", e.target.value)}
-                >
-                  <FormControlLabel value="Male" control={<Radio />} label="Male" />
-                  <FormControlLabel value="Female" control={<Radio />} label="Female" />
-                  <FormControlLabel value="Other" control={<Radio />} label="Other" />
-                </RadioGroup>
-                {formik.touched.gender && formik.errors.gender && (
-                  <Typography color="error" variant="caption">
-                    {formik.errors.gender}
-                  </Typography>
-                )}
-              </div>
-            </Box>
+            <TextField
+              fullWidth
+              label="Employee ID"
+              name="EmpId"
+              value={formik.values.EmpId}
+              onChange={formik.handleChange}
+              error={!!formik.errors.EmpId}
+              helperText={formik.errors.EmpId}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="First Name"
+              name="firstname"
+              value={formik.values.firstname}
+              onChange={formik.handleChange}
+              error={!!formik.errors.firstname}
+              helperText={formik.errors.firstname}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Last Name"
+              name="lastname"
+              value={formik.values.lastname}
+              onChange={formik.handleChange}
+              error={!!formik.errors.lastname}
+              helperText={formik.errors.lastname}
+              sx={{ mb: 2 }}
+            />
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              Gender
+            </Typography>
+            <RadioGroup
+              row
+              name="gender"
+              value={formik.values.gender}
+              onChange={formik.handleChange}
+            >
+              <FormControlLabel value="male" control={<Radio />} label="Male" />
+              <FormControlLabel value="female" control={<Radio />} label="Female" />
+              <FormControlLabel value="other" control={<Radio />} label="Other" />
+            </RadioGroup>
+            {formik.errors.gender && <Typography color="error">{formik.errors.gender}</Typography>}
           </Box>
 
-          {/* Contact & Credentials Section */}
           <Box>
-            <Typography variant="h6" color="primary" gutterBottom>
-              Contact & Credentials
+            <Typography variant="h6" color="primary">
+              Subjects
             </Typography>
             <Divider sx={{ mb: 2 }} />
+            <FormControl fullWidth error={!!formik.errors.subjects}>
+              <InputLabel id="subjects-label">Select Subjects</InputLabel>
+              <Select
+                labelId="subjects-label"
+                multiple
+                value={formik.values.subjects}
+                onChange={(e) => formik.setFieldValue("subjects", e.target.value)}
+                input={<OutlinedInput label="Select Subjects" />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                    {selected.map((id) => {
+                      const subj = subjectsList.find((s) => s._id === id);
+                      return <Chip key={id} label={subj ? `${subj.name} (${subj.code})` : id} />;
+                    })}
+                  </Box>
+                )}
+              >
+                {subjectsList.map((subj) => (
+                  <MenuItem key={subj._id} value={subj._id}>
+                    {subj.name} ({subj.code})
+                  </MenuItem>
+                ))}
+              </Select>
+              {formik.errors.subjects && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.subjects}
+                </Typography>
+              )}
+            </FormControl>
+          </Box>
 
-            <Box display="flex" flexDirection="column" gap={2}>
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                {...formik.getFieldProps("email")}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
-              />
-
-              <TextField
-                fullWidth
-                label="Phone Number"
-                {...formik.getFieldProps("phone")}
-                error={formik.touched.phone && Boolean(formik.errors.phone)}
-                helperText={formik.touched.phone && formik.errors.phone}
-              />
-
-              <TextField
-                fullWidth
-                type="password"
-                label="Password"
-                {...formik.getFieldProps("password")}
-                error={formik.touched.password && Boolean(formik.errors.password)}
-                helperText={formik.touched.password && formik.errors.password}
-              />
-
-              <TextField
-                fullWidth
+          <Box>
+            <Typography variant="h6" color="primary">
+              Contact & Class
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              error={!!formik.errors.email}
+              helperText={formik.errors.email}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Phone Number"
+              name="phoneNumber"
+              value={formik.values.phoneNumber}
+              onChange={formik.handleChange}
+              error={!!formik.errors.phoneNumber}
+              helperText={formik.errors.phoneNumber}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              error={!!formik.errors.password}
+              helperText={formik.errors.password}
+              sx={{ mb: 2 }}
+            />
+            <FormControl fullWidth error={!!formik.errors.classincharge}>
+              <InputLabel id="classincharge-label">Class Incharge</InputLabel>
+              <Select
+                labelId="classincharge-label"
+                value={formik.values.classincharge}
+                onChange={(e) => formik.setFieldValue("classincharge", e.target.value)}
                 label="Class Incharge"
-                {...formik.getFieldProps("classIncharge")}
-                error={formik.touched.classIncharge && Boolean(formik.errors.classIncharge)}
-                helperText={formik.touched.classIncharge && formik.errors.classIncharge}
-              />
-
-              <TextField
-                fullWidth
-                type="number"
-                label="Experience (Years)"
-                {...formik.getFieldProps("experience")}
-                error={formik.touched.experience && Boolean(formik.errors.experience)}
-                helperText={formik.touched.experience && formik.errors.experience}
-              />
-
-              <TextField
-                fullWidth
-                label="Subject"
-                {...formik.getFieldProps("subject")}
-                error={formik.touched.subject && Boolean(formik.errors.subject)}
-                helperText={formik.touched.subject && formik.errors.subject}
-              />
-
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Experience Details"
-                {...formik.getFieldProps("experienceDetails")}
-                error={formik.touched.experienceDetails && Boolean(formik.errors.experienceDetails)}
-                helperText={formik.touched.experienceDetails && formik.errors.experienceDetails}
-              />
-            </Box>
+              >
+                {classesList.map((cls) => (
+                  <MenuItem key={cls._id} value={cls._id}>
+                    {cls.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {formik.errors.classincharge && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.classincharge}
+                </Typography>
+              )}
+            </FormControl>
           </Box>
 
-          {/* Documents Upload Section */}
           <Box>
-            <Typography variant="h6" color="primary" gutterBottom>
-              Documents Upload
+            <Typography variant="h6" color="primary">
+              Experience
             </Typography>
             <Divider sx={{ mb: 2 }} />
+            <TextField
+              fullWidth
+              type="date"
+              label="Experience Duration"
+              name="experienceDuration"
+              InputLabelProps={{ shrink: true }}
+              value={formik.values.experienceDuration}
+              onChange={formik.handleChange}
+              error={!!formik.errors.experienceDuration}
+              helperText={formik.errors.experienceDuration}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              label="Experience Details"
+              name="experienceDetails"
+              value={formik.values.experienceDetails}
+              onChange={formik.handleChange}
+              error={!!formik.errors.experienceDetails}
+              helperText={formik.errors.experienceDetails}
+            />
+          </Box>
 
-            <Box display="flex" flexDirection="column" gap={2}>
-              <div>
-                <Typography variant="body1" gutterBottom>
-                  Upload Photo
+          <Box>
+            <Typography variant="h6" color="primary">
+              Upload Documents
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Photo *
+              </Typography>
+              <input type="file" accept="image/*" onChange={handleFileChange("photo")} />
+              {formik.errors.photo && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.photo}
                 </Typography>
-                <input
-                  type="file"
-                  accept=".jpg,.jpeg,.png"
-                  onChange={(event) => {
-                    formik.setFieldValue(
-                      "photo",
-                      event.currentTarget.files ? event.currentTarget.files[0] : null
-                    );
-                  }}
-                />
-                {formik.touched.photo && formik.errors.photo && (
-                  <Typography color="error" variant="caption">
-                    {formik.errors.photo}
-                  </Typography>
-                )}
-              </div>
-
-              <div>
-                <Typography variant="body1" gutterBottom>
-                  Upload Experience Certificate
+              )}
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Experience Certificate *
+              </Typography>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={handleFileChange("experienceCertificate")}
+              />
+              {formik.errors.experienceCertificate && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.experienceCertificate}
                 </Typography>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(event) => {
-                    formik.setFieldValue(
-                      "experienceCertificate",
-                      event.currentTarget.files ? event.currentTarget.files[0] : null
-                    );
-                  }}
-                />
-                {formik.touched.experienceCertificate && formik.errors.experienceCertificate && (
-                  <Typography color="error" variant="caption">
-                    {formik.errors.experienceCertificate}
-                  </Typography>
-                )}
-              </div>
-
-              <div>
-                <Typography variant="body1" gutterBottom>
-                  Upload Aadhar (Identity Verification)
+              )}
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Identity Verification *
+              </Typography>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={handleFileChange("identityVerification")}
+              />
+              {formik.errors.identityVerification && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {formik.errors.identityVerification}
                 </Typography>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(event) => {
-                    formik.setFieldValue(
-                      "identityVerification",
-                      event.currentTarget.files ? event.currentTarget.files[0] : null
-                    );
-                  }}
-                />
-                {formik.touched.identityVerification && formik.errors.identityVerification && (
-                  <Typography color="error" variant="caption">
-                    {formik.errors.identityVerification}
-                  </Typography>
-                )}
-              </div>
+              )}
             </Box>
           </Box>
 
-          {/* Submit */}
-          <Button type="submit" variant="contained" fullWidth>
+          <Button variant="contained" type="submit" color="primary" size="large">
             Register Teacher
           </Button>
         </form>
-      </Box>
-    </div>
+      )}
+    </Box>
   );
 };
 
