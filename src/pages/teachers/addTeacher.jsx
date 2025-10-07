@@ -21,9 +21,8 @@ import {
 } from "@mui/material";
 import { registerTeacher } from "../../services/teacherServices";
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
-import { fetchSectionsThunk } from "../../features/section/sectionThunk";
+import { classListThunk } from "../../features/class/classThunk";
 
-// ✅ Validation Schema
 const validationSchema = Yup.object({
   EmpId: Yup.number().typeError("Employee ID must be a number").required("Employee ID is required"),
   firstname: Yup.string().required("First Name is required"),
@@ -39,7 +38,7 @@ const validationSchema = Yup.object({
     .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
   classincharge: Yup.string()
-    .length(24, "Please select a valid section")
+    .length(24, "Please select a valid class")
     .required("Class Incharge is required"),
   experienceDuration: Yup.date()
     .typeError("Invalid date")
@@ -57,25 +56,14 @@ const validationSchema = Yup.object({
 const TeacherRegistration = () => {
   const dispatch = useDispatch();
 
-  // Redux data
   const { data: subjectsList = [], loading: subjectsLoading } = useSelector(
     (state) => state.subject
   );
-  const { sections: sectionsList = [], loading: sectionsLoading } = useSelector(
-    (state) => state.sections
-  );
+  const { data: classesList = [], loading: classesLoading } = useSelector((state) => state.class);
 
   useEffect(() => {
-    (async () => {
-      try {
-        await Promise.all([
-          dispatch(fetchAllSubjectsThunk({ page: 1, limit: 100 })),
-          dispatch(fetchSectionsThunk({ page: 1, limit: 100 })),
-        ]);
-      } catch (err) {
-        console.error("Error fetching subjects/sections:", err);
-      }
-    })();
+    dispatch(fetchAllSubjectsThunk({ page: 1, limit: 100 }));
+    dispatch(classListThunk({ page: 1, limit: 100 }));
   }, [dispatch]);
 
   const formik = useFormik({
@@ -121,11 +109,11 @@ const TeacherRegistration = () => {
         });
 
         const response = await registerTeacher(formData);
-        console.log("✅ Registration successful:", response);
+        console.log(response);
+
         alert("Teacher registered successfully!");
         resetForm();
       } catch (error) {
-        console.error("❌ Error registering teacher:", error);
         alert(error?.response?.data?.message || "Failed to register teacher");
       }
     },
@@ -139,7 +127,7 @@ const TeacherRegistration = () => {
     [formik]
   );
 
-  const isLoading = subjectsLoading || sectionsLoading;
+  const isLoading = subjectsLoading || classesLoading;
 
   return (
     <Box maxWidth="700px" mx="auto" mt={4} p={4} boxShadow={3} borderRadius={3} bgcolor="white">
@@ -156,7 +144,6 @@ const TeacherRegistration = () => {
           onSubmit={formik.handleSubmit}
           style={{ display: "flex", flexDirection: "column", gap: 20 }}
         >
-          {/* Personal Info */}
           <Box>
             <Typography variant="h6" color="primary">
               Personal Information
@@ -208,7 +195,6 @@ const TeacherRegistration = () => {
             {formik.errors.gender && <Typography color="error">{formik.errors.gender}</Typography>}
           </Box>
 
-          {/* Subjects */}
           <Box>
             <Typography variant="h6" color="primary">
               Subjects
@@ -245,7 +231,6 @@ const TeacherRegistration = () => {
             </FormControl>
           </Box>
 
-          {/* Contact & Class */}
           <Box>
             <Typography variant="h6" color="primary">
               Contact & Class
@@ -290,9 +275,9 @@ const TeacherRegistration = () => {
                 onChange={(e) => formik.setFieldValue("classincharge", e.target.value)}
                 label="Class Incharge"
               >
-                {sectionsList.map((sec) => (
-                  <MenuItem key={sec._id} value={sec._id}>
-                    {sec.name}
+                {classesList.map((cls) => (
+                  <MenuItem key={cls._id} value={cls._id}>
+                    {cls.name}
                   </MenuItem>
                 ))}
               </Select>
@@ -304,7 +289,6 @@ const TeacherRegistration = () => {
             </FormControl>
           </Box>
 
-          {/* Experience */}
           <Box>
             <Typography variant="h6" color="primary">
               Experience
@@ -335,7 +319,6 @@ const TeacherRegistration = () => {
             />
           </Box>
 
-          {/* File Uploads */}
           <Box>
             <Typography variant="h6" color="primary">
               Upload Documents

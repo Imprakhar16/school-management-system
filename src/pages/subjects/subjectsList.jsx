@@ -27,25 +27,18 @@ import Pagination from "../../components/pagination";
 const SubjectsList = () => {
   const dispatch = useDispatch();
   const { data, pagination, loading } = useSelector((state) => state.subject);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-
-  // 🔍 Search states
   const [searchName, setSearchName] = useState("");
   const [searchCode, setSearchCode] = useState("");
-
-  // ✏️ Edit modal states
   const [openModal, setOpenModal] = useState(false);
   const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
 
-  // 📦 Fetch subjects
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
   }, [dispatch, currentPage, itemsPerPage]);
 
-  // 🔍 Filtered data with memoization
   const filteredData = useMemo(() => {
     if (!data) return [];
     return data.filter(
@@ -55,10 +48,8 @@ const SubjectsList = () => {
     );
   }, [data, searchName, searchCode]);
 
-  // 🗑️ Delete handler
   const handleDelete = async (_id) => {
     if (!_id) return showToast({ message: "❌ Invalid subject ID!", status: "error" });
-
     if (window.confirm("⚠️ Are you sure you want to delete this subject?")) {
       try {
         await dispatch(deleteSubjectThunk(_id)).unwrap();
@@ -70,7 +61,6 @@ const SubjectsList = () => {
     }
   };
 
-  // ✏️ Edit handlers
   const handleEditOpen = (subject) => {
     setEditSubject(subject);
     setEditValues({ name: subject.name, code: subject.code });
@@ -92,7 +82,6 @@ const SubjectsList = () => {
           updatedData: { name: editValues.name, code: editValues.code },
         })
       ).unwrap();
-
       showToast({ message: "✅ Subject updated successfully!", status: "success" });
       handleModalClose();
       dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
@@ -103,12 +92,11 @@ const SubjectsList = () => {
 
   const handlePageChange = (newPage) => setCurrentPage(newPage);
 
-  // 🧱 Table columns using reusable components
   const columns = [
     {
       field: "slNo",
       headerName: "SL.No",
-      render: (_, row, index) => (currentPage - 1) * itemsPerPage + (index + 1),
+      render: (row) => row.slNo,
     },
     {
       field: "name",
@@ -123,7 +111,7 @@ const SubjectsList = () => {
           />
         </Box>
       ),
-      render: (value) => value,
+      render: (row) => row.name,
     },
     {
       field: "code",
@@ -138,27 +126,23 @@ const SubjectsList = () => {
           />
         </Box>
       ),
-      render: (value) => value,
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      render: (_, subject) => (
-        <>
-          <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
-            Edit
-          </Button>
-          <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
-            Delete
-          </Button>
-        </>
-      ),
+      render: (row) => row.code,
     },
   ];
 
+  const customRowActions = (subject) => (
+    <>
+      <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
+        Edit
+      </Button>
+      <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
+        Delete
+      </Button>
+    </>
+  );
+
   return (
     <Box p={3}>
-      {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5" fontWeight="bold">
           Subjects List
@@ -170,18 +154,24 @@ const SubjectsList = () => {
         </Link>
       </Box>
 
-      {/* Table */}
       <Paper sx={{ overflow: "hidden" }}>
         {loading ? (
           <Box display="flex" justifyContent="center" p={5}>
             <CircularProgress />
           </Box>
         ) : (
-          <TableComponent columns={columns} rows={filteredData} />
+          <TableComponent
+            columns={columns}
+            data={filteredData.map((row, index) => ({
+              ...row,
+              slNo: (currentPage - 1) * itemsPerPage + (index + 1),
+            }))}
+            loading={loading}
+            customRowActions={customRowActions}
+          />
         )}
       </Paper>
 
-      {/* Pagination */}
       <Pagination
         page={currentPage}
         limit={itemsPerPage}
@@ -191,7 +181,6 @@ const SubjectsList = () => {
         total={pagination?.totalSubjects || 0}
       />
 
-      {/* Edit Modal */}
       <Dialog open={openModal} onClose={handleModalClose}>
         <DialogTitle>Edit Subject</DialogTitle>
         <DialogContent>
