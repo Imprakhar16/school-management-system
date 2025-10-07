@@ -291,7 +291,7 @@ const Login = () => {
 
               <ButtonComp
                 type="submit"
-                fullWidth
+                fullwidth={true}
                 variant="contained"
                 sx={{
                   backgroundColor: "#1e3a8a",

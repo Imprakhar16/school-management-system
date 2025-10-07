@@ -8,6 +8,7 @@ import ButtonComp from "../../components/button";
 import TableComponent from "../../components/table";
 import { renderArrayChips } from "../../helper/renderHelper";
 import Pagination from "../../components/pagination";
+import AddIcon from "@mui/icons-material/Add";
 
 export default function ClassList() {
   const [page, setPage] = useState(1);
@@ -91,6 +92,8 @@ export default function ClassList() {
           variant="contained"
           color="primary"
           onClick={() => navigate("/addClass")}
+          fullwidth={false}
+          startIcon={<AddIcon />}
         />
       </Box>
 

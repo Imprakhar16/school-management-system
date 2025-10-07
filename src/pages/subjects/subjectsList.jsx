@@ -23,6 +23,7 @@ import { showToast } from "../../components/toaster";
 import TableComponent from "../../components/table";
 import SearchInput from "../../components/searchInput";
 import Pagination from "../../components/pagination";
+import ButtonComp from "../../components/button";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
@@ -148,9 +149,12 @@ const SubjectsList = () => {
           Subjects List
         </Typography>
         <Link to="/addSubject">
-          <Button variant="contained" color="primary" startIcon={<AddIcon />}>
-            Add Subject
-          </Button>
+          <ButtonComp
+            title="Add Subject"
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+          />
         </Link>
       </Box>
 

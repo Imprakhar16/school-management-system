@@ -24,6 +24,7 @@ import ReusableModal from "../../components/modal";
 import SectionForm from "./createSection"; // Adjust path
 import ButtonComp from "../../components/button";
 import Pagination from "../../components/pagination";
+import AddIcon from "@mui/icons-material/Add";
 
 const SectionHome = () => {
   const dispatch = useDispatch();
@@ -132,11 +133,12 @@ const SectionHome = () => {
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             Sections List
           </Typography>
-          <Button
+          <ButtonComp
             title="Create Section"
             variant="contained"
             color="primary"
             onClick={() => setCreateModalOpen(true)}
+            startIcon={<AddIcon />}
           />
         </Box>
 
@@ -208,8 +210,12 @@ const SectionHome = () => {
         title="Confirm Deletion"
         actions={
           <>
-            <Button title="Cancel" variant="outlined" onClick={() => setDeleteModalOpen(false)} />
-            <Button
+            <ButtonComp
+              title="Cancel"
+              variant="outlined"
+              onClick={() => setDeleteModalOpen(false)}
+            />
+            <ButtonComp
               title="Delete"
               variant="contained"
               color="error"
@@ -228,8 +234,13 @@ const SectionHome = () => {
         title="Edit Section"
         actions={
           <>
-            <Button title="Cancel" variant="outlined" onClick={() => setEditModalOpen(false)} />
-            <Button title="Save" variant="contained" color="primary" onClick={handleConfirmEdit} />
+            <ButtonComp title="Cancel" variant="outlined" onClick={() => setEditModalOpen(false)} />
+            <ButtonComp
+              title="Save"
+              variant="contained"
+              color="primary"
+              onClick={handleConfirmEdit}
+            />
           </>
         }
       >
@@ -259,12 +270,10 @@ const SectionHome = () => {
         </Box>
       </ReusableModal>
 
-      {/* Create Section Modal */}
       <ReusableModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         title="Create Section"
-        // no actions here because SectionForm handles buttons
       >
         <SectionForm
           onSuccess={() => {

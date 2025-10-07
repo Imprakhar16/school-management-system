@@ -6,6 +6,7 @@ import AddIcon from "@mui/icons-material/Add";
 import TableComponent from "../../components/table";
 import SearchInput from "../../components/searchInput";
 import { fetchAllTeachersThunk } from "../../features/teachers/teacherThunk";
+import ButtonComp from "../../components/button";
 
 const TeachersList = () => {
   const dispatch = useDispatch();
@@ -145,9 +146,12 @@ const TeachersList = () => {
           Teachers List
         </Typography>
         <Link to="/registerTeacher">
-          <Button variant="contained" color="primary" startIcon={<AddIcon />}>
-            Add Teacher
-          </Button>
+          <ButtonComp
+            title="Add Teacher"
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+          />
         </Link>
       </Box>
 

@@ -11,6 +11,7 @@ const ButtonComp = ({
   variant,
   fullwidth,
   sx,
+  startIcon,
 }) => {
   return (
     <Button
@@ -20,8 +21,9 @@ const ButtonComp = ({
       onClick={onClick}
       color={color}
       variant={variant}
-      fullWidth={!fullwidth ? true : false}
+      fullWidth={fullwidth ? true : false}
       sx={sx}
+      startIcon={startIcon}
     >
       {title}
     </Button>
