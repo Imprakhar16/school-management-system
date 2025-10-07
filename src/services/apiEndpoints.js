@@ -6,8 +6,11 @@ const API_PATHS = {
     FORGOT_PASSWORD: "auth/forgot-password",
     RESET_PASSWORD: "auth/reset-password",
   },
-  USER: {
-    // users endpoint
+  STUDENT: {
+    CREATE_STUDENT: "/student/create",
+    ALL_STUDENTS: "/student/students",
+    UPDATE_STUDENT: "",
+    DELETE_STUDENT: "",
   },
   SUBJECT: {
     CREATE_SUBJECT: "subject/create",

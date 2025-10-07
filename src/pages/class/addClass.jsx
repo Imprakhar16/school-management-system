@@ -132,7 +132,7 @@ export default function AddClass() {
             <Select
               labelId="classIncharge-label"
               id="classincharge"
-              name="classIncharge"
+              name="classincharge"
               value={formik.values.classIncharge}
               onChange={formik.handleChange}
               input={<OutlinedInput label="Class Incharge" />}
