@@ -3,9 +3,9 @@ import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 import { showToast } from "../components/toaster";
 
-export const fetchStudent = async ({ page, limit, search }) => {
+export const fetchStudent = async ({ page, limit }) => {
   const response = await axiosInstance.get(
-    `${API_PATHS.STUDENT.ALL_STUDENTS}?page=${page}&limit=${limit}&search${search}`
+    `${API_PATHS.STUDENT.ALL_STUDENTS}?page=${page}&limit=${limit}&search="`
   );
   return response;
 };
