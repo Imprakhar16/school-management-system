@@ -7,7 +7,7 @@ export const loginPrincipal = async (body) => {
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, body);
     localStorage.setItem("authToken", response.data.token);
     showToast({
-      message: `Welcome Back ${response.data.user.role}`,
+      message: `Welcome Back ${response.data.user.role}😄`,
       status: "success",
     });
     return response;
@@ -16,7 +16,7 @@ export const loginPrincipal = async (body) => {
 
     if (message === "Incorrect password") {
       showToast({
-        message: "Invalid Credentials",
+        message: "Invalid Credentials 😞",
         status: "error",
       });
     } else if (message === "User not found") {
@@ -26,7 +26,7 @@ export const loginPrincipal = async (body) => {
       });
     } else {
       showToast({
-        message: "Login Failed",
+        message: "Login Failed 😞",
         status: "error",
       });
     }
@@ -40,7 +40,7 @@ export const loginTeacher = async (body) => {
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN_TEACHER, body);
     localStorage.setItem("authToken", response.data.token);
     showToast({
-      message: `Welcome Back ${response.data.teacher.firstname} (Teacher)`,
+      message: `Welcome Back ${response.data.teacher.firstname} (Teacher)😄`,
       status: "success",
     });
     return response;
@@ -48,17 +48,47 @@ export const loginTeacher = async (body) => {
     const message = error.response?.data?.message || "Login Failed";
     if (message === "Incorrect password") {
       showToast({
-        message: "Invalid Credentials",
+        message: "Invalid Credentials 😞",
         status: "error",
       });
     } else if (message === "teacher not found") {
       showToast({
-        message: "You are not a Teacher !!!",
+        message: "You are not a Teacher !!! 😞",
         status: "error",
       });
     } else {
       showToast({
         message: "Login Failed",
+        status: "error",
+      });
+    }
+    throw error;
+  }
+};
+export const loginStudent = async (body) => {
+  try {
+    const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN_STUDENT, body);
+    localStorage.setItem("authToken", response.data.token);
+    showToast({
+      message: `Welcome Back ${response.data.student.firstname} (Student)😄`,
+      status: "success",
+    });
+    return response;
+  } catch (error) {
+    const message = error.response?.data?.message || "Login Failed";
+    if (message === "Incorrect password") {
+      showToast({
+        message: "Invalid Credentials 😞",
+        status: "error",
+      });
+    } else if (message === "student not found") {
+      showToast({
+        message: "You are not a Student !!! 😞",
+        status: "error",
+      });
+    } else {
+      showToast({
+        message: "Login Failed 😞",
         status: "error",
       });
     }

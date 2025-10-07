@@ -4,6 +4,7 @@ import {
   loginPrincipal,
   resetPassword,
   loginTeacher,
+  loginStudent,
 } from "../../services/authServices";
 
 export const loginPrincipalThunk = createAsyncThunk(
@@ -23,6 +24,18 @@ export const loginTeacherThunk = createAsyncThunk(
   async (body, { rejectWithValue }) => {
     try {
       const response = await loginTeacher(body);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || { error: "Login failed" });
+    }
+  }
+);
+
+export const loginStudentThunk = createAsyncThunk(
+  "auth/loginStudent",
+  async (body, { rejectWithValue }) => {
+    try {
+      const response = await loginStudent(body);
       return response;
     } catch (error) {
       return rejectWithValue(error?.response?.data || { error: "Login failed" });
