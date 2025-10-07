@@ -2,46 +2,39 @@ import { showToast } from "../components/toaster";
 import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 
-export const loginTeacher = async (body) => {
-  try {
-    const response = await axiosInstance.post(API_PATHS.TEACHER.LOGIN, body);
-    localStorage.setItem("teacherAuthToken", JSON.stringify(response.data.token));
-    showToast({
-      message: `Welcome Back ${response.data.teacher.firstName}`,
-      status: "success",
-    });
-    return response;
-  } catch (error) {
-    if (error.response?.data?.message === "Password incorrect") {
-      showToast({
-        message: "Invalid Credentials",
-        status: "error",
-      });
-    } else {
-      showToast({
-        message: "Teacher Login Failed",
-        status: "error",
-      });
-    }
-  }
-};
+//TEACHER REGISTRATION --->
 export const registerTeacher = async (body) => {
   try {
-    console.log("Register Teacher Body:", body); // dummy log
-    // simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await axiosInstance.post(API_PATHS.TEACHER.REGISTER, body, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     showToast({
-      message: `Teacher ${body.firstName} ${body.lastName} registered successfully!`,
+      message: `Teacher ${response.data.teacher?.firstname || body.get("firstname")} registered successfully!`,
       status: "success",
     });
 
-    return { data: body };
+    return response.data;
   } catch (error) {
     showToast({
-      message: "Teacher Registration Failed",
+      message: error.response?.data?.message || "Teacher Registration Failed",
       status: "error",
     });
-    throw error;
+
+    throw error.response?.data || error;
+  }
+};
+
+// fetch all teachers -->
+export const fetchAllTeachers = async ({ page, limit, search }) => {
+  try {
+    const params = { page, limit };
+    if (search) params.search = search;
+    const response = await axiosInstance.get(API_PATHS.TEACHER.ALL_TEACHERS, { params });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
   }
 };

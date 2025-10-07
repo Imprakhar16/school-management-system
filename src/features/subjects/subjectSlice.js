@@ -8,7 +8,7 @@ import {
 
 const initialState = {
   data: [], // subjects list
-  pagination: null, // pagination info
+  pagination: {}, // pagination info
   loading: false,
   error: null,
   success: false,

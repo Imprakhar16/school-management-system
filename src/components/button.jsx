@@ -1,7 +1,18 @@
 import { Button } from "@mui/material";
 import React from "react";
 
-const ButtonComp = ({ className, title, type, disabled, onClick, color, variant, fullwidth }) => {
+const ButtonComp = ({
+  className,
+  title,
+  type,
+  disabled,
+  onClick,
+  color,
+  variant,
+  fullwidth,
+  sx,
+  startIcon,
+}) => {
   return (
     <Button
       type={type}
@@ -10,7 +21,9 @@ const ButtonComp = ({ className, title, type, disabled, onClick, color, variant,
       onClick={onClick}
       color={color}
       variant={variant}
-      fullWidth={fullwidth}
+      fullWidth={fullwidth ? true : false}
+      sx={sx}
+      startIcon={startIcon}
     >
       {title}
     </Button>

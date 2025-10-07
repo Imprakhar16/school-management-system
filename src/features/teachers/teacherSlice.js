@@ -1,40 +1,72 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loginTeacherThunk } from "./teacherThunk";
+import { registerTeacherThunk, fetchAllTeachersThunk } from "./teacherThunk";
 
 const initialState = {
   teacher: null,
-  token: null,
+  teachers: [],
+  meta: null, // ✅ Add meta to initial state
   loading: false,
   error: null,
+  success: false,
+  pagination: {},
 };
 
 const teacherSlice = createSlice({
   name: "teacher",
   initialState,
   reducers: {
-    logout: (state) => {
-      state.teacher = null;
-      state.token = null;
-      localStorage.removeItem("authToken");
+    resetTeacherState: (state) => {
+      state.loading = false;
+      state.error = null;
+      state.success = false;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginTeacherThunk.pending, (state) => {
+      // ✅ Register Teacher
+      .addCase(registerTeacherThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(registerTeacherThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.teacher = action.payload.teacher;
+        state.pagination = {
+          totalPages: action.meta?.totalPages || 1,
+          currentPage: action.meta?.currentPage || 1,
+          perPage: action.meta?.perPage || 10,
+          totalTeachers: action.meta?.totalTeachers || 0,
+        };
+      })
+      .addCase(registerTeacherThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ✅ Fetch All Teachers
+      .addCase(fetchAllTeachersThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(loginTeacherThunk.fulfilled, (state, action) => {
+      .addCase(fetchAllTeachersThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.data.token;
-        state.teacher = action.payload.data.teacher;
+        state.success = true;
+        state.teachers = action.payload.teachers || []; // ✅ Fixed
+        state.meta = action.payload.meta; // ✅ Store meta
+        state.pagination = {
+          page: action.payload.meta?.currentPage || 1,
+          totalPages: action.payload.meta?.totalPages || 1,
+          total: action.payload.meta?.totalTeachers || 0,
+        };
       })
-      .addCase(loginTeacherThunk.rejected, (state, action) => {
+      .addCase(fetchAllTeachersThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Login failed";
+        state.error = action.payload;
       });
   },
 });
 
-export const { logout } = teacherSlice.actions;
+export const { resetTeacherState } = teacherSlice.actions;
 export default teacherSlice.reducer;

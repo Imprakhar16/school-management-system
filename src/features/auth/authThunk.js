@@ -1,14 +1,44 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { forgotPassword, loginUser, resetPassword } from "../../services/authServices";
+import {
+  forgotPassword,
+  loginPrincipal,
+  resetPassword,
+  loginTeacher,
+  loginStudent,
+} from "../../services/authServices";
 
-export const loginUserThunk = createAsyncThunk(
-  "auth/loginUser",
+export const loginPrincipalThunk = createAsyncThunk(
+  "auth/loginPrincipal",
   async (body, { rejectWithValue }) => {
     try {
-      const response = await loginUser(body);
+      const response = await loginPrincipal(body);
       return response;
     } catch (error) {
-      return rejectWithValue("Login Failed", error);
+      return rejectWithValue(error.response?.data || error.message || "Login Failed");
+    }
+  }
+);
+
+export const loginTeacherThunk = createAsyncThunk(
+  "auth/loginTeacher",
+  async (body, { rejectWithValue }) => {
+    try {
+      const response = await loginTeacher(body);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || { error: "Login failed" });
+    }
+  }
+);
+
+export const loginStudentThunk = createAsyncThunk(
+  "auth/loginStudent",
+  async (body, { rejectWithValue }) => {
+    try {
+      const response = await loginStudent(body);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || { error: "Login failed" });
     }
   }
 );
