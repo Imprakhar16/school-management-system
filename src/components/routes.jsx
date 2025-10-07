@@ -8,6 +8,12 @@ import DummyHome from "../pages/dashboard/dummyHome.jsx";
 import SubjectsList from "../pages/subjects/subjectsList.jsx";
 import TeacherRegistration from "../pages/teachers/addTeacher.jsx";
 import TeachersList from "../pages/teachers/teachersList.jsx";
+import StudentsHome from "../pages/students/studentsHome.jsx";
+import StudentForm from "../pages/students/createStudents.jsx";
+import ClassList from "../pages/class/classList.jsx";
+import AddClass from "../pages/class/addClass.jsx";
+import SectionHome from "../pages/section/sectionsHome.jsx";
+import SectionForm from "../pages/section/createSection.jsx";
 
 export const privateRoutes = [
   {

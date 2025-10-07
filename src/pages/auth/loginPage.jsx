@@ -156,7 +156,8 @@ const Login = () => {
               }}
             >
               {userTypes.map((type) => (
-                <Button
+                <ButtonComp
+                  title={type.label}
                   key={type.value}
                   onClick={() => handleTabChange(type.value)}
                   sx={{
@@ -176,9 +177,7 @@ const Login = () => {
                       color: userType === type.value ? "#ffffff" : "#475569",
                     },
                   }}
-                >
-                  {type.label}
-                </Button>
+                />
               ))}
             </Box>
 

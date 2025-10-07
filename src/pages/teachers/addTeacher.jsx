@@ -19,11 +19,12 @@ import {
   OutlinedInput,
   CircularProgress,
 } from "@mui/material";
-import { registerTeacher } from "../../services/teacherServices";
+
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
 import { classListThunk } from "../../features/class/classThunk";
 
-// ✅ Validation Schema
+import { registerTeacherThunk } from "../../features/teachers/teacherThunk";
+
 const validationSchema = Yup.object({
   EmpId: Yup.number().typeError("Employee ID must be a number").required("Employee ID is required"),
   firstname: Yup.string().required("First Name is required"),
@@ -45,7 +46,7 @@ const validationSchema = Yup.object({
     .typeError("Invalid date")
     .required("Experience duration is required"),
   experienceDetails: Yup.string().required("Experience details are required"),
-  photo: Yup.mixed().required("Photo is required"),
+  photoUrl: Yup.mixed().required("Photo is required"),
   experienceCertificate: Yup.mixed().required("Experience certificate is required"),
   identityVerification: Yup.mixed().required("Identity verification document is required"),
   subjects: Yup.array()
@@ -60,7 +61,7 @@ const TeacherRegistration = () => {
   const { data: subjectsList = [], loading: subjectsLoading } = useSelector(
     (state) => state.subject
   );
-  const { data: classesList = [], loading: classesLoading } = useSelector((state) => state.class);
+  const { classes, loading } = useSelector((state) => state.class);
 
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: 1, limit: 100 }));
@@ -79,7 +80,7 @@ const TeacherRegistration = () => {
       classincharge: "",
       experienceDuration: "",
       experienceDetails: "",
-      photo: null,
+      photoUrl: null,
       experienceCertificate: null,
       identityVerification: null,
       subjects: [],
@@ -87,36 +88,28 @@ const TeacherRegistration = () => {
     validationSchema,
     validateOnChange: false,
     onSubmit: async (values, { resetForm }) => {
-      try {
-        const formData = new FormData();
-        Object.entries(values).forEach(([key, val]) => {
-          if (key === "subjects" && Array.isArray(val)) {
-            val.forEach((subId) => formData.append("subjects", subId));
-          } else if (
-            key === "photo" ||
-            key === "experienceCertificate" ||
-            key === "identityVerification"
-          ) {
-            if (val) formData.append(key, val, val.name);
-          } else if (key === "EmpId") {
-            formData.append("EmpId", Number(val));
-          } else if (key === "experienceDuration") {
-            formData.append("experienceDuration", new Date(val).toISOString());
-          } else if (key === "classincharge" && val) {
-            formData.append(key, val);
-          } else if (key !== "classincharge") {
-            formData.append(key, val);
-          }
-        });
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, val]) => {
+        if (key === "subjects" && Array.isArray(val)) {
+          val.forEach((subId) => formData.append("subjects[]", subId));
+        } else if (
+          key === "photoUrl" ||
+          key === "experienceCertificate" ||
+          key === "identityVerification"
+        ) {
+          if (val) formData.append(key, val, val.name);
+        } else if (key === "EmpId") {
+          formData.append("EmpId", Number(val));
+        } else if (key === "experienceDuration") {
+          formData.append("experienceDuration", new Date(val).toISOString());
+        } else if (key === "classincharge" && val) {
+          formData.append(key, val);
+        } else if (key !== "classincharge") {
+          formData.append(key, val);
+        }
+      });
 
-        const response = await registerTeacher(formData);
-        console.log(response);
-
-        alert("Teacher registered successfully!");
-        resetForm();
-      } catch (error) {
-        alert(error?.response?.data?.message || "Failed to register teacher");
-      }
+      dispatch(registerTeacherThunk(formData)).then(() => resetForm());
     },
   });
 
@@ -128,7 +121,7 @@ const TeacherRegistration = () => {
     [formik]
   );
 
-  const isLoading = subjectsLoading || classesLoading;
+  const isLoading = loading || subjectsLoading;
 
   return (
     <Box maxWidth="700px" mx="auto" mt={4} p={4} boxShadow={3} borderRadius={3} bgcolor="white">
@@ -276,7 +269,7 @@ const TeacherRegistration = () => {
                 onChange={(e) => formik.setFieldValue("classincharge", e.target.value)}
                 label="Class Incharge"
               >
-                {classesList.map((cls) => (
+                {classes.map((cls) => (
                   <MenuItem key={cls._id} value={cls._id}>
                     {cls.name}
                   </MenuItem>
@@ -329,10 +322,10 @@ const TeacherRegistration = () => {
               <Typography variant="body2" sx={{ mb: 1 }}>
                 Photo *
               </Typography>
-              <input type="file" accept="image/*" onChange={handleFileChange("photo")} />
-              {formik.errors.photo && (
+              <input type="file" accept="image/*" onChange={handleFileChange("photoUrl")} />
+              {formik.errors.photoUrl && (
                 <Typography color="error" sx={{ mt: 1 }}>
-                  {formik.errors.photo}
+                  {formik.errors.photoUrl}
                 </Typography>
               )}
             </Box>

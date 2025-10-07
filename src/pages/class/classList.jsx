@@ -24,7 +24,7 @@ export default function ClassList() {
   });
 
   useEffect(() => {
-    dispatch(classListThunk(page, limit));
+    dispatch(classListThunk({ page, limit }));
   }, [dispatch, limit, page]);
 
   const handleDelete = (id) => {
@@ -60,20 +60,26 @@ export default function ClassList() {
       field: "classIncharge",
       headerName: "CLASSINCHARGE",
       render: (row) =>
-        row.classIncharge ? `${row.classIncharge.firstname} ${row.classIncharge.lastname}` : "N/A",
+        row.classincharge ? `${row.classincharge.firstname} ${row.classincharge.lastname}` : "N/A",
     },
   ];
 
-  const filteredData = classes?.filter(
-    (e) =>
-      String(e.name)?.includes(search.searchClass) &&
-      e.subjects?.some((sub) => String(sub.code).includes(search.searchSubject)) &&
-      e.sections?.some((sec) =>
-        sec.name?.toLowerCase().includes(search.searchSection.toLowerCase())
-      ) &&
-      e.classIncharge?.firstname?.toLowerCase().includes(search.searchIncharge.toLowerCase())
-  );
-
+  const filteredData = classes?.filter((e) => {
+    return (
+      (!search.searchClass ||
+        String(e.name).toLowerCase().includes(search.searchClass.toLowerCase())) &&
+      (!search.searchSubject ||
+        e.subjects?.some((sub) =>
+          String(sub.code).toLowerCase().includes(search.searchSubject.toLowerCase())
+        )) &&
+      (!search.searchSection ||
+        e.sections?.some((sec) =>
+          sec.name.toLowerCase().includes(search.searchSection.toLowerCase())
+        )) &&
+      (!search.searchIncharge ||
+        e.classIncharge?.firstname?.toLowerCase().includes(search.searchIncharge.toLowerCase()))
+    );
+  });
   return (
     <Paper sx={{ p: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>

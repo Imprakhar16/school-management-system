@@ -122,16 +122,12 @@ const TeachersList = () => {
     },
   ];
 
-  const customRowActions = (teacher) => (
+  const customRowActions = () => (
     <>
-      <Button size="small" onClick={() => console.log("Edit teacher:", teacher._id)} sx={{ mr: 1 }}>
+      <Button size="small" sx={{ mr: 1 }}>
         Edit
       </Button>
-      <Button
-        size="small"
-        color="error"
-        onClick={() => console.log("Delete teacher:", teacher._id)}
-      >
+      <Button size="small" color="error">
         Delete
       </Button>
     </>
