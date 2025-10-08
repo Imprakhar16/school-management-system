@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import ReusableModal from "../../components/modal";
 import {
   fetchAllSubjectsThunk,
   deleteSubjectThunk,
@@ -32,9 +33,13 @@ const SubjectsList = () => {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [searchName, setSearchName] = useState("");
   const [searchCode, setSearchCode] = useState("");
-  const [openModal, setOpenModal] = useState(false);
+
+  // ✳️ States
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
+  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
@@ -51,25 +56,23 @@ const SubjectsList = () => {
 
   const handleDelete = async (_id) => {
     if (!_id) return showToast({ message: "❌ Invalid subject ID!", status: "error" });
-    if (window.confirm("⚠️ Are you sure you want to delete this subject?")) {
-      try {
-        await dispatch(deleteSubjectThunk(_id)).unwrap();
-        showToast({ message: "✅ Subject deleted successfully!", status: "success" });
-        dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
-      } catch (err) {
-        showToast({ message: `❌ Failed to delete: ${err}`, status: "error" });
-      }
+    try {
+      await dispatch(deleteSubjectThunk(_id)).unwrap();
+      showToast({ message: "✅ Subject deleted successfully!", status: "success" });
+      dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
+    } catch (err) {
+      showToast({ message: `❌ Failed to delete: ${err}`, status: "error" });
     }
   };
 
   const handleEditOpen = (subject) => {
     setEditSubject(subject);
     setEditValues({ name: subject.name, code: subject.code });
-    setOpenModal(true);
+    setOpenEditModal(true);
   };
 
-  const handleModalClose = () => {
-    setOpenModal(false);
+  const handleEditClose = () => {
+    setOpenEditModal(false);
     setEditSubject(null);
     setEditValues({ name: "", code: "" });
   };
@@ -84,7 +87,7 @@ const SubjectsList = () => {
         })
       ).unwrap();
       showToast({ message: "✅ Subject updated successfully!", status: "success" });
-      handleModalClose();
+      handleEditClose();
       dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
     } catch (err) {
       showToast({ message: `❌ Failed to update: ${err}`, status: "error" });
@@ -139,7 +142,14 @@ const SubjectsList = () => {
       <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
         Edit
       </Button>
-      <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
+      <Button
+        size="small"
+        color="error"
+        onClick={() => {
+          setDeleteId(subject._id);
+          setConfirmOpen(true);
+        }}
+      >
         Delete
       </Button>
     </>
@@ -188,7 +198,8 @@ const SubjectsList = () => {
         total={pagination?.totalSubjects || 0}
       />
 
-      <Dialog open={openModal} onClose={handleModalClose}>
+      {/* ✳️ Edit Modal */}
+      <Dialog open={openEditModal} onClose={handleEditClose}>
         <DialogTitle>Edit Subject</DialogTitle>
         <DialogContent>
           <TextField
@@ -207,12 +218,33 @@ const SubjectsList = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleModalClose}>Cancel</Button>
+          <Button onClick={handleEditClose}>Cancel</Button>
           <Button onClick={handleEditSave} variant="contained" color="primary">
             Save
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* ✅ Delete Confirmation Modal */}
+      <ReusableModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title="Confirm Delete"
+        actions={
+          <>
+            <ButtonComp title="Cancel" onClick={() => setConfirmOpen(false)} />
+            <ButtonComp
+              title="Confirm"
+              onClick={() => {
+                handleDelete(deleteId);
+                setConfirmOpen(false);
+              }}
+            />
+          </>
+        }
+      >
+        <Typography>Are you sure you want to delete this subject?</Typography>
+      </ReusableModal>
     </Box>
   );
 };

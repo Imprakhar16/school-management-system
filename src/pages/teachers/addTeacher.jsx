@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -22,8 +23,7 @@ import {
 
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
 import { classListThunk } from "../../features/class/classThunk";
-
-import { registerTeacherThunk } from "../../features/teachers/teacherThunk";
+import { registerTeacherThunk, updateTeacherThunk } from "../../features/teachers/teacherThunk";
 
 const validationSchema = Yup.object({
   EmpId: Yup.number().typeError("Employee ID must be a number").required("Employee ID is required"),
@@ -38,7 +38,11 @@ const validationSchema = Yup.object({
     .required("Phone number is required"),
   password: Yup.string()
     .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+    .when("isEdit", {
+      is: false,
+      then: (schema) => schema.required("Password is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   classincharge: Yup.string()
     .length(24, "Please select a valid class")
     .required("Class Incharge is required"),
@@ -46,9 +50,21 @@ const validationSchema = Yup.object({
     .typeError("Invalid date")
     .required("Experience duration is required"),
   experienceDetails: Yup.string().required("Experience details are required"),
-  photoUrl: Yup.mixed().required("Photo is required"),
-  experienceCertificate: Yup.mixed().required("Experience certificate is required"),
-  identityVerification: Yup.mixed().required("Identity verification document is required"),
+  photoUrl: Yup.mixed().when("isEdit", {
+    is: false,
+    then: (schema) => schema.required("Photo is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  experienceCertificate: Yup.mixed().when("isEdit", {
+    is: false,
+    then: (schema) => schema.required("Experience certificate is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  identityVerification: Yup.mixed().when("isEdit", {
+    is: false,
+    then: (schema) => schema.required("Identity verification document is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   subjects: Yup.array()
     .of(Yup.string())
     .min(1, "At least one subject must be selected")
@@ -57,6 +73,12 @@ const validationSchema = Yup.object({
 
 const TeacherRegistration = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get teacher data from navigation state
+  const teacherData = location.state?.teacherData;
+  const isEdit = location.state?.isEdit || false;
 
   const { data: subjectsList = [], loading: subjectsLoading } = useSelector(
     (state) => state.subject
@@ -68,40 +90,67 @@ const TeacherRegistration = () => {
     dispatch(classListThunk({ page: 1, limit: 100 }));
   }, [dispatch]);
 
+  // Helper function to format date for input field
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0];
+  };
+
+  // Helper function to extract IDs from subjects
+  const extractSubjectIds = (subjects) => {
+    if (!subjects || !Array.isArray(subjects)) return [];
+    return subjects.map((sub) => (typeof sub === "object" ? sub._id : sub));
+  };
+
+  // Helper function to extract class ID
+  const extractClassId = (classincharge) => {
+    if (!classincharge) return "";
+    return typeof classincharge === "object" ? classincharge._id : classincharge;
+  };
+
   const formik = useFormik({
     initialValues: {
-      EmpId: "",
-      firstname: "",
-      lastname: "",
-      gender: "",
-      email: "",
-      phoneNumber: "",
+      EmpId: teacherData?.EmpId || "",
+      firstname: teacherData?.firstname || "",
+      lastname: teacherData?.lastname || "",
+      gender: teacherData?.gender || "",
+      email: teacherData?.email || "",
+      phoneNumber: teacherData?.phoneNumber || "",
       password: "",
-      classincharge: "",
-      experienceDuration: "",
-      experienceDetails: "",
+      classincharge: extractClassId(teacherData?.classincharge) || "",
+      experienceDuration: formatDateForInput(teacherData?.experienceDuration) || "",
+      experienceDetails: teacherData?.experienceDetails || "",
       photoUrl: null,
       experienceCertificate: null,
       identityVerification: null,
-      subjects: [],
+      subjects: extractSubjectIds(teacherData?.subjects) || [],
+      isEdit: isEdit,
     },
     validationSchema,
     validateOnChange: false,
     onSubmit: async (values, { resetForm }) => {
       const formData = new FormData();
+
       Object.entries(values).forEach(([key, val]) => {
-        if (key === "subjects" && Array.isArray(val)) {
+        if (key === "isEdit") {
+          return;
+        } else if (key === "subjects" && Array.isArray(val)) {
           val.forEach((subId) => formData.append("subjects[]", subId));
         } else if (
           key === "photoUrl" ||
           key === "experienceCertificate" ||
           key === "identityVerification"
         ) {
+          // Only append files if they are newly selected
           if (val) formData.append(key, val, val.name);
         } else if (key === "EmpId") {
           formData.append("EmpId", Number(val));
         } else if (key === "experienceDuration") {
           formData.append("experienceDuration", new Date(val).toISOString());
+        } else if (key === "password") {
+          // Only include password if it's filled
+          if (val) formData.append(key, val);
         } else if (key === "classincharge" && val) {
           formData.append(key, val);
         } else if (key !== "classincharge") {
@@ -109,7 +158,27 @@ const TeacherRegistration = () => {
         }
       });
 
-      dispatch(registerTeacherThunk(formData)).then(() => resetForm());
+      try {
+        if (isEdit && teacherData?._id) {
+          // Use updateTeacherThunk for editing
+          await dispatch(
+            updateTeacherThunk({
+              id: teacherData._id,
+              body: formData,
+            })
+          )
+            .unwrap()
+            .then(() => (resetForm(), navigate("/teachers")));
+        } else {
+          // Use registerTeacherThunk for creating new teacher
+          await dispatch(registerTeacherThunk(formData))
+            .unwrap()
+            .then(() => (resetForm(), navigate("/teachers")));
+        }
+      } catch (error) {
+        console.error("Failed to save teacher:", error);
+        // You can show an error notification here if you have a toast/notification system
+      }
     },
   });
 
@@ -126,7 +195,7 @@ const TeacherRegistration = () => {
   return (
     <Box maxWidth="700px" mx="auto" mt={4} p={4} boxShadow={3} borderRadius={3} bgcolor="white">
       <Typography variant="h4" mb={2} textAlign="center" color="primary">
-        Teacher Registration
+        {isEdit ? "Edit Teacher" : "Teacher Registration"}
       </Typography>
 
       {isLoading ? (
@@ -252,7 +321,7 @@ const TeacherRegistration = () => {
             />
             <TextField
               fullWidth
-              label="Password"
+              label={isEdit ? "Password (leave blank to keep current)" : "Password"}
               name="password"
               type="password"
               value={formik.values.password}
@@ -320,7 +389,12 @@ const TeacherRegistration = () => {
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                Photo *
+                Photo {!isEdit && "*"}
+                {isEdit && teacherData?.photoUrl && (
+                  <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
+                    (Current file exists - upload new to replace)
+                  </Typography>
+                )}
               </Typography>
               <input type="file" accept="image/*" onChange={handleFileChange("photoUrl")} />
               {formik.errors.photoUrl && (
@@ -331,7 +405,12 @@ const TeacherRegistration = () => {
             </Box>
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                Experience Certificate *
+                Experience Certificate {!isEdit && "*"}
+                {isEdit && teacherData?.experienceCertificate && (
+                  <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
+                    (Current file exists - upload new to replace)
+                  </Typography>
+                )}
               </Typography>
               <input
                 type="file"
@@ -346,7 +425,12 @@ const TeacherRegistration = () => {
             </Box>
             <Box>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                Identity Verification *
+                Identity Verification {!isEdit && "*"}
+                {isEdit && teacherData?.identityVerification && (
+                  <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
+                    (Current file exists - upload new to replace)
+                  </Typography>
+                )}
               </Typography>
               <input
                 type="file"
@@ -362,7 +446,7 @@ const TeacherRegistration = () => {
           </Box>
 
           <Button variant="contained" type="submit" color="primary" size="large">
-            Register Teacher
+            {isEdit ? "Update Teacher" : "Register Teacher"}
           </Button>
         </form>
       )}

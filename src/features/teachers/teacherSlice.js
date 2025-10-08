@@ -1,10 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { registerTeacherThunk, fetchAllTeachersThunk } from "./teacherThunk";
+import {
+  registerTeacherThunk,
+  fetchAllTeachersThunk,
+  updateTeacherThunk,
+  deleteTeacherThunk,
+} from "./teacherThunk";
 
 const initialState = {
   teacher: null,
   teachers: [],
-  meta: null, // ✅ Add meta to initial state
+  meta: null,
   loading: false,
   error: null,
   success: false,
@@ -23,7 +28,7 @@ const teacherSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // ✅ Register Teacher
+      // Register Teacher
       .addCase(registerTeacherThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -33,19 +38,13 @@ const teacherSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.teacher = action.payload.teacher;
-        state.pagination = {
-          totalPages: action.meta?.totalPages || 1,
-          currentPage: action.meta?.currentPage || 1,
-          perPage: action.meta?.perPage || 10,
-          totalTeachers: action.meta?.totalTeachers || 0,
-        };
       })
       .addCase(registerTeacherThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // ✅ Fetch All Teachers
+      // Fetch All Teachers
       .addCase(fetchAllTeachersThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -53,8 +52,8 @@ const teacherSlice = createSlice({
       .addCase(fetchAllTeachersThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        state.teachers = action.payload.teachers || []; // ✅ Fixed
-        state.meta = action.payload.meta; // ✅ Store meta
+        state.teachers = action.payload.teachers || [];
+        state.meta = action.payload.meta;
         state.pagination = {
           page: action.payload.meta?.currentPage || 1,
           totalPages: action.payload.meta?.totalPages || 1,
@@ -62,6 +61,40 @@ const teacherSlice = createSlice({
         };
       })
       .addCase(fetchAllTeachersThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Update Teacher
+      .addCase(updateTeacherThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(updateTeacherThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.teacher = action.payload.updatedTeacher;
+        // Update teacher in list if exists
+        const index = state.teachers.findIndex((t) => t._id === action.payload.updatedTeacher._id);
+        if (index !== -1) state.teachers[index] = action.payload.updatedTeacher;
+      })
+      .addCase(updateTeacherThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Delete Teacher
+      .addCase(deleteTeacherThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteTeacherThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.teachers = state.teachers.filter((t) => t.id !== action.payload.id);
+      })
+      .addCase(deleteTeacherThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
