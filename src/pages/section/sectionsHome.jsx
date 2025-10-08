@@ -122,8 +122,8 @@ const SectionHome = () => {
 
   const filteredData = sections?.filter(
     (sec) =>
-      String(sec.sectionId)?.includes(search.sectionId) &&
-      sec.name?.toLowerCase().includes(search.sectionName)
+      String(sec?.sectionId)?.includes(search?.sectionId) &&
+      sec?.name?.toLowerCase().includes(search.sectionName)
   );
 
   return (

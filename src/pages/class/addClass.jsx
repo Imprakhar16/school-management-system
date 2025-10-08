@@ -23,6 +23,7 @@ import { createClassThunk } from "../../features/class/classThunk";
 import { fetchSectionsThunk } from "../../features/section/sectionThunk";
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
 import { fetchAllTeachersThunk } from "../../features/teachers/teacherThunk";
+import { addClassSchema } from "../../validations/validation";
 
 export default function AddClass() {
   const dispatch = useDispatch();
@@ -38,12 +39,7 @@ export default function AddClass() {
       sections: [],
       classIncharge: "",
     },
-    validationSchema: Yup.object({
-      name: Yup.string().required("Class name is required"),
-      subjects: Yup.array().min(1, "Select at least one subject"),
-      sections: Yup.array().min(1, "Select at least one section"),
-      classIncharge: Yup.object().required("Teacher name is requred"),
-    }),
+    validationSchema: addClassSchema,
     onSubmit: (values) => {
       dispatch(createClassThunk(values));
       formik.resetForm();
