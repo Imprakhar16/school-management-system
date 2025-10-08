@@ -6,7 +6,7 @@ export const registerTeacherThunk = createAsyncThunk(
   "teacher/registerTeacher",
   async (body, { rejectWithValue }) => {
     try {
-      const data = await registerTeacher(body); // returns response.data
+      const data = await registerTeacher(body);
       return data;
     } catch (error) {
       return rejectWithValue(error.message || "Teacher registration failed");

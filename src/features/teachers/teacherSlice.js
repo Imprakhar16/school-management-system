@@ -8,11 +8,7 @@ const initialState = {
   loading: false,
   error: null,
   success: false,
-  pagination: {
-    page: 1,
-    totalPages: 1,
-    total: 0,
-  },
+  pagination: {},
 };
 
 const teacherSlice = createSlice({
@@ -37,6 +33,12 @@ const teacherSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.teacher = action.payload.teacher;
+        state.pagination = {
+          totalPages: action.meta?.totalPages || 1,
+          currentPage: action.meta?.currentPage || 1,
+          perPage: action.meta?.perPage || 10,
+          totalTeachers: action.meta?.totalTeachers || 0,
+        };
       })
       .addCase(registerTeacherThunk.rejected, (state, action) => {
         state.loading = false;

@@ -7,10 +7,11 @@ import TableComponent from "../../components/table";
 import SearchInput from "../../components/searchInput";
 import { fetchAllTeachersThunk } from "../../features/teachers/teacherThunk";
 import ButtonComp from "../../components/button";
+import Pagination from "../../components/pagination";
 
 const TeachersList = () => {
   const dispatch = useDispatch();
-  const { teachers, meta, loading } = useSelector((state) => state.teacher || {});
+  const { teachers, pagination, meta, loading } = useSelector((state) => state.teacher || {});
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -39,6 +40,11 @@ const TeachersList = () => {
       );
     });
   }, [teachers, searchFirstName, searchLastName, searchEmail, searchSubjects, searchClassIncharge]);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    dispatch(fetchAllTeachersThunk(newPage, rowsPerPage));
+  };
 
   const columns = [
     {
@@ -160,12 +166,17 @@ const TeachersList = () => {
         data={dataWithSlno}
         loading={loading}
         totalCount={meta?.totalTeachers || 0}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={setPage}
-        onRowsPerPageChange={setRowsPerPage}
         customRowActions={customRowActions}
         emptyMessage="No teachers found."
+      />
+
+      <Pagination
+        page={page}
+        limit={rowsPerPage}
+        setLimit={setRowsPerPage}
+        onPageChange={handlePageChange}
+        totalPage={pagination?.totalPages || 1}
+        total={pagination?.total}
       />
     </Box>
   );

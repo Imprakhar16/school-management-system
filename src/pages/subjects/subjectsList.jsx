@@ -91,7 +91,10 @@ const SubjectsList = () => {
     }
   };
 
-  const handlePageChange = (newPage) => setCurrentPage(newPage);
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    dispatch(fetchAllSubjectsThunk(newPage, itemsPerPage));
+  };
 
   const columns = [
     {
