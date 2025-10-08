@@ -9,8 +9,8 @@ const API_PATHS = {
   STUDENT: {
     CREATE_STUDENT: "/student/create",
     ALL_STUDENTS: "/student/students",
-    UPDATE_STUDENT: "",
-    DELETE_STUDENT: "",
+    UPDATE_STUDENT: "/student/update",
+    DELETE_STUDENT: "/student/delete",
   },
   SUBJECT: {
     CREATE_SUBJECT: "subject/create",
