@@ -12,6 +12,7 @@ import {
   fetchSectionsThunk,
 } from "../../features/section/sectionThunk";
 import ButtonComp from "../../components/button";
+import { createSectionSchema } from "../../validations/validation";
 
 const SectionForm = ({ onSuccess }) => {
   const dispatch = useDispatch();
@@ -29,10 +30,7 @@ const SectionForm = ({ onSuccess }) => {
       sectionId: existingSection?.sectionId || "",
       name: existingSection?.name || "",
     },
-    validationSchema: Yup.object({
-      sectionId: Yup.string().required("Section ID is required"),
-      name: Yup.string().required("Section Name is required"),
-    }),
+    validationSchema: createSectionSchema,
     onSubmit: (values, { setSubmitting }) => {
       if (isEditMode) {
         dispatch(updateSectionThunk({ sectionId: editId, data: values }))

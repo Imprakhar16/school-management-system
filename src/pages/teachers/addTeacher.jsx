@@ -24,36 +24,7 @@ import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
 import { classListThunk } from "../../features/class/classThunk";
 
 import { registerTeacherThunk } from "../../features/teachers/teacherThunk";
-
-const validationSchema = Yup.object({
-  EmpId: Yup.number().typeError("Employee ID must be a number").required("Employee ID is required"),
-  firstname: Yup.string().required("First Name is required"),
-  lastname: Yup.string().required("Last Name is required"),
-  gender: Yup.string()
-    .oneOf(["male", "female", "other"], "Invalid gender")
-    .required("Gender is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  phoneNumber: Yup.string()
-    .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
-    .required("Phone number is required"),
-  password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
-  classincharge: Yup.string()
-    .length(24, "Please select a valid class")
-    .required("Class Incharge is required"),
-  experienceDuration: Yup.date()
-    .typeError("Invalid date")
-    .required("Experience duration is required"),
-  experienceDetails: Yup.string().required("Experience details are required"),
-  photoUrl: Yup.mixed().required("Photo is required"),
-  experienceCertificate: Yup.mixed().required("Experience certificate is required"),
-  identityVerification: Yup.mixed().required("Identity verification document is required"),
-  subjects: Yup.array()
-    .of(Yup.string())
-    .min(1, "At least one subject must be selected")
-    .required("Subjects are required"),
-});
+import { createTeacherSchema } from "../../validations/validation";
 
 const TeacherRegistration = () => {
   const dispatch = useDispatch();
@@ -85,7 +56,7 @@ const TeacherRegistration = () => {
       identityVerification: null,
       subjects: [],
     },
-    validationSchema,
+    validationSchema: createTeacherSchema,
     validateOnChange: false,
     onSubmit: async (values, { resetForm }) => {
       const formData = new FormData();

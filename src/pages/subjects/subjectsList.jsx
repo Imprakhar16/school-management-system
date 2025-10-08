@@ -6,35 +6,30 @@ import {
   updateSubjectThunk,
 } from "../../features/subjects/subjectThunk";
 import { Link } from "react-router-dom";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Paper,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Typography, TextField, Paper } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
 import TableComponent from "../../components/table";
 import SearchInput from "../../components/searchInput";
 import Pagination from "../../components/pagination";
 import ButtonComp from "../../components/button";
+import ReusableModal from "../../components/modal";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
   const { data, pagination, loading } = useSelector((state) => state.subject);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [searchName, setSearchName] = useState("");
   const [searchCode, setSearchCode] = useState("");
-  const [openModal, setOpenModal] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
+
   const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
+
+  const [subjectToDelete, setSubjectToDelete] = useState(null);
 
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
@@ -49,27 +44,37 @@ const SubjectsList = () => {
     );
   }, [data, searchName, searchCode]);
 
-  const handleDelete = async (_id) => {
-    if (!_id) return showToast({ message: "❌ Invalid subject ID!", status: "error" });
-    if (window.confirm("⚠️ Are you sure you want to delete this subject?")) {
-      try {
-        await dispatch(deleteSubjectThunk(_id)).unwrap();
-        showToast({ message: "✅ Subject deleted successfully!", status: "success" });
-        dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
-      } catch (err) {
-        showToast({ message: `❌ Failed to delete: ${err}`, status: "error" });
-      }
+  const handleDelete = (_id) => {
+    const subject = data.find((subj) => subj._id === _id);
+    if (!subject) {
+      return showToast({ message: "❌ Invalid subject ID!", status: "error" });
+    }
+    setSubjectToDelete(subject);
+    setModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!subjectToDelete?._id) return;
+    try {
+      await dispatch(deleteSubjectThunk(subjectToDelete._id)).unwrap();
+      showToast({ message: "Subject deleted successfully!", status: "success" });
+      dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
+    } catch (err) {
+      showToast({ message: `❌ Failed to delete: ${err}`, status: "error" });
+    } finally {
+      setModalOpen(false);
+      setSubjectToDelete(null);
     }
   };
 
   const handleEditOpen = (subject) => {
     setEditSubject(subject);
     setEditValues({ name: subject.name, code: subject.code });
-    setOpenModal(true);
+    setModalOpen(true);
   };
 
-  const handleModalClose = () => {
-    setOpenModal(false);
+  const handleEditClose = () => {
+    setModalOpen(false);
     setEditSubject(null);
     setEditValues({ name: "", code: "" });
   };
@@ -84,7 +89,7 @@ const SubjectsList = () => {
         })
       ).unwrap();
       showToast({ message: "✅ Subject updated successfully!", status: "success" });
-      handleModalClose();
+      handleEditClose();
       dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
     } catch (err) {
       showToast({ message: `❌ Failed to update: ${err}`, status: "error" });
@@ -93,7 +98,7 @@ const SubjectsList = () => {
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    dispatch(fetchAllSubjectsThunk(newPage, itemsPerPage));
+    dispatch(fetchAllSubjectsThunk({ page: newPage, limit: itemsPerPage }));
   };
 
   const columns = [
@@ -188,31 +193,61 @@ const SubjectsList = () => {
         total={pagination?.totalSubjects || 0}
       />
 
-      <Dialog open={openModal} onClose={handleModalClose}>
-        <DialogTitle>Edit Subject</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Subject Name"
-            fullWidth
-            margin="dense"
-            value={editValues.name}
-            onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
-          />
-          <TextField
-            label="Subject Code"
-            fullWidth
-            margin="dense"
-            value={editValues.code}
-            onChange={(e) => setEditValues({ ...editValues, code: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleModalClose}>Cancel</Button>
-          <Button onClick={handleEditSave} variant="contained" color="primary">
+      <ReusableModal
+        open={modalOpen && editSubject}
+        onClose={handleEditClose}
+        title="Edit Subject"
+        actions={[
+          <Button key="cancel" onClick={handleEditClose}>
+            Cancel
+          </Button>,
+          <Button key="save" onClick={handleEditSave} variant="contained" color="primary">
             Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </Button>,
+        ]}
+      >
+        <TextField
+          label="Subject Name"
+          fullWidth
+          margin="dense"
+          value={editValues.name}
+          onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
+        />
+        <TextField
+          label="Subject Code"
+          fullWidth
+          margin="dense"
+          value={editValues.code}
+          onChange={(e) => setEditValues({ ...editValues, code: e.target.value })}
+        />
+      </ReusableModal>
+
+      <ReusableModal
+        open={modalOpen && subjectToDelete}
+        onClose={() => {
+          setModalOpen(false);
+          setSubjectToDelete(null);
+        }}
+        title="Confirm Delete"
+        actions={[
+          <Button
+            key="cancel"
+            onClick={() => {
+              setModalOpen(false);
+              setSubjectToDelete(null);
+            }}
+          >
+            Cancel
+          </Button>,
+          <Button key="delete" onClick={confirmDelete} variant="contained" color="error">
+            Delete
+          </Button>,
+        ]}
+      >
+        <Typography>
+          Are you sure you want to delete the subject <strong>{subjectToDelete?.name}</strong>?
+        </Typography>
+      </ReusableModal>
     </Box>
   );
 };
