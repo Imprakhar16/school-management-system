@@ -127,7 +127,7 @@ const SectionHome = () => {
   );
 
   return (
-    <Box sx={{ p: 4, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+    <Box>
       <Paper sx={{ p: 3 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>

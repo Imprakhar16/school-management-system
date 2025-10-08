@@ -22,6 +22,7 @@ import ButtonComp from "../../components/button";
 import { createClassThunk } from "../../features/class/classThunk";
 import { fetchSectionsThunk } from "../../features/section/sectionThunk";
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
+import { fetchAllTeachersThunk } from "../../features/teachers/teacherThunk";
 import { addClassSchema } from "../../validations/validation";
 
 export default function AddClass() {
@@ -29,6 +30,7 @@ export default function AddClass() {
   const navigate = useNavigate();
   const { sections } = useSelector((state) => state.sections);
   const { data } = useSelector((state) => state.subject);
+  const { teachers } = useSelector((state) => state.teacher);
 
   const formik = useFormik({
     initialValues: {
@@ -46,7 +48,8 @@ export default function AddClass() {
 
   useEffect(() => {
     dispatch(fetchSectionsThunk(1, 100));
-    dispatch(fetchAllSubjectsThunk(2, 100));
+    dispatch(fetchAllSubjectsThunk(5, 100));
+    dispatch(fetchAllTeachersThunk(1, 100));
   }, [dispatch]);
 
   return (
@@ -60,15 +63,6 @@ export default function AddClass() {
           >
             Back
           </Button>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <ButtonComp
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(-1)}
-            sx={{ textTransform: "none" }}
-          >
-            Back
-          </ButtonComp>
         </Box>
 
         <Typography variant="h5" gutterBottom>
@@ -128,22 +122,14 @@ export default function AddClass() {
             <Select
               labelId="classIncharge-label"
               id="classincharge"
-              name="classIncharge"
+              name="classincharge"
               value={formik.values.classIncharge}
               onChange={formik.handleChange}
               input={<OutlinedInput label="Class Incharge" />}
-              renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((id) => {
-                    const sub = data.find((s) => s._id === id);
-                    return <Chip key={id} label={sub?.name || ""} />;
-                  })}
-                </Box>
-              )}
             >
-              {data.map((s) => (
-                <MenuItem key={s._id} value={s._id}>
-                  {s.name} ({s.code})
+              {teachers.map((t) => (
+                <MenuItem key={t._id} value={t._id}>
+                  {t.firstname} {t.lastname}
                 </MenuItem>
               ))}
             </Select>
