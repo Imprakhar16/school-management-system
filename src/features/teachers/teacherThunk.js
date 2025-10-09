@@ -1,5 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchAllTeachers, registerTeacher } from "../../services/teacherServices";
+import {
+  fetchAllTeachers,
+  registerTeacher,
+  updateTeacher,
+  deleteTeacher,
+} from "../../services/teacherServices";
 
 //Register
 export const registerTeacherThunk = createAsyncThunk(
@@ -26,6 +31,32 @@ export const fetchAllTeachersThunk = createAsyncThunk(
       return rejectWithValue(
         error.response?.data?.message || error.message || "Failed to fetch subjects"
       );
+    }
+  }
+);
+
+// Update Teacher
+export const updateTeacherThunk = createAsyncThunk(
+  "teacher/updateTeacher",
+  async ({ id, body }, { rejectWithValue }) => {
+    try {
+      const data = await updateTeacher(id, body);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to update teacher");
+    }
+  }
+);
+
+// Delete Teacher
+export const deleteTeacherThunk = createAsyncThunk(
+  "teacher/deleteTeacher",
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await deleteTeacher(id);
+      return { id, ...data };
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to delete teacher");
     }
   }
 );

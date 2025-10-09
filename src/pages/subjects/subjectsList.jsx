@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import ReusableModal from "../../components/modal";
 import {
   fetchAllSubjectsThunk,
   deleteSubjectThunk,
@@ -28,6 +29,7 @@ const SubjectsList = () => {
 
   const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
+  const [deleteId, setDeleteId] = useState(null);
 
   const [subjectToDelete, setSubjectToDelete] = useState(null);
 
@@ -144,7 +146,14 @@ const SubjectsList = () => {
       <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
         Edit
       </Button>
-      <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
+      <Button
+        size="small"
+        color="error"
+        onClick={() => {
+          setDeleteId(subject._id);
+          setConfirmOpen(true);
+        }}
+      >
         Delete
       </Button>
     </>
