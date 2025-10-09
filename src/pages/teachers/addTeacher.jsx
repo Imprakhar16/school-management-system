@@ -25,53 +25,6 @@ import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
 import { classListThunk } from "../../features/class/classThunk";
 import { registerTeacherThunk, updateTeacherThunk } from "../../features/teachers/teacherThunk";
 
-const validationSchema = Yup.object({
-  EmpId: Yup.number().typeError("Employee ID must be a number").required("Employee ID is required"),
-  firstname: Yup.string().required("First Name is required"),
-  lastname: Yup.string().required("Last Name is required"),
-  gender: Yup.string()
-    .oneOf(["male", "female", "other"], "Invalid gender")
-    .required("Gender is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  phoneNumber: Yup.string()
-    .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
-    .required("Phone number is required"),
-  password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
-    .when("isEdit", {
-      is: false,
-      then: (schema) => schema.required("Password is required"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-  classincharge: Yup.string()
-    .length(24, "Please select a valid class")
-    .required("Class Incharge is required"),
-  experienceDuration: Yup.date()
-    .typeError("Invalid date")
-    .required("Experience duration is required"),
-  experienceDetails: Yup.string().required("Experience details are required"),
-  photoUrl: Yup.mixed().when("isEdit", {
-    is: false,
-    then: (schema) => schema.required("Photo is required"),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  experienceCertificate: Yup.mixed().when("isEdit", {
-    is: false,
-    then: (schema) => schema.required("Experience certificate is required"),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  identityVerification: Yup.mixed().when("isEdit", {
-    is: false,
-    then: (schema) => schema.required("Identity verification document is required"),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  subjects: Yup.array()
-    .of(Yup.string())
-    .min(1, "At least one subject must be selected")
-    .required("Subjects are required"),
-});
-
-import { registerTeacherThunk } from "../../features/teachers/teacherThunk";
 import { createTeacherSchema } from "../../validations/validation";
 
 const TeacherRegistration = () => {

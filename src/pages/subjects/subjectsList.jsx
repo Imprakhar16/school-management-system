@@ -14,7 +14,6 @@ import TableComponent from "../../components/table";
 import SearchInput from "../../components/searchInput";
 import Pagination from "../../components/pagination";
 import ButtonComp from "../../components/button";
-import ReusableModal from "../../components/modal";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
@@ -29,7 +28,7 @@ const SubjectsList = () => {
 
   const [editSubject, setEditSubject] = useState(null);
   const [editValues, setEditValues] = useState({ name: "", code: "" });
-  const [deleteId, setDeleteId] = useState(null);
+  // const [deleteId, setDeleteId] = useState(null);
 
   const [subjectToDelete, setSubjectToDelete] = useState(null);
 
@@ -146,14 +145,7 @@ const SubjectsList = () => {
       <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
         Edit
       </Button>
-      <Button
-        size="small"
-        color="error"
-        onClick={() => {
-          setDeleteId(subject._id);
-          setConfirmOpen(true);
-        }}
-      >
+      <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
         Delete
       </Button>
     </>

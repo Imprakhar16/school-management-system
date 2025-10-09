@@ -41,7 +41,11 @@ export const createTeacherSchema = Yup.object({
     .required("Phone number is required"),
   password: Yup.string()
     .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+    .when("isEdit", {
+      is: false,
+      then: (schema) => schema.required("Password is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   classincharge: Yup.string()
     .length(24, "Please select a valid class")
     .required("Class Incharge is required"),
@@ -49,9 +53,21 @@ export const createTeacherSchema = Yup.object({
     .typeError("Invalid date")
     .required("Experience duration is required"),
   experienceDetails: Yup.string().required("Experience details are required"),
-  photoUrl: Yup.mixed().required("Photo is required"),
-  experienceCertificate: Yup.mixed().required("Experience certificate is required"),
-  identityVerification: Yup.mixed().required("Identity verification document is required"),
+  photoUrl: Yup.mixed().when("isEdit", {
+    is: false,
+    then: (schema) => schema.required("Photo is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  experienceCertificate: Yup.mixed().when("isEdit", {
+    is: false,
+    then: (schema) => schema.required("Experience certificate is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  identityVerification: Yup.mixed().when("isEdit", {
+    is: false,
+    then: (schema) => schema.required("Identity verification document is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   subjects: Yup.array()
     .of(Yup.string())
     .min(1, "At least one subject must be selected")
