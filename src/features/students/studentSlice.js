@@ -40,7 +40,7 @@ const fetchStudentSlice = createSlice({
       })
       .addCase(createStudentThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.students.push(action.payload.student);
+        state.students.push(action.payload);
         state.totalStudents += 1;
       })
       .addCase(createStudentThunk.rejected, (state, action) => {

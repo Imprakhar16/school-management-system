@@ -24,7 +24,7 @@ export const addClassSchema = Yup.object({
   name: Yup.string().required("Class name is required"),
   subjects: Yup.array().min(1, "Select at least one subject"),
   sections: Yup.array().min(1, "Select at least one section"),
-  classIncharge: Yup.object().required("Teacher name is requred"),
+  classincharge: Yup.string().required("Teacher name is requred"),
 });
 
 export const createTeacherSchema = Yup.object({

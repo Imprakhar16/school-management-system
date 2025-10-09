@@ -37,18 +37,23 @@ export default function AddClass() {
       name: "",
       subjects: [],
       sections: [],
-      classIncharge: "",
+      classincharge: "",
     },
     validationSchema: addClassSchema,
-    onSubmit: (values) => {
-      dispatch(createClassThunk(values));
-      formik.resetForm();
+    onSubmit: async (values, { resetForm }) => {
+      dispatch(createClassThunk(values)).unwrap();
+      resetForm();
     },
   });
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    formik.handleSubmit();
+  };
+
   useEffect(() => {
-    dispatch(fetchSectionsThunk(1, 100));
-    dispatch(fetchAllSubjectsThunk(5, 100));
+    dispatch(fetchSectionsThunk(1, 10));
+    dispatch(fetchAllSubjectsThunk(1, 100));
     dispatch(fetchAllTeachersThunk(1, 100));
   }, [dispatch]);
 
@@ -69,7 +74,7 @@ export default function AddClass() {
           Create Class
         </Typography>
 
-        <form onSubmit={formik.handleSubmit} noValidate>
+        <form onSubmit={handleSubmit} noValidate>
           {/* Class Name */}
           <TextField
             fullWidth
@@ -123,7 +128,7 @@ export default function AddClass() {
               labelId="classIncharge-label"
               id="classincharge"
               name="classincharge"
-              value={formik.values.classIncharge}
+              value={formik.values.classincharge}
               onChange={formik.handleChange}
               input={<OutlinedInput label="Class Incharge" />}
             >
@@ -133,9 +138,9 @@ export default function AddClass() {
                 </MenuItem>
               ))}
             </Select>
-            {formik.touched.classIncharge && formik.errors.classIncharge && (
+            {formik.touched.classincharge && formik.errors.classincharge && (
               <Typography color="error" variant="caption">
-                {formik.errors.classIncharge}
+                {formik.errors.classincharge}
               </Typography>
             )}
           </FormControl>

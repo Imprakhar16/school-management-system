@@ -1,32 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, Paper, TextField, Typography, Divider } from "@mui/material";
+import { Box, Paper, TextField, Typography, IconButton, Tooltip } from "@mui/material";
+import { Edit, Delete } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
-import { fetchStudentThunk } from "../../features/students/studentsThunk";
+import { showToast } from "../../components/toaster";
+import { deleteStudentThunk, fetchStudentThunk } from "../../features/students/studentsThunk";
 import ButtonComp from "../../components/button";
 import TableComponent from "../../components/table";
 import Pagination from "../../components/pagination";
 import { useNavigate } from "react-router-dom";
-import ReusableModal from "../../components/modal"; // ✅ import your modal
+import ReusableModal from "../../components/modal";
 
 const StudentsHome = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [open, setOpen] = useState(false); // ✅ modal open state
-  const [selectedStudent, setSelectedStudent] = useState(null); // ✅ store selected student
+
+  const { students, loading, totalPages, totalStudents } = useSelector((state) => state.student);
+  const [deleteStudentModal, setDeleteStudentModal] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
 
   const [search, setSearch] = useState({
     rollNo: "",
     firstname: "",
     lastname: "",
     parentname: "",
+    gender: "",
+    email: "",
     class: "",
+    section: "",
   });
-
-  const { students, loading, totalPages, totalStudents } = useSelector((state) => state.student);
-
   useEffect(() => {
     dispatch(fetchStudentThunk({ page, limit }));
   }, [dispatch, page, limit]);
@@ -36,10 +40,17 @@ const StudentsHome = () => {
     { field: "firstname", headerName: "FIRSTNAME" },
     { field: "lastname", headerName: "LASTNAME" },
     { field: "parentname", headerName: "PARENTNAME" },
+    { field: "gender", headerName: "GENDER" },
+    { field: "email", headerName: "EMAIL" },
     {
       field: "class",
       headerName: "CLASS",
       render: (row) => (row.class?.name ? `${row.class.name}` : "N/A"),
+    },
+    {
+      field: "section",
+      headerName: "SECTION",
+      render: (row) => (row.section?.name ? row.section.name : "-"),
     },
   ];
 
@@ -57,7 +68,10 @@ const StudentsHome = () => {
       s.firstname?.toLowerCase().includes(search.firstname) &&
       s.lastname?.toLowerCase().includes(search.lastname) &&
       s.parentname?.toLowerCase().includes(search.parentname) &&
-      String(s.class?.name)?.includes(search.class)
+      s.gender.toLowerCase().includes(search.gender) &&
+      s.email.toLowerCase().includes(search.email) &&
+      String(s.class?.name)?.includes(search.class) &&
+      s.section?.name.toLowerCase().includes(search.section)
   );
 
   const handlePageChange = (newPage) => {
@@ -65,15 +79,23 @@ const StudentsHome = () => {
     dispatch(fetchStudentThunk(newPage, limit));
   };
 
-  // ✅ when user clicks "Details"
-  const handleDetailsClick = (student) => {
-    setSelectedStudent(student);
-    setOpen(true);
+  const handleDelete = (id) => {
+    setDeleteStudentModal(true);
+    setSelectedStudentId(id);
   };
 
-  const handleCloseModal = () => {
-    setOpen(false);
-    setSelectedStudent(null);
+  const handleConfirmDelete = () => {
+    if (!selectedStudentId) return;
+    dispatch(deleteStudentThunk(selectedStudentId))
+      .unwrap()
+      .then(() => {
+        showToast({ status: "success", message: "Student deleted successfully" });
+        dispatch(fetchStudentThunk({ page, limit: limit }));
+      })
+      .finally(() => {
+        setDeleteStudentModal(false);
+        setSelectedStudentId(null);
+      });
   };
 
   return (
@@ -136,6 +158,26 @@ const StudentsHome = () => {
               fullWidth
             />
           ),
+          gender: (
+            <TextField
+              placeholder="Search Gender"
+              name="gender"
+              value={search.gender}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+            />
+          ),
+          email: (
+            <TextField
+              placeholder="Search email"
+              name="email"
+              value={search.email}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+            />
+          ),
           class: (
             <TextField
               placeholder="Search Class"
@@ -146,15 +188,32 @@ const StudentsHome = () => {
               fullWidth
             />
           ),
+          section: (
+            <TextField
+              placeholder="Search Section"
+              name="section"
+              value={search.section}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+            />
+          ),
         }}
         customRowActions={(row) => (
           <>
-            <ButtonComp
-              title="Details"
-              variant="contained"
-              color="primary"
-              onClick={() => handleDetailsClick(row)}
-            />
+            <Box sx={{ display: "flex", columnGap: 2 }}>
+              <Tooltip title="Edit Section">
+                <IconButton color="primary">
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Delete Section">
+                <IconButton color="error" onClick={() => handleDelete(row._id)}>
+                  <Delete />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </>
         )}
       />
@@ -168,143 +227,28 @@ const StudentsHome = () => {
         total={totalStudents}
       />
 
-      {/* ✅ Modal for details */}
-      <ReusableModal open={open} onClose={handleCloseModal} title="Student Details">
-        {selectedStudent ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              alignItems: { xs: "center", sm: "flex-start" },
-              gap: 3,
-              p: 2,
-            }}
-          >
-            {/* Left side - Student Photo */}
-            <Box
-              sx={{
-                flex: "0 0 200px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                textAlign: "center",
-              }}
-            >
-              <img
-                src={
-                  selectedStudent.photoUrl ||
-                  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                }
-                alt="student"
-                style={{
-                  width: 180,
-                  height: 180,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "3px solid #1976d2",
-                }}
-              />
-              <Typography variant="h6" sx={{ mt: 1, fontWeight: 600 }}>
-                {selectedStudent.firstname} {selectedStudent.lastname}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Roll No: {selectedStudent.rollNo}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{
-                  bgcolor: "#e3f2fd",
-                  px: 1,
-                  py: 0.3,
-                  borderRadius: 1,
-                  mt: 0.5,
-                }}
-              >
-                {selectedStudent.class?.name || "N/A"}{" "}
-                {selectedStudent.section?.name ? `(${selectedStudent.section?.name})` : ""}
-              </Typography>
-            </Box>
-
-            {/* Right side - Student Info */}
-            <Box sx={{ flex: 1 }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: "bold",
-                  color: "primary.main",
-                  borderBottom: "2px solid #1976d2",
-                  pb: 0.5,
-                  mb: 1.5,
-                }}
-              >
-                Personal Details
-              </Typography>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                  gap: 1,
-                }}
-              >
-                <Typography>
-                  <strong>Gender:</strong> {selectedStudent.gender}
-                </Typography>
-                <Typography>
-                  <strong>Parent Name:</strong> {selectedStudent.parentname}
-                </Typography>
-                <Typography>
-                  <strong>Email:</strong> {selectedStudent.email || "N/A"}
-                </Typography>
-                <Typography>
-                  <strong>Phone:</strong> {selectedStudent.phoneNumber || "N/A"}
-                </Typography>
-                <Typography>
-                  <strong>Address:</strong> {selectedStudent.address || "N/A"}
-                </Typography>
-              </Box>
-
-              <Divider sx={{ my: 2 }} />
-
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: "bold",
-                  color: "primary.main",
-                  borderBottom: "2px solid #1976d2",
-                  pb: 0.5,
-                  mb: 1.5,
-                }}
-              >
-                Documents
-              </Typography>
-
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {selectedStudent.identityVerification ? (
-                  <Typography>
-                    <strong>Aadhar / ID Proof:</strong>{" "}
-                    <a
-                      href={selectedStudent.identityVerification}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: "#1976d2", textDecoration: "none" }}
-                    >
-                      View Document
-                    </a>
-                  </Typography>
-                ) : (
-                  <Typography color="text.secondary">No ID Proof Uploaded</Typography>
-                )}
-              </Box>
-              <Box sx={{ mt: 3, display: "flex", columnGap: 3 }}>
-                <ButtonComp title="Edit" variant="contained" />
-                <ButtonComp title="Delete" variant="contained" color="error" />
-              </Box>
-            </Box>
-          </Box>
-        ) : (
-          <Typography>No data available</Typography>
-        )}
+      {/* Delete Student Modal */}
+      <ReusableModal
+        open={deleteStudentModal}
+        onClose={() => setSelectedStudentId(false)}
+        title="Confirm Deletion"
+        actions={
+          <>
+            <ButtonComp
+              title="cancel"
+              variant="contained"
+              onClick={() => setDeleteStudentModal(false)}
+            />
+            <ButtonComp
+              title="delete"
+              variant="contained"
+              color="error"
+              onClick={handleConfirmDelete}
+            />
+          </>
+        }
+      >
+        <Typography>Are you sure you want to delete this Student?</Typography>
       </ReusableModal>
     </Paper>
   );

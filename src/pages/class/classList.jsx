@@ -216,7 +216,7 @@ export default function ClassList() {
           </>
         }
       >
-        <Typography>Are you want to delete this class?</Typography>
+        <Typography>Are you sure you want to delete this class?</Typography>
       </ReusableModal>
     </Paper>
   );

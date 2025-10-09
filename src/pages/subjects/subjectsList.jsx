@@ -61,7 +61,7 @@ const SubjectsList = () => {
       showToast({ message: "Subject deleted successfully!", status: "success" });
       dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
     } catch (err) {
-      showToast({ message: `❌ Failed to delete: ${err}`, status: "error" });
+      showToast({ message: ` Failed to delete: ${err}`, status: "error" });
     } finally {
       setModalOpen(false);
       setSubjectToDelete(null);
