@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Tooltip, Paper, Typography, Box, IconButton, TextField } from "@mui/material";
+import { Tooltip, Paper, Typography, Box, IconButton, TextField, Button } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import { classListThunk, deleteClassThunk } from "../../features/class/classThunk";
 import ButtonComp from "../../components/button";
@@ -9,10 +9,16 @@ import TableComponent from "../../components/table";
 import { renderArrayChips } from "../../helper/renderHelper";
 import Pagination from "../../components/pagination";
 import AddIcon from "@mui/icons-material/Add";
+import ReusableModal from "../../components/modal";
+import { showToast } from "../../components/toaster";
 
 export default function ClassList() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedClassId, setSelectedClassId] = useState(null);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { classes, loading, totalPages, totalCount } = useSelector((state) => state.class);
@@ -29,7 +35,25 @@ export default function ClassList() {
   }, [dispatch, limit, page]);
 
   const handleDelete = (id) => {
-    dispatch(deleteClassThunk(id));
+    setSelectedClassId(id);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!selectedClassId) return;
+    dispatch(deleteClassThunk(selectedClassId))
+      .unwrap()
+      .then(() => {
+        showToast({ status: "success", message: "Class deleted successfully" });
+        dispatch(classListThunk({ page, limit: limit }));
+      })
+      .catch((error) => {
+        showToast({ status: "error", message: error?.message || "Failed to delete Class" });
+      })
+      .finally(() => {
+        setDeleteModalOpen(false);
+        setSelectedClassId(null);
+      });
   };
 
   const handleChange = (e) => {
@@ -58,7 +82,7 @@ export default function ClassList() {
       render: (row) => renderArrayChips(row.sections, (sec) => sec.name),
     },
     {
-      field: "classIncharge",
+      field: "classincharge",
       headerName: "CLASSINCHARGE",
       render: (row) =>
         row.classincharge ? `${row.classincharge.firstname} ${row.classincharge.lastname}` : "N/A",
@@ -133,7 +157,7 @@ export default function ClassList() {
               fullWidth
             />
           ),
-          classIncharge: (
+          classincharge: (
             <TextField
               placeholder="Search Incharge"
               name="searchIncharge"
@@ -171,6 +195,29 @@ export default function ClassList() {
         totalPage={totalPages}
         total={totalCount}
       />
+
+      <ReusableModal
+        open={deleteModalOpen}
+        onClose={() => setSelectedClassId(false)}
+        title="Confirm Deletion"
+        actions={
+          <>
+            <ButtonComp
+              title="cancel"
+              variant="contained"
+              onClick={() => setDeleteModalOpen(false)}
+            />
+            <ButtonComp
+              title="delete"
+              variant="contained"
+              color="error"
+              onClick={handleConfirmDelete}
+            />
+          </>
+        }
+      >
+        <Typography>Are you want to delete this class?</Typography>
+      </ReusableModal>
     </Paper>
   );
 }

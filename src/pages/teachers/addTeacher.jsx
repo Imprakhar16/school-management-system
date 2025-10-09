@@ -71,6 +71,9 @@ const validationSchema = Yup.object({
     .required("Subjects are required"),
 });
 
+import { registerTeacherThunk } from "../../features/teachers/teacherThunk";
+import { createTeacherSchema } from "../../validations/validation";
+
 const TeacherRegistration = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -127,7 +130,7 @@ const TeacherRegistration = () => {
       subjects: extractSubjectIds(teacherData?.subjects) || [],
       isEdit: isEdit,
     },
-    validationSchema,
+    validationSchema: createTeacherSchema,
     validateOnChange: false,
     onSubmit: async (values, { resetForm }) => {
       const formData = new FormData();

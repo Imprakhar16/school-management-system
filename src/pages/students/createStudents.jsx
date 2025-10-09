@@ -1,108 +1,81 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
+import { createStudentThunk } from "../../features/students/studentsThunk";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Divider,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  FormHelperText,
+  OutlinedInput,
+  Paper,
+} from "@mui/material";
+import { classListThunk } from "../../features/class/classThunk";
 
-const genderOptions = ["Male", "Female", "Other"];
-const categoryOptions = ["General", "OBC", "SC", "ST", "Other"];
+const genderOptions = ["male", "female", "other"];
 
 const validationSchema = Yup.object().shape({
-  firstName: Yup.string().required("First name is required"),
-  lastName: Yup.string().required("Last name is required"),
-  fatherName: Yup.string().required("Father name is required"),
-  motherName: Yup.string().required("Mother name is required"),
+  firstname: Yup.string().required("First name is required"),
+  lastname: Yup.string().required("Last name is required"),
+  parentname: Yup.string().required("Father name is required"),
   email: Yup.string().email("Invalid email"),
-  fatherEmail: Yup.string().email("Invalid email").required("Father's email is required"),
-  motherEmail: Yup.string().email("Invalid email"),
-  rollNumber: Yup.string().required("Roll number is required"),
+  rollNo: Yup.string().required("Roll number is required"),
   gender: Yup.string().required("Gender is required"),
-  category: Yup.string().required("Category is required"),
-  address: Yup.string().required("Address is required"),
   password: Yup.string().min(6, "Min 6 characters").required("Password is required"),
-  enrollmentNumber: Yup.string().required("Enrollment number is required"),
   class: Yup.string().required("Class is required"),
   section: Yup.string().required("Section is required"),
-  studentContact: Yup.string(),
-  fatherContact: Yup.string().required("Father's contact is required"),
-  motherContact: Yup.string(),
+  phoneNumber: Yup.string(),
 });
 
 const StudentForm = () => {
   const [aadharFile, setAadharFile] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
-  const [certificatesFiles, setCertificatesFiles] = useState(null);
+
+  const { classes } = useSelector((state) => state.class);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(classListThunk(10, 100));
+  }, [dispatch]);
 
   const formik = useFormik({
     initialValues: {
-      firstName: "",
-      lastName: "",
-      fatherName: "",
-      motherName: "",
+      firstname: "",
+      lastname: "",
+      parentname: "",
       email: "",
-      fatherEmail: "",
-      motherEmail: "",
-      rollNumber: "",
+      rollNo: "",
       gender: "",
-      category: "",
-      address: "",
       password: "",
-      enrollmentNumber: "",
       class: "",
       section: "",
-      studentContact: "",
-      fatherContact: "",
-      motherContact: "",
+      phoneNumber: "",
     },
     validationSchema,
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: (values) => {
-      console.log(values);
-      alert("Form submitted successfully! Check console for data.");
+      const formData = new FormData();
+      for (const key in values) {
+        formData.append(key, values[key]);
+      }
+      if (photoFile) formData.append("photoUrl", photoFile);
+      if (aadharFile) formData.append("identityVerification", aadharFile);
+
+      dispatch(createStudentThunk(formData));
     },
   });
-
-  const inputStyle = {
-    width: "100%",
-    padding: "12px 16px",
-    fontSize: "15px",
-    border: "2px solid #e0e0e0",
-    borderRadius: "8px",
-    transition: "all 0.3s ease",
-    fontFamily: "inherit",
-    boxSizing: "border-box",
-  };
-
-  const errorInputStyle = {
-    ...inputStyle,
-    borderColor: "#d32f2f",
-  };
-
-  const labelStyle = {
-    display: "block",
-    marginBottom: "8px",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#424242",
-  };
-
-  const errorStyle = {
-    color: "#d32f2f",
-    fontSize: "12px",
-    marginTop: "4px",
-    display: "block",
-  };
-
-  const fileInputStyle = {
-    width: "100%",
-    padding: "12px 16px",
-    fontSize: "14px",
-    border: "2px dashed #e0e0e0",
-    borderRadius: "8px",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    backgroundColor: "#fafafa",
-    boxSizing: "border-box",
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -110,592 +83,351 @@ const StudentForm = () => {
   };
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         minHeight: "100vh",
         backgroundColor: "#f5f5f5",
-        padding: "40px 20px",
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        py: 5,
+        px: 2,
       }}
     >
-      <div
-        style={{
-          maxWidth: "1000px",
+      <Paper
+        elevation={3}
+        sx={{
+          maxWidth: "900px",
           margin: "0 auto",
-          backgroundColor: "#ffffff",
-          borderRadius: "20px",
-          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+          borderRadius: 3,
           overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            backgroundColor: "#667eea",
-            padding: "40px 30px",
-            color: "#ffffff",
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            py: 5,
+            px: 3,
+            color: "white",
             textAlign: "center",
           }}
         >
-          <h1
-            style={{
-              margin: "0 0 10px 0",
-              fontSize: "32px",
-              fontWeight: "700",
-            }}
-          >
+          <Typography variant="h4" fontWeight="700" gutterBottom>
             Student Registration
-          </h1>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "16px",
-              opacity: 0.9,
-            }}
-          >
+          </Typography>
+          <Typography variant="body1" sx={{ opacity: 0.9 }}>
             Fill in the details below to register a new student
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
-        <div style={{ padding: "40px 30px" }} onSubmit={handleSubmit}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "24px",
-            }}
+        <Box sx={{ p: 4 }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: "flex", flexDirection: "column", gap: 24 }}
           >
-            <div style={{ gridColumn: "1 / -1" }}>
-              <h2
-                style={{
-                  fontSize: "20px",
-                  fontWeight: "600",
-                  color: "#667eea",
-                  marginBottom: "20px",
-                  paddingBottom: "10px",
-                  borderBottom: "2px solid #e0e0e0",
-                }}
-              >
+            {/* Personal Information */}
+            <Box>
+              <Typography variant="h6" color="primary" gutterBottom>
                 Personal Information
-              </h2>
-            </div>
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
 
-            <div>
-              <label style={labelStyle}>
-                First Name <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="firstName"
-                value={formik.values.firstName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Enter first name"
-                style={
-                  formik.touched.firstName && formik.errors.firstName ? errorInputStyle : inputStyle
-                }
-              />
-              {formik.touched.firstName && formik.errors.firstName && (
-                <span style={errorStyle}>{formik.errors.firstName}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>
-                Last Name <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="lastName"
-                value={formik.values.lastName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Enter last name"
-                style={
-                  formik.touched.lastName && formik.errors.lastName ? errorInputStyle : inputStyle
-                }
-              />
-              {formik.touched.lastName && formik.errors.lastName && (
-                <span style={errorStyle}>{formik.errors.lastName}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>
-                Gender <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <select
-                name="gender"
-                value={formik.values.gender}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                style={formik.touched.gender && formik.errors.gender ? errorInputStyle : inputStyle}
+              <Box
+                sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}
               >
-                <option value="">Select Gender</option>
-                {genderOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              {formik.touched.gender && formik.errors.gender && (
-                <span style={errorStyle}>{formik.errors.gender}</span>
-              )}
-            </div>
+                <TextField
+                  fullWidth
+                  label="First Name"
+                  name="firstname"
+                  value={formik.values.firstname}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.firstname && Boolean(formik.errors.firstname)}
+                  helperText={formik.touched.firstname && formik.errors.firstname}
+                />
 
-            <div>
-              <label style={labelStyle}>
-                Category <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <select
-                name="category"
-                value={formik.values.category}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                style={
-                  formik.touched.category && formik.errors.category ? errorInputStyle : inputStyle
-                }
-              >
-                <option value="">Select Category</option>
-                {categoryOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              {formik.touched.category && formik.errors.category && (
-                <span style={errorStyle}>{formik.errors.category}</span>
-              )}
-            </div>
+                <TextField
+                  fullWidth
+                  label="Last Name"
+                  name="lastname"
+                  value={formik.values.lastname}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.lastname && Boolean(formik.errors.lastname)}
+                  helperText={formik.touched.lastname && formik.errors.lastname}
+                />
+              </Box>
 
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>
-                Address <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <textarea
-                name="address"
-                value={formik.values.address}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Enter complete address"
-                rows="3"
-                style={{
-                  ...(formik.touched.address && formik.errors.address
-                    ? errorInputStyle
-                    : inputStyle),
-                  resize: "vertical",
-                }}
-              />
-              {formik.touched.address && formik.errors.address && (
-                <span style={errorStyle}>{formik.errors.address}</span>
-              )}
-            </div>
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  Gender <span style={{ color: "#d32f2f" }}>*</span>
+                </Typography>
+                <RadioGroup
+                  row
+                  name="gender"
+                  value={formik.values.gender}
+                  onChange={formik.handleChange}
+                >
+                  {genderOptions.map((option) => (
+                    <FormControlLabel
+                      key={option}
+                      value={option}
+                      control={<Radio />}
+                      label={option}
+                    />
+                  ))}
+                </RadioGroup>
+                {formik.touched.gender && formik.errors.gender && (
+                  <Typography color="error" variant="caption">
+                    {formik.errors.gender}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
 
-            <div style={{ gridColumn: "1 / -1" }}>
-              <h2
-                style={{
-                  fontSize: "20px",
-                  fontWeight: "600",
-                  color: "#667eea",
-                  marginTop: "20px",
-                  marginBottom: "20px",
-                  paddingBottom: "10px",
-                  borderBottom: "2px solid #e0e0e0",
-                }}
-              >
+            {/* Parent Information */}
+            <Box>
+              <Typography variant="h6" color="primary" gutterBottom>
                 Parent Information
-              </h2>
-            </div>
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
 
-            <div>
-              <label style={labelStyle}>
-                Father's Name <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="fatherName"
-                value={formik.values.fatherName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Enter father's name"
-                style={
-                  formik.touched.fatherName && formik.errors.fatherName
-                    ? errorInputStyle
-                    : inputStyle
-                }
-              />
-              {formik.touched.fatherName && formik.errors.fatherName && (
-                <span style={errorStyle}>{formik.errors.fatherName}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>
-                Mother's Name <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="motherName"
-                value={formik.values.motherName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Enter mother's name"
-                style={
-                  formik.touched.motherName && formik.errors.motherName
-                    ? errorInputStyle
-                    : inputStyle
-                }
-              />
-              {formik.touched.motherName && formik.errors.motherName && (
-                <span style={errorStyle}>{formik.errors.motherName}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>
-                Father's Email <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="email"
-                name="fatherEmail"
-                value={formik.values.fatherEmail}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="father@example.com"
-                style={
-                  formik.touched.fatherEmail && formik.errors.fatherEmail
-                    ? errorInputStyle
-                    : inputStyle
-                }
-              />
-              {formik.touched.fatherEmail && formik.errors.fatherEmail && (
-                <span style={errorStyle}>{formik.errors.fatherEmail}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>Mother's Email</label>
-              <input
-                type="email"
-                name="motherEmail"
-                value={formik.values.motherEmail}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="mother@example.com"
-                style={
-                  formik.touched.motherEmail && formik.errors.motherEmail
-                    ? errorInputStyle
-                    : inputStyle
-                }
-              />
-              {formik.touched.motherEmail && formik.errors.motherEmail && (
-                <span style={errorStyle}>{formik.errors.motherEmail}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>
-                Father's Contact <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="tel"
-                name="fatherContact"
-                value={formik.values.fatherContact}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="+91 XXXXXXXXXX"
-                style={
-                  formik.touched.fatherContact && formik.errors.fatherContact
-                    ? errorInputStyle
-                    : inputStyle
-                }
-              />
-              {formik.touched.fatherContact && formik.errors.fatherContact && (
-                <span style={errorStyle}>{formik.errors.fatherContact}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>Mother's Contact</label>
-              <input
-                type="tel"
-                name="motherContact"
-                value={formik.values.motherContact}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="+91 XXXXXXXXXX"
-                style={inputStyle}
-              />
-            </div>
-
-            <div style={{ gridColumn: "1 / -1" }}>
-              <h2
-                style={{
-                  fontSize: "20px",
-                  fontWeight: "600",
-                  color: "#667eea",
-                  marginTop: "20px",
-                  marginBottom: "20px",
-                  paddingBottom: "10px",
-                  borderBottom: "2px solid #e0e0e0",
-                }}
+              <Box
+                sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}
               >
+                <TextField
+                  fullWidth
+                  label="Parent's Name"
+                  name="parentname"
+                  placeholder="Enter father's name"
+                  value={formik.values.parentname}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.parentname && Boolean(formik.errors.parentname)}
+                  helperText={formik.touched.parentname && formik.errors.parentname}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Contact No."
+                  name="phoneNumber"
+                  type="tel"
+                  placeholder="+91 XXXXXXXXXX"
+                  value={formik.values.phoneNumber}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
+                  helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
+                />
+              </Box>
+            </Box>
+
+            {/* Academic Information */}
+            <Box>
+              <Typography variant="h6" color="primary" gutterBottom>
                 Academic Information
-              </h2>
-            </div>
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
 
-            <div>
-              <label style={labelStyle}>
-                Roll Number <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="rollNumber"
-                value={formik.values.rollNumber}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Enter roll number"
-                style={
-                  formik.touched.rollNumber && formik.errors.rollNumber
-                    ? errorInputStyle
-                    : inputStyle
-                }
-              />
-              {formik.touched.rollNumber && formik.errors.rollNumber && (
-                <span style={errorStyle}>{formik.errors.rollNumber}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>
-                Enrollment Number <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="enrollmentNumber"
-                value={formik.values.enrollmentNumber}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Enter enrollment number"
-                style={
-                  formik.touched.enrollmentNumber && formik.errors.enrollmentNumber
-                    ? errorInputStyle
-                    : inputStyle
-                }
-              />
-              {formik.touched.enrollmentNumber && formik.errors.enrollmentNumber && (
-                <span style={errorStyle}>{formik.errors.enrollmentNumber}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>
-                Class <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="class"
-                value={formik.values.class}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="e.g., 10th, 12th"
-                style={formik.touched.class && formik.errors.class ? errorInputStyle : inputStyle}
-              />
-              {formik.touched.class && formik.errors.class && (
-                <span style={errorStyle}>{formik.errors.class}</span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>
-                Section <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="section"
-                value={formik.values.section}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="e.g., A, B, C"
-                style={
-                  formik.touched.section && formik.errors.section ? errorInputStyle : inputStyle
-                }
-              />
-              {formik.touched.section && formik.errors.section && (
-                <span style={errorStyle}>{formik.errors.section}</span>
-              )}
-            </div>
-
-            <div style={{ gridColumn: "1 / -1" }}>
-              <h2
-                style={{
-                  fontSize: "20px",
-                  fontWeight: "600",
-                  color: "#667eea",
-                  marginTop: "20px",
-                  marginBottom: "20px",
-                  paddingBottom: "10px",
-                  borderBottom: "2px solid #e0e0e0",
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
+                  gap: 2,
                 }}
               >
-                Contact & Credentials
-              </h2>
-            </div>
+                <TextField
+                  fullWidth
+                  label="Roll Number"
+                  name="rollNo"
+                  placeholder="Enter roll number"
+                  value={formik.values.rollNo}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.rollNo && Boolean(formik.errors.rollNo)}
+                  helperText={formik.touched.rollNo && formik.errors.rollNo}
+                />
 
-            <div>
-              <label style={labelStyle}>Student Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="student@example.com"
-                style={formik.touched.email && formik.errors.email ? errorInputStyle : inputStyle}
-              />
-              {formik.touched.email && formik.errors.email && (
-                <span style={errorStyle}>{formik.errors.email}</span>
-              )}
-            </div>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="class">Class</InputLabel>
+                  <Select
+                    labelId="class-label"
+                    id="class"
+                    name="class"
+                    value={formik.values.class}
+                    onChange={formik.handleChange}
+                    input={<OutlinedInput label="Class" />}
+                  >
+                    {classes.map((s) => (
+                      <MenuItem key={s._id} value={s._id}>
+                        {s.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {formik.touched.class && formik.errors.class && (
+                    <Typography color="error" variant="caption">
+                      {formik.errors.class}
+                    </Typography>
+                  )}
+                </FormControl>
 
-            <div>
-              <label style={labelStyle}>Student Contact</label>
-              <input
-                type="tel"
-                name="studentContact"
-                value={formik.values.studentContact}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="+91 XXXXXXXXXX"
-                style={inputStyle}
-              />
-            </div>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="section">Section</InputLabel>
+                  <Select
+                    labelId="section-label"
+                    id="section"
+                    name="section"
+                    value={formik.values.section}
+                    onChange={formik.handleChange}
+                    input={<OutlinedInput label="Sections" />}
+                  >
+                    {classes
+                      .find((c) => c._id === formik.values.class)
+                      ?.sections.map((sec) => (
+                        <MenuItem key={sec._id} value={sec._id}>
+                          {sec.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                  {formik.touched.section && formik.errors.section && (
+                    <Typography color="error" variant="caption">
+                      {formik.errors.section}
+                    </Typography>
+                  )}
+                </FormControl>
+              </Box>
+            </Box>
 
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>
-                Password <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Minimum 6 characters"
-                style={
-                  formik.touched.password && formik.errors.password ? errorInputStyle : inputStyle
-                }
-              />
-              {formik.touched.password && formik.errors.password && (
-                <span style={errorStyle}>{formik.errors.password}</span>
-              )}
-            </div>
+            {/* Credentials */}
+            <Box>
+              <Typography variant="h6" color="primary" gutterBottom>
+                Credentials
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
 
-            <div style={{ gridColumn: "1 / -1" }}>
-              <h2
-                style={{
-                  fontSize: "20px",
-                  fontWeight: "600",
-                  color: "#667eea",
-                  marginTop: "20px",
-                  marginBottom: "20px",
-                  paddingBottom: "10px",
-                  borderBottom: "2px solid #e0e0e0",
-                }}
+              <Box
+                sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}
               >
+                <TextField
+                  fullWidth
+                  label="Student Email"
+                  name="email"
+                  type="email"
+                  placeholder="student@example.com"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Password"
+                  name="password"
+                  type="password"
+                  placeholder="Minimum 6 characters"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.password && Boolean(formik.errors.password)}
+                  helperText={formik.touched.password && formik.errors.password}
+                />
+              </Box>
+            </Box>
+
+            {/* Documents Upload */}
+            <Box>
+              <Typography variant="h6" color="primary" gutterBottom>
                 Documents Upload
-              </h2>
-            </div>
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
 
-            <div>
-              <label style={labelStyle}>
-                Aadhar Card (PDF/Image) <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setAadharFile(e.target.files[0])}
-                style={fileInputStyle}
-              />
-              {aadharFile && (
-                <span
-                  style={{ fontSize: "12px", color: "#4caf50", marginTop: "4px", display: "block" }}
-                >
-                  ✓ {aadharFile.name}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label style={labelStyle}>
-                Student Photo <span style={{ color: "#d32f2f" }}>*</span>
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setPhotoFile(e.target.files[0])}
-                style={fileInputStyle}
-              />
-              {photoFile && (
-                <span
-                  style={{ fontSize: "12px", color: "#4caf50", marginTop: "4px", display: "block" }}
-                >
-                  ✓ {photoFile.name}
-                </span>
-              )}
-            </div>
-
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Certificates (Optional)</label>
-              <input
-                type="file"
-                multiple
-                accept="image/*,application/pdf"
-                onChange={(e) => setCertificatesFiles(e.target.files)}
-                style={fileInputStyle}
-              />
-              {certificatesFiles && (
-                <span
-                  style={{ fontSize: "12px", color: "#4caf50", marginTop: "4px", display: "block" }}
-                >
-                  ✓ {certificatesFiles.length} file(s) selected
-                </span>
-              )}
-            </div>
-
-            <div style={{ gridColumn: "1 / -1", marginTop: "30px" }}>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                style={{
-                  width: "100%",
-                  padding: "16px",
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  color: "#ffffff",
-                  backgroundColor: "#667eea",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.transform = "translateY(-2px)";
-                  e.target.style.boxShadow = "0 6px 20px rgba(102, 126, 234, 0.6)";
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.transform = "translateY(0)";
-                  e.target.style.boxShadow = "0 4px 15px rgba(102, 126, 234, 0.4)";
-                }}
+              <Box
+                sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}
               >
-                Submit Registration
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Aadhar Card (PDF/Image) <span style={{ color: "#d32f2f" }}>*</span>
+                  </Typography>
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    name="identityVerification"
+                    onChange={(e) => setAadharFile(e.target.files[0])}
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      border: "2px dashed #e0e0e0",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      backgroundColor: "#fafafa",
+                    }}
+                  />
+                  {aadharFile && (
+                    <Typography
+                      variant="caption"
+                      color="success.main"
+                      sx={{ mt: 1, display: "block" }}
+                    >
+                      ✓ {aadharFile.name}
+                    </Typography>
+                  )}
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Student Photo <span style={{ color: "#d32f2f" }}>*</span>
+                  </Typography>
+                  <input
+                    type="file"
+                    name="photoUrl"
+                    accept="image/*"
+                    onChange={(e) => setPhotoFile(e.target.files[0])}
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      border: "2px dashed #e0e0e0",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      backgroundColor: "#fafafa",
+                    }}
+                  />
+                  {photoFile && (
+                    <Typography
+                      variant="caption"
+                      color="success.main"
+                      sx={{ mt: 1, display: "block" }}
+                    >
+                      ✓ {photoFile.name}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              fullWidth
+              sx={{
+                py: 2,
+                fontSize: "16px",
+                fontWeight: "600",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+                "&:hover": {
+                  boxShadow: "0 6px 20px rgba(102, 126, 234, 0.6)",
+                  transform: "translateY(-2px)",
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              Submit Registration
+            </Button>
+          </form>
+        </Box>
+      </Paper>
+    </Box>
   );
 };
 

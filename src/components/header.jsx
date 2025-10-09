@@ -13,10 +13,8 @@ export default function Header({ onMenuClick }) {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   const handleLogOut = () => {
-    setTimeout(() => {
-      localStorage.removeItem("authToken");
-      navigate("/login");
-    }, 2000);
+    localStorage.removeItem("authToken");
+    navigate("/login");
     showToast({ message: "Logout Successfully", status: "success" });
     setLogoutModalOpen(false);
   };

@@ -122,12 +122,12 @@ const SectionHome = () => {
 
   const filteredData = sections?.filter(
     (sec) =>
-      String(sec.sectionId)?.includes(search.sectionId) &&
-      sec.name?.toLowerCase().includes(search.sectionName)
+      String(sec?.sectionId)?.includes(search?.sectionId) &&
+      sec?.name?.toLowerCase().includes(search.sectionName)
   );
 
   return (
-    <Box sx={{ p: 4, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+    <Box>
       <Paper sx={{ p: 3 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
