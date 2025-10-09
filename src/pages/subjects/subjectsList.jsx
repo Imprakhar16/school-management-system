@@ -1,13 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ReusableModal from "../../components/modal";
-import {
-  fetchAllSubjectsThunk,
-  deleteSubjectThunk,
-  updateSubjectThunk,
-} from "../../features/subjects/subjectThunk";
-import { Link } from "react-router-dom";
-import { Box, Button, CircularProgress, Typography, TextField, Paper } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { fetchAllSubjectsThunk, deleteSubjectThunk } from "../../features/subjects/subjectThunk";
+import { Link, useNavigate } from "react-router-dom";
+import { Box, Button, CircularProgress, Typography, Paper } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
 import TableComponent from "../../components/table";
@@ -17,6 +15,7 @@ import ButtonComp from "../../components/button";
 
 const SubjectsList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { data, pagination, loading } = useSelector((state) => state.subject);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,10 +24,6 @@ const SubjectsList = () => {
   const [searchCode, setSearchCode] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
-
-  const [editSubject, setEditSubject] = useState(null);
-  const [editValues, setEditValues] = useState({ name: "", code: "" });
-  // const [deleteId, setDeleteId] = useState(null);
 
   const [subjectToDelete, setSubjectToDelete] = useState(null);
 
@@ -65,35 +60,6 @@ const SubjectsList = () => {
     } finally {
       setModalOpen(false);
       setSubjectToDelete(null);
-    }
-  };
-
-  const handleEditOpen = (subject) => {
-    setEditSubject(subject);
-    setEditValues({ name: subject.name, code: subject.code });
-    setModalOpen(true);
-  };
-
-  const handleEditClose = () => {
-    setModalOpen(false);
-    setEditSubject(null);
-    setEditValues({ name: "", code: "" });
-  };
-
-  const handleEditSave = async () => {
-    if (!editSubject?._id) return;
-    try {
-      await dispatch(
-        updateSubjectThunk({
-          _id: editSubject._id,
-          updatedData: { name: editValues.name, code: editValues.code },
-        })
-      ).unwrap();
-      showToast({ message: "✅ Subject updated successfully!", status: "success" });
-      handleEditClose();
-      dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
-    } catch (err) {
-      showToast({ message: `❌ Failed to update: ${err}`, status: "error" });
     }
   };
 
@@ -142,11 +108,11 @@ const SubjectsList = () => {
 
   const customRowActions = (subject) => (
     <>
-      <Button size="small" onClick={() => handleEditOpen(subject)} sx={{ mr: 1 }}>
-        Edit
+      <Button size="small" onClick={() => navigate("/addSubject", { state: { subject } })}>
+        <EditIcon />
       </Button>
       <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
-        Delete
+        <DeleteIcon />
       </Button>
     </>
   );
@@ -193,35 +159,6 @@ const SubjectsList = () => {
         totalPage={pagination?.totalPages || 1}
         total={pagination?.totalSubjects || 0}
       />
-
-      <ReusableModal
-        open={modalOpen && editSubject}
-        onClose={handleEditClose}
-        title="Edit Subject"
-        actions={[
-          <Button key="cancel" onClick={handleEditClose}>
-            Cancel
-          </Button>,
-          <Button key="save" onClick={handleEditSave} variant="contained" color="primary">
-            Save
-          </Button>,
-        ]}
-      >
-        <TextField
-          label="Subject Name"
-          fullWidth
-          margin="dense"
-          value={editValues.name}
-          onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
-        />
-        <TextField
-          label="Subject Code"
-          fullWidth
-          margin="dense"
-          value={editValues.code}
-          onChange={(e) => setEditValues({ ...editValues, code: e.target.value })}
-        />
-      </ReusableModal>
 
       <ReusableModal
         open={modalOpen && subjectToDelete}
