@@ -14,10 +14,17 @@ const createSection = async (data) => {
     const response = await axiosInstance.post(API_PATHS.SECTION.CREATE, data);
     return response.data;
   } catch (error) {
-    showToast({
-      status: "error",
-      message: error.message || "Failed Creating Section",
-    });
+    if (error.response.data.message === "sectionId already exist") {
+      showToast({
+        status: "error",
+        message: "Section already exist!",
+      });
+    } else {
+      showToast({
+        status: "error",
+        message: "Failed Creating Section",
+      });
+    }
   }
 };
 
@@ -26,15 +33,22 @@ const deleteSection = async (sectionId) => {
   return response.data;
 };
 export const updateSection = async ({ sectionId, data }) => {
+  console.log(sectionId);
   try {
     const response = await axiosInstance.put(`${API_PATHS.SECTION.UPDATE}/${sectionId}`, data);
     return response.data;
   } catch (error) {
-    showToast({
-      status: "error",
-      message: error?.response?.data?.message || "Failed updating section",
-    });
-    throw error;
+    if (error.response.data.message === "section already exist") {
+      showToast({
+        status: "error",
+        message: "Section Already Found, Please Enter a diffrent Section.",
+      });
+    } else {
+      showToast({
+        status: "error",
+        message: "Failed updating section",
+      });
+    }
   }
 };
 

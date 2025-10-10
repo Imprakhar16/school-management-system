@@ -132,8 +132,7 @@ const TeacherRegistration = () => {
             .then(() => (resetForm(), navigate("/teachers")));
         }
       } catch (error) {
-        console.error("Failed to save teacher:", error);
-        // You can show an error notification here if you have a toast/notification system
+        console.log(error);
       }
     },
   });

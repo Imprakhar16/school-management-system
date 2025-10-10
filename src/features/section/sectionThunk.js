@@ -15,6 +15,7 @@ export const fetchSectionsThunk = createAsyncThunk(
 export const createSectionThunk = createAsyncThunk(
   "sections/createSection",
   async (sectionData, { rejectWithValue }) => {
+    console.log(sectionData);
     try {
       const data = await sectionService.createSection(sectionData);
       return data;
@@ -39,6 +40,7 @@ export const deleteSectionThunk = createAsyncThunk(
 export const updateSectionThunk = createAsyncThunk(
   "sections/updateSection",
   async ({ sectionId, data }, { rejectWithValue }) => {
+    console.log(sectionId, data);
     try {
       const response = await sectionService.updateSection({ sectionId, data });
       return { sectionId, updatedData: response.section };

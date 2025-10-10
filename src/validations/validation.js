@@ -17,7 +17,6 @@ export const resetPassSchema = Yup.object({
 });
 
 export const createSectionSchema = Yup.object({
-  sectionId: Yup.string().required("Section ID is required"),
   name: Yup.string().required("Section Name is required"),
 });
 
