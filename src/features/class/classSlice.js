@@ -53,7 +53,7 @@ const classSlice = createSlice({
       })
       .addCase(editClassThunk.fulfilled, (state, action) => {
         state.loading = false;
-        const updatedClass = action.payload.classes;
+        const updatedClass = action.payload;
         const index = state.classes.findIndex((c) => c._id === updatedClass._id);
         if (index !== -1) state.classes[index] = updatedClass;
       })

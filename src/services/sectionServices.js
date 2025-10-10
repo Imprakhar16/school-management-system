@@ -3,10 +3,26 @@ import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 
 const fetchSections = async ({ page, limit, search }) => {
-  const response = await axiosInstance.get(API_PATHS.SECTION.GET, {
-    params: { page, limit, search },
-  });
-  return response.data;
+  try {
+    const response = await axiosInstance.get(API_PATHS.SECTION.GET, {
+      params: { page, limit, search },
+    });
+    return response.data;
+  } catch (error) {
+    const message = error.response.data.message;
+
+    if (message === "Token Expired") {
+      showToast({
+        status: "error",
+        message: "Token is expired,Please login",
+      });
+    } else {
+      showToast({
+        status: "error",
+        message: "Can't fetch sections",
+      });
+    }
+  }
 };
 
 const createSection = async (data) => {
@@ -32,6 +48,7 @@ const deleteSection = async (sectionId) => {
   const response = await axiosInstance.delete(`${API_PATHS.SECTION.DELETE}/${sectionId}`);
   return response.data;
 };
+
 export const updateSection = async ({ sectionId, data }) => {
   try {
     const response = await axiosInstance.put(`${API_PATHS.SECTION.UPDATE}/${sectionId}`, data);

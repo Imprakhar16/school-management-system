@@ -8,7 +8,9 @@ import {
   CircularProgress,
   TablePagination,
   Typography,
+  Box,
 } from "@mui/material";
+
 import Pagination from "./pagination";
 
 const TableComponent = ({
@@ -26,18 +28,52 @@ const TableComponent = ({
           <TableRow>
             {columns?.map((col) => (
               <TableCell key={col?.field ?? Math.random()} sx={{ fontWeight: "bold" }}>
-                {col?.headerName ?? ""}
+                {col?.headerName ? String(col.headerName).toUpperCase() : ""}
               </TableCell>
             ))}
-            {customRowActions && <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>}
+            {customRowActions && <TableCell sx={{ fontWeight: "bold" }}>ACTIONS</TableCell>}
           </TableRow>
 
           {/* 🔽 Filter row just under the headers */}
           {filterRow && (
-            <TableRow>
+            <TableRow
+              sx={{
+                backgroundColor: "#fafafa",
+              }}
+            >
               {columns?.map((col) => (
-                <TableCell key={col?.field ?? Math.random()}>
-                  {filterRow[col.field] || null}
+                <TableCell
+                  key={col?.field ?? Math.random()}
+                  sx={{
+                    py: 0.5,
+                  }}
+                >
+                  {filterRow[col.field] ? (
+                    <Box
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          height: 30,
+                          fontSize: 13,
+                          borderRadius: 1.5,
+                          "& fieldset": {
+                            borderColor: "#ddd",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "#bdbdbd",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#90caf9",
+                          },
+                        },
+                        "& input::placeholder": {
+                          fontSize: 12,
+                          color: "#9e9e9e",
+                        },
+                      }}
+                    >
+                      {filterRow[col.field]}
+                    </Box>
+                  ) : null}
                 </TableCell>
               ))}
               {customRowActions && <TableCell />}

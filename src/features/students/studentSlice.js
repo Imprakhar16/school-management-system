@@ -40,7 +40,7 @@ const fetchStudentSlice = createSlice({
       })
       .addCase(createStudentThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.students.push(action.payload.student);
+        state.students.push(action.payload);
         state.totalStudents += 1;
       })
       .addCase(createStudentThunk.rejected, (state, action) => {
@@ -70,8 +70,11 @@ const fetchStudentSlice = createSlice({
       })
       .addCase(deleteStudentThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.students = state.students.filter((student) => student._id !== action.payload._id);
-        state.totalStudents -= 1;
+        state.students = state.students.filter((student) => student._id !== action.payload);
+      })
+      .addCase(deleteStudentThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.error;
       });
   },
 });

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { createStudentThunk } from "../../features/students/studentsThunk";
+import { showToast } from "../../components/toaster";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -12,68 +12,80 @@ import {
   FormControlLabel,
   Radio,
   Divider,
-  Select,
   MenuItem,
-  InputLabel,
-  FormControl,
-  FormHelperText,
-  OutlinedInput,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import { classListThunk } from "../../features/class/classThunk";
+import { createStudentThunk, editStudentThunk } from "../../features/students/studentsThunk";
+import ButtonComp from "../../components/button";
+import { studentSchema } from "../../validations/validation";
 
 const genderOptions = ["male", "female", "other"];
 
-const validationSchema = Yup.object().shape({
-  firstname: Yup.string().required("First name is required"),
-  lastname: Yup.string().required("Last name is required"),
-  parentname: Yup.string().required("Father name is required"),
-  email: Yup.string().email("Invalid email"),
-  rollNo: Yup.string().required("Roll number is required"),
-  gender: Yup.string().required("Gender is required"),
-  password: Yup.string().min(6, "Min 6 characters").required("Password is required"),
-  class: Yup.string().required("Class is required"),
-  section: Yup.string().required("Section is required"),
-  phoneNumber: Yup.string(),
-});
-
 const StudentForm = () => {
-  const [aadharFile, setAadharFile] = useState(null);
-  const [photoFile, setPhotoFile] = useState(null);
-
   const { classes } = useSelector((state) => state.class);
-
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+  const studentData = location.state?.studentData;
+  const [aadharFile, setAadharFile] = useState(studentData?.identityVerification || null);
+  const [photoFile, setPhotoFile] = useState(studentData?.photoUrl || null);
 
   useEffect(() => {
-    dispatch(classListThunk(10, 100));
+    dispatch(classListThunk({ page: 1, limit: 100 }));
   }, [dispatch]);
 
   const formik = useFormik({
     initialValues: {
-      firstname: "",
-      lastname: "",
-      parentname: "",
-      email: "",
-      rollNo: "",
-      gender: "",
-      password: "",
-      class: "",
-      section: "",
-      phoneNumber: "",
+      firstname: studentData?.firstname || "",
+      lastname: studentData?.lastname || "",
+      parentname: studentData?.parentname || "",
+      email: studentData?.email || "",
+      rollNo: studentData?.rollNo || null,
+      gender: studentData?.gender || "",
+      password: studentData?.password || "",
+      class: studentData?.class?._id || "",
+      section: studentData?.section?._id || "",
+      phoneNumber: studentData?.phoneNumber || "",
     },
-    validationSchema,
+    validationSchema: studentSchema,
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: (values) => {
+    enableReinitialize: true,
+
+    onSubmit: async (values) => {
       const formData = new FormData();
       for (const key in values) {
-        formData.append(key, values[key]);
+        if (key === "rollNo") {
+          formData.append(key, Number(values[key]));
+        } else {
+          formData.append(key, values[key]);
+        }
       }
-      if (photoFile) formData.append("photoUrl", photoFile);
-      if (aadharFile) formData.append("identityVerification", aadharFile);
 
-      dispatch(createStudentThunk(formData));
+      if (photoFile instanceof File) formData.append("photoUrl", photoFile);
+      if (aadharFile instanceof File) formData.append("identityVerification", aadharFile);
+
+      if (studentData) {
+        await dispatch(editStudentThunk({ id: studentData._id, update: formData })).then(() => {
+          (navigate("/students"),
+            showToast({
+              status: "success",
+              message: "Student updated successfully!",
+            }));
+        });
+      } else {
+        await dispatch(createStudentThunk(formData))
+          .unwrap()
+          .then(() => {
+            (navigate("/students"),
+              showToast({
+                status: "success",
+                message: "Student created successfully!",
+              }));
+          });
+      }
     },
   });
 
@@ -215,6 +227,10 @@ const StudentForm = () => {
                   onBlur={formik.handleBlur}
                   error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
                   helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
+                  inputProps={{
+                    maxLength: 10, // <-- this prevents typing more than 10 characters
+                    inputMode: "numeric", // optional: shows numeric keyboard on mobile
+                  }}
                 />
               </Box>
             </Box>
@@ -245,53 +261,45 @@ const StudentForm = () => {
                   helperText={formik.touched.rollNo && formik.errors.rollNo}
                 />
 
-                <FormControl fullWidth margin="normal">
-                  <InputLabel id="class">Class</InputLabel>
-                  <Select
-                    labelId="class-label"
-                    id="class"
-                    name="class"
-                    value={formik.values.class}
-                    onChange={formik.handleChange}
-                    input={<OutlinedInput label="Class" />}
-                  >
-                    {classes.map((s) => (
-                      <MenuItem key={s._id} value={s._id}>
-                        {s.name}
+                {/* Class */}
+                <TextField
+                  fullWidth
+                  select
+                  label="Class"
+                  name="class"
+                  value={formik.values.class}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.class && Boolean(formik.errors.class)}
+                  helperText={formik.touched.class && formik.errors.class}
+                >
+                  {classes.map((s) => (
+                    <MenuItem key={s._id} value={s._id}>
+                      {s.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                {/* Section */}
+                <TextField
+                  fullWidth
+                  select
+                  label="Section"
+                  name="section"
+                  value={formik.values.section}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.section && Boolean(formik.errors.section)}
+                  helperText={formik.touched.section && formik.errors.section}
+                >
+                  {classes
+                    .find((c) => c._id === formik.values.class)
+                    ?.sections.map((sec) => (
+                      <MenuItem key={sec._id} value={sec._id}>
+                        {sec.name}
                       </MenuItem>
                     ))}
-                  </Select>
-                  {formik.touched.class && formik.errors.class && (
-                    <Typography color="error" variant="caption">
-                      {formik.errors.class}
-                    </Typography>
-                  )}
-                </FormControl>
-
-                <FormControl fullWidth margin="normal">
-                  <InputLabel id="section">Section</InputLabel>
-                  <Select
-                    labelId="section-label"
-                    id="section"
-                    name="section"
-                    value={formik.values.section}
-                    onChange={formik.handleChange}
-                    input={<OutlinedInput label="Sections" />}
-                  >
-                    {classes
-                      .find((c) => c._id === formik.values.class)
-                      ?.sections.map((sec) => (
-                        <MenuItem key={sec._id} value={sec._id}>
-                          {sec.name}
-                        </MenuItem>
-                      ))}
-                  </Select>
-                  {formik.touched.section && formik.errors.section && (
-                    <Typography color="error" variant="caption">
-                      {formik.errors.section}
-                    </Typography>
-                  )}
-                </FormControl>
+                </TextField>
               </Box>
             </Box>
 
@@ -341,7 +349,7 @@ const StudentForm = () => {
               <Divider sx={{ mb: 3 }} />
 
               <Box
-                sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}
+                sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}
               >
                 <Box>
                   <Typography variant="body2" sx={{ mb: 1 }}>
@@ -353,7 +361,7 @@ const StudentForm = () => {
                     name="identityVerification"
                     onChange={(e) => setAadharFile(e.target.files[0])}
                     style={{
-                      width: "100%",
+                      width: "96%",
                       padding: "12px",
                       border: "2px dashed #e0e0e0",
                       borderRadius: "8px",
@@ -367,7 +375,7 @@ const StudentForm = () => {
                       color="success.main"
                       sx={{ mt: 1, display: "block" }}
                     >
-                      ✓ {aadharFile.name}
+                      ✓ {studentData ? studentData.identityVerification : aadharFile.name}
                     </Typography>
                   )}
                 </Box>
@@ -382,7 +390,7 @@ const StudentForm = () => {
                     accept="image/*"
                     onChange={(e) => setPhotoFile(e.target.files[0])}
                     style={{
-                      width: "100%",
+                      width: "93%",
                       padding: "12px",
                       border: "2px dashed #e0e0e0",
                       borderRadius: "8px",
@@ -396,7 +404,7 @@ const StudentForm = () => {
                       color="success.main"
                       sx={{ mt: 1, display: "block" }}
                     >
-                      ✓ {photoFile.name}
+                      ✓ {studentData ? studentData.photoUrl : photoFile.name}
                     </Typography>
                   )}
                 </Box>
@@ -404,26 +412,22 @@ const StudentForm = () => {
             </Box>
 
             {/* Submit Button */}
-            <Button
+            <ButtonComp
+              title={
+                formik.isSubmitting ? (
+                  <CircularProgress size={24} />
+                ) : studentData ? (
+                  "Update Student"
+                ) : (
+                  "Create Student"
+                )
+              }
               type="submit"
               variant="contained"
-              size="large"
+              color="primary"
+              disabled={formik.isSubmitting}
               fullWidth
-              sx={{
-                py: 2,
-                fontSize: "16px",
-                fontWeight: "600",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
-                "&:hover": {
-                  boxShadow: "0 6px 20px rgba(102, 126, 234, 0.6)",
-                  transform: "translateY(-2px)",
-                },
-                transition: "all 0.3s ease",
-              }}
-            >
-              Submit Registration
-            </Button>
+            />
           </form>
         </Box>
       </Paper>

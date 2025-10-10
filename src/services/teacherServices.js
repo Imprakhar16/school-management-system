@@ -2,7 +2,7 @@ import { showToast } from "../components/toaster";
 import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 
-//TEACHER REGISTRATION --->
+//Teacher registration --->
 export const registerTeacher = async (body) => {
   try {
     const response = await axiosInstance.post(API_PATHS.TEACHER.REGISTER, body, {
@@ -35,11 +35,15 @@ export const fetchAllTeachers = async ({ page, limit, search }) => {
     const response = await axiosInstance.get(API_PATHS.TEACHER.ALL_TEACHERS, { params });
     return response.data;
   } catch (error) {
+    showToast({
+      message: error.response.data.message || "Failed to fetch teachers",
+      status: "error",
+    });
     throw error.response?.data || error;
   }
 };
 
-// UPDATE TEACHER
+// Update teacher --->
 export const updateTeacher = async (id, body) => {
   try {
     const response = await axiosInstance.put(`${API_PATHS.TEACHER.UPDATE_TEACHER}/${id}`, body, {
@@ -61,7 +65,7 @@ export const updateTeacher = async (id, body) => {
   }
 };
 
-// DELETE TEACHER
+// Delete teacher --->
 export const deleteTeacher = async (id) => {
   try {
     const response = await axiosInstance.delete(`${API_PATHS.TEACHER.DELETE_TEACHER}/${id}`);

@@ -4,7 +4,6 @@ import ResetPassword from "../pages/auth/resetPassword.jsx";
 import AddSubject from "../pages/subjects/createSubject.jsx";
 
 //PrivateRoutes:-
-import DummyHome from "../pages/dashboard/dummyHome.jsx";
 import SubjectsList from "../pages/subjects/subjectsList.jsx";
 import TeacherRegistration from "../pages/teachers/addTeacher.jsx";
 import TeachersList from "../pages/teachers/teachersList.jsx";
@@ -14,12 +13,13 @@ import ClassList from "../pages/class/classList.jsx";
 import AddClass from "../pages/class/addClass.jsx";
 import SectionHome from "../pages/section/sectionsHome.jsx";
 import SectionForm from "../pages/section/createSection.jsx";
+import Home from "../pages/dashboard/dashboard.jsx";
 
 export const privateRoutes = [
   {
     name: "Home",
     path: "/",
-    element: <DummyHome />,
+    element: <Home />,
     showInSidebar: true,
   },
   {
@@ -60,15 +60,21 @@ export const privateRoutes = [
   },
   {
     name: "AddClass",
-    path: "/addClass",
+    path: "/create-class",
     element: <AddClass />,
     showInSidebar: false,
   },
   {
     name: "Section",
-    path: "/section",
+    path: "/sections",
     element: <SectionHome />,
     showInSidebar: true,
+  },
+  {
+    name: "Section",
+    path: "/sections/form",
+    element: <SectionForm />,
+    showInSidebar: false,
   },
   {
     name: "AddSection",
@@ -88,12 +94,6 @@ export const privateRoutes = [
     element: <TeacherRegistration />,
     showInSidebar: false,
   },
-  // {
-  //   name: "Register-Teacher",
-  //   path: "/registerTeacher/:id",
-  //   element: <TeacherRegistration />,
-  //   showInSidebar: false,
-  // },
   {
     name: "Add-Subject",
     path: "/addSubject",

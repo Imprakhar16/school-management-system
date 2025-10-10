@@ -39,11 +39,11 @@ export const editClass = async (id, data) => {
       message: "Update Successfully",
       status: "success",
     });
-    return response;
+    return response.data;
   } catch (err) {
     showToast({
-      message: err.message,
       status: "error",
+      message: err.message || "Failed updating section",
     });
   }
 };

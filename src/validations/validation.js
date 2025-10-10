@@ -24,7 +24,7 @@ export const addClassSchema = Yup.object({
   name: Yup.string().required("Class name is required"),
   subjects: Yup.array().min(1, "Select at least one subject"),
   sections: Yup.array().min(1, "Select at least one section"),
-  classIncharge: Yup.object().required("Teacher name is requred"),
+  classincharge: Yup.string().required("Teacher name is requred"),
 });
 
 export const createTeacherSchema = Yup.object({
@@ -45,9 +45,6 @@ export const createTeacherSchema = Yup.object({
       then: (schema) => schema.required("Password is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
-  classincharge: Yup.string()
-    .length(24, "Please select a valid class")
-    .required("Class Incharge is required"),
   experienceDuration: Yup.date()
     .typeError("Invalid date")
     .required("Experience duration is required"),
@@ -71,4 +68,20 @@ export const createTeacherSchema = Yup.object({
     .of(Yup.string())
     .min(1, "At least one subject must be selected")
     .required("Subjects are required"),
+});
+
+export const studentSchema = Yup.object().shape({
+  firstname: Yup.string().required("First name is required"),
+  lastname: Yup.string().required("Last name is required"),
+  parentname: Yup.string().required("Father name is required"),
+  email: Yup.string().email("Invalid email"),
+  rollNo: Yup.number().required("Roll number is required"),
+  gender: Yup.string().required("Gender is required"),
+  password: Yup.string().min(6, "Min 6 characters").required("Password is required"),
+  class: Yup.string().required("Class is required"),
+  section: Yup.string().required("Section is required"),
+  phoneNumber: Yup.string()
+    .min(10, "Min 10 characters required")
+    .max(10, "Max 10 numbers")
+    .required("Contact is required"),
 });

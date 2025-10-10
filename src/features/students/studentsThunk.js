@@ -4,6 +4,7 @@ import {
   fetchStudent,
   createStudentService,
   editStudentService,
+  deleteStudentService,
 } from "../../services/studentServices";
 
 export const fetchStudentThunk = createAsyncThunk(
@@ -32,7 +33,7 @@ export const createStudentThunk = createAsyncThunk(
 
 export const editStudentThunk = createAsyncThunk(
   "student/editStudent",
-  async ({ id, update }, [rejectWithValue]) => {
+  async ({ id, update }, { rejectWithValue }) => {
     try {
       const response = await editStudentService(id, update);
       return response;
@@ -46,7 +47,7 @@ export const deleteStudentThunk = createAsyncThunk(
   "student/deleteStudent",
   async (id, { rejectWithValue }) => {
     try {
-      await deleteStudentThunk();
+      await deleteStudentService(id);
       return id;
     } catch (err) {
       return rejectWithValue("Students delete failed", err);
