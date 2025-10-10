@@ -28,7 +28,11 @@ const ReusableModal = ({ open, onClose, title, children, actions }) => {
           </IconButton>
         </Box>
 
-        <Box sx={{ mb: 2 }}>{children}</Box>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            {children}
+          </Typography>
+        </Box>
 
         {actions && (
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>{actions}</Box>

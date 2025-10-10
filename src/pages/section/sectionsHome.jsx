@@ -1,33 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, TextField, Paper, IconButton, Tooltip, Button } from "@mui/material";
+import { Box, Typography, TextField, Paper, IconButton, Tooltip } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 import useDebounce from "../../hooks/useDebounce";
-import {
-  deleteSectionThunk,
-  fetchSectionsThunk,
-  updateSectionThunk,
-} from "../../features/section/sectionThunk";
+import { deleteSectionThunk, fetchSectionsThunk } from "../../features/section/sectionThunk";
 import { showToast } from "../../components/toaster";
 import TableComponent from "../../components/table";
 import ReusableModal from "../../components/modal";
-import SectionForm from "./createSection"; // Adjust path
 import ButtonComp from "../../components/button";
 import Pagination from "../../components/pagination";
-import AddIcon from "@mui/icons-material/Add";
 
 const SectionHome = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { sections, loading, totalCount, totalPages } = useSelector((state) => state.sections);
+
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState({ sectionId: "", sectionName: "" });
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState({ name: "" });
-  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -40,6 +37,36 @@ const SectionHome = () => {
     setDeleteModalOpen(true);
   };
 
+  const handleConfirmDelete = () => {
+    if (!selectedSectionId) return;
+
+    dispatch(deleteSectionThunk(selectedSectionId))
+      .unwrap()
+      .then(() => {
+        showToast({
+          status: "success",
+          message: "Section deleted successfully",
+        });
+        dispatch(
+          fetchSectionsThunk({
+            page,
+            limit: rowsPerPage,
+            search: debouncedSearch,
+          })
+        );
+      })
+      .catch((error) => {
+        showToast({
+          status: "error",
+          message: error?.message || "Failed to delete section",
+        });
+      })
+      .finally(() => {
+        setDeleteModalOpen(false);
+        setSelectedSectionId(null);
+      });
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSearch((prev) => ({
@@ -48,54 +75,8 @@ const SectionHome = () => {
     }));
   };
 
-  const handleConfirmDelete = () => {
-    if (!selectedSectionId) return;
-
-    dispatch(deleteSectionThunk(selectedSectionId))
-      .unwrap()
-      .then(() => {
-        showToast({ status: "success", message: "Section deleted successfully" });
-        dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
-      })
-      .catch((error) => {
-        showToast({ status: "error", message: error?.message || "Failed to delete section" });
-      })
-      .finally(() => {
-        setDeleteModalOpen(false);
-        setSelectedSectionId(null);
-      });
-  };
-
-  const handleEditClick = (id) => {
-    const section = sections.find((sec) => sec._id === id);
-    if (section) {
-      setEditFormData({ name: section.name || "" }); // Only set 'name'
-      setEditModalOpen(true);
-      setSelectedSectionId(id);
-    }
-  };
-
-  const handleEditInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleConfirmEdit = () => {
-    if (!selectedSectionId) return;
-
-    dispatch(updateSectionThunk({ sectionId: selectedSectionId, data: editFormData }))
-      .unwrap()
-      .then(() => {
-        showToast({ status: "success", message: "Section updated successfully" });
-        dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
-        setEditModalOpen(false);
-        setSelectedSectionId(null);
-      });
-  };
-
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    dispatch(fetchSectionsThunk(newPage, rowsPerPage));
   };
 
   const columns = [{ field: "name", headerName: "Section Name" }];
@@ -103,13 +84,20 @@ const SectionHome = () => {
   const filteredData = sections?.filter(
     (sec) =>
       String(sec?.sectionId)?.includes(search?.sectionId) &&
-      sec?.name?.toLowerCase().includes(search.sectionName)
+      sec?.name?.toLowerCase().includes(search.sectionName.toLowerCase())
   );
 
   return (
     <Box>
       <Paper sx={{ p: 3 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             Sections List
           </Typography>
@@ -117,7 +105,7 @@ const SectionHome = () => {
             title="Create Section"
             variant="contained"
             color="primary"
-            onClick={() => setCreateModalOpen(true)}
+            onClick={() => navigate("/sections/form", { state: null })}
             startIcon={<AddIcon />}
           />
         </Box>
@@ -153,19 +141,13 @@ const SectionHome = () => {
               <Tooltip title="Edit Section">
                 <IconButton
                   color="primary"
-                  onClick={() => handleEditClick(row._id)}
-                  aria-label="Edit Section"
+                  onClick={() => navigate("/sections/form", { state: { section: row } })}
                 >
                   <EditIcon />
                 </IconButton>
               </Tooltip>
-
               <Tooltip title="Delete Section">
-                <IconButton
-                  color="error"
-                  onClick={() => handleDeleteClick(row._id)}
-                  aria-label="Delete Section"
-                >
+                <IconButton color="error" onClick={() => handleDeleteClick(row._id)}>
                   <DeleteIcon />
                 </IconButton>
               </Tooltip>
@@ -183,7 +165,7 @@ const SectionHome = () => {
         />
       </Paper>
 
-      {/* Delete Modal */}
+      {/* Delete Confirmation Modal */}
       <ReusableModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -194,70 +176,19 @@ const SectionHome = () => {
               title="Cancel"
               variant="outlined"
               onClick={() => setDeleteModalOpen(false)}
+              size="small"
             />
             <ButtonComp
               title="Delete"
               variant="contained"
               color="error"
               onClick={handleConfirmDelete}
+              size="small"
             />
           </>
         }
       >
         <Typography>Are you sure you want to delete this section?</Typography>
-      </ReusableModal>
-
-      {/* Edit Modal */}
-      <ReusableModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        title="Edit Section"
-        actions={
-          <>
-            <ButtonComp title="Cancel" variant="outlined" onClick={() => setEditModalOpen(false)} />
-            <ButtonComp
-              title="Save"
-              variant="contained"
-              color="primary"
-              onClick={handleConfirmEdit}
-            />
-          </>
-        }
-      >
-        <Box
-          component="form"
-          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-          noValidate
-          autoComplete="off"
-        >
-          <TextField
-            label="Section Name"
-            name="name"
-            value={editFormData.name} // Only bind 'name' field
-            onChange={handleEditInputChange}
-            variant="outlined"
-            fullWidth
-          />
-        </Box>
-      </ReusableModal>
-
-      {/* Create Section Modal */}
-      <ReusableModal
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        title="Create Section"
-      >
-        <SectionForm
-          onSuccess={() => {
-            setCreateModalOpen(false);
-            dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
-          }}
-          onFailed={() => {
-            setCreateModalOpen(false);
-            dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
-          }}
-          onCancel={() => setCreateModalOpen(false)}
-        />
       </ReusableModal>
     </Box>
   );

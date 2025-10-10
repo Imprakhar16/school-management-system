@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
   Box,
@@ -14,11 +14,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import {
-  loginPrincipalThunk,
-  loginStudentThunk,
-  loginTeacherThunk,
-} from "../../features/auth/authThunk";
+import { loginThunk } from "../../features/auth/authThunk";
 import { loginSchema } from "../../validations/validation";
 import ButtonComp from "../../components/button";
 
@@ -26,16 +22,12 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [userType, setUserType] = useState("principal");
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleTabChange = (newValue) => {
-    setUserType(newValue);
-  };
-
+  const { loading } = useSelector((state) => state.auth);
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -43,21 +35,9 @@ const Login = () => {
     },
     validationSchema: loginSchema,
     onSubmit: (values) => {
-      if (userType === "principal") {
-        dispatch(loginPrincipalThunk(values)).then(() => navigate("/"));
-      } else if (userType === "teacher") {
-        dispatch(loginTeacherThunk(values)).then(() => navigate("/"));
-      } else if (userType === "student") {
-        dispatch(loginStudentThunk(values)).then(() => navigate("/"));
-      }
+      dispatch(loginThunk(values)).then(() => navigate("/"));
     },
   });
-
-  const userTypes = [
-    { value: "principal", label: "Principal" },
-    { value: "teacher", label: "Teacher" },
-    { value: "student", label: "Student" },
-  ];
 
   return (
     <Box
@@ -144,43 +124,6 @@ const Login = () => {
               justifyContent: "center",
             }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1.5,
-                mb: 4,
-                width: "100%",
-                p: 0.5,
-                backgroundColor: "#f0f4ff",
-                borderRadius: 3,
-              }}
-            >
-              {userTypes.map((type) => (
-                <ButtonComp
-                  title={type.label}
-                  key={type.value}
-                  onClick={() => handleTabChange(type.value)}
-                  sx={{
-                    flex: 1,
-                    py: 1.2,
-                    borderRadius: 2.5,
-                    textTransform: "none",
-                    fontWeight: 600,
-                    fontSize: "0.95rem",
-                    backgroundColor: userType === type.value ? "#1e3a8a" : "transparent",
-                    color: userType === type.value ? "#ffffff" : "#64748b",
-                    boxShadow:
-                      userType === type.value ? "0 2px 8px rgba(30, 58, 138, 0.3)" : "none",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      backgroundColor: userType === type.value ? "#1e40af" : "#e0e7ff",
-                      color: userType === type.value ? "#ffffff" : "#475569",
-                    },
-                  }}
-                />
-              ))}
-            </Box>
-
             <Typography
               component="h1"
               variant="h4"
@@ -290,17 +233,25 @@ const Login = () => {
               </Box>
 
               <ButtonComp
+                title={loading ? "Signing in..." : "Sign In"}
                 type="submit"
                 fullwidth={true}
                 variant="contained"
+                disabled={loading}
                 sx={{
                   backgroundColor: "#1e3a8a",
                   mt: 2,
                   mb: 2,
                   py: 1.5,
-                  "&:hover": { backgroundColor: "#1e40af" },
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#1e40af",
+                  },
+                  "&.Mui-disabled": {
+                    backgroundColor: "rgba(30, 58, 138, 0.6)",
+                    color: "#fff",
+                  },
                 }}
-                title="Sign In"
               />
             </Box>
           </Grid>

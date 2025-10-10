@@ -12,6 +12,7 @@ const ButtonComp = ({
   fullwidth,
   sx,
   startIcon,
+  size,
 }) => {
   return (
     <Button
@@ -24,6 +25,7 @@ const ButtonComp = ({
       fullWidth={fullwidth ? true : false}
       sx={sx}
       startIcon={startIcon}
+      size={size}
     >
       {title}
     </Button>

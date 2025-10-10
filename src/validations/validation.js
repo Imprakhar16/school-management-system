@@ -45,9 +45,6 @@ export const createTeacherSchema = Yup.object({
       then: (schema) => schema.required("Password is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
-  classincharge: Yup.string()
-    .length(24, "Please select a valid class")
-    .required("Class Incharge is required"),
   experienceDuration: Yup.date()
     .typeError("Invalid date")
     .required("Experience duration is required"),
