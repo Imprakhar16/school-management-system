@@ -88,6 +88,12 @@ export const privateRoutes = [
     element: <TeacherRegistration />,
     showInSidebar: false,
   },
+  // {
+  //   name: "Register-Teacher",
+  //   path: "/registerTeacher/:id",
+  //   element: <TeacherRegistration />,
+  //   showInSidebar: false,
+  // },
   {
     name: "Add-Subject",
     path: "/addSubject",

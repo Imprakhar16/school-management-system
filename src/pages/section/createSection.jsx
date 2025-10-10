@@ -4,7 +4,7 @@ import * as Yup from "yup";
 import { Box, TextField, Button, Typography, CircularProgress } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { showToast } from "../../components/toaster";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createSectionThunk,
@@ -12,10 +12,10 @@ import {
   fetchSectionsThunk,
 } from "../../features/section/sectionThunk";
 import ButtonComp from "../../components/button";
+import { createSectionSchema } from "../../validations/validation";
 
-const SectionForm = ({ onSuccess }) => {
+const SectionForm = ({ onSuccess, onFailed }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { id: editId } = useParams();
   const isEditMode = Boolean(editId);
 
@@ -26,14 +26,10 @@ const SectionForm = ({ onSuccess }) => {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      sectionId: existingSection?.sectionId || "",
       name: existingSection?.name || "",
     },
-    validationSchema: Yup.object({
-      sectionId: Yup.string().required("Section ID is required"),
-      name: Yup.string().required("Section Name is required"),
-    }),
-    onSubmit: (values, { setSubmitting }) => {
+    validationSchema: createSectionSchema,
+    onSubmit: (values) => {
       if (isEditMode) {
         dispatch(updateSectionThunk({ sectionId: editId, data: values }))
           .unwrap()
@@ -42,16 +38,10 @@ const SectionForm = ({ onSuccess }) => {
               status: "success",
               message: "Section updated successfully!",
             });
-            if (onSuccess) {
-              onSuccess();
-            } else {
-              navigate("/section");
-            }
+
+            onSuccess();
           })
-          .catch(() => {
-            showToast({ status: "error", message: "Update failed" });
-            setSubmitting(false);
-          });
+          .catch(() => onFailed());
       } else {
         dispatch(createSectionThunk(values))
           .unwrap()
@@ -60,16 +50,10 @@ const SectionForm = ({ onSuccess }) => {
               status: "success",
               message: "Section created successfully!",
             });
-            if (onSuccess) {
-              onSuccess();
-            } else {
-              navigate("/section");
-            }
+
+            onSuccess();
           })
-          .catch(() => {
-            showToast({ status: "error", message: "Creation failed" });
-            setSubmitting(false);
-          });
+          .catch(() => onFailed());
       }
     },
   });
@@ -93,19 +77,6 @@ const SectionForm = ({ onSuccess }) => {
       }}
     >
       <form onSubmit={formik.handleSubmit} noValidate>
-        <TextField
-          fullWidth
-          id="sectionId"
-          name="sectionId"
-          label="Section ID"
-          value={formik.values.sectionId}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={formik.touched.sectionId && Boolean(formik.errors.sectionId)}
-          helperText={formik.touched.sectionId && formik.errors.sectionId}
-          margin="normal"
-          disabled={isEditMode}
-        />
         <TextField
           fullWidth
           id="name"

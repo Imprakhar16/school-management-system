@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  Paper,
-  InputAdornment,
-  IconButton,
-  Tooltip,
-  Button,
-} from "@mui/material";
+import { Box, Typography, TextField, Paper, IconButton, Tooltip, Button } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,19 +19,14 @@ import AddIcon from "@mui/icons-material/Add";
 
 const SectionHome = () => {
   const dispatch = useDispatch();
-
   const { sections, loading, totalCount, totalPages } = useSelector((state) => state.sections);
-
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState({ sectionId: "", sectionName: "" });
-
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
-
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState({ sectionId: "", name: "" });
-
+  const [editFormData, setEditFormData] = useState({ name: "" });
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const debouncedSearch = useDebounce(search, 500);
@@ -83,7 +69,7 @@ const SectionHome = () => {
   const handleEditClick = (id) => {
     const section = sections.find((sec) => sec._id === id);
     if (section) {
-      setEditFormData({ sectionId: section.sectionId || "", name: section.name || "" });
+      setEditFormData({ name: section.name || "" }); // Only set 'name'
       setEditModalOpen(true);
       setSelectedSectionId(id);
     }
@@ -104,9 +90,6 @@ const SectionHome = () => {
         dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
         setEditModalOpen(false);
         setSelectedSectionId(null);
-      })
-      .catch((error) => {
-        showToast({ status: "error", message: error?.message || "Failed to update section" });
       });
   };
 
@@ -115,19 +98,16 @@ const SectionHome = () => {
     dispatch(fetchSectionsThunk(newPage, rowsPerPage));
   };
 
-  const columns = [
-    { field: "sectionId", headerName: "Section ID" },
-    { field: "name", headerName: "Section Name" },
-  ];
+  const columns = [{ field: "name", headerName: "Section Name" }];
 
   const filteredData = sections?.filter(
     (sec) =>
-      String(sec.sectionId)?.includes(search.sectionId) &&
-      sec.name?.toLowerCase().includes(search.sectionName)
+      String(sec?.sectionId)?.includes(search?.sectionId) &&
+      sec?.name?.toLowerCase().includes(search.sectionName)
   );
 
   return (
-    <Box sx={{ p: 4, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+    <Box>
       <Paper sx={{ p: 3 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
@@ -251,18 +231,9 @@ const SectionHome = () => {
           autoComplete="off"
         >
           <TextField
-            label="Section ID"
-            name="sectionId"
-            value={editFormData.sectionId}
-            onChange={handleEditInputChange}
-            variant="outlined"
-            fullWidth
-            disabled
-          />
-          <TextField
             label="Section Name"
             name="name"
-            value={editFormData.name}
+            value={editFormData.name} // Only bind 'name' field
             onChange={handleEditInputChange}
             variant="outlined"
             fullWidth
@@ -270,6 +241,7 @@ const SectionHome = () => {
         </Box>
       </ReusableModal>
 
+      {/* Create Section Modal */}
       <ReusableModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
@@ -277,6 +249,10 @@ const SectionHome = () => {
       >
         <SectionForm
           onSuccess={() => {
+            setCreateModalOpen(false);
+            dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
+          }}
+          onFailed={() => {
             setCreateModalOpen(false);
             dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
           }}
