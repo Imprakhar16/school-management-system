@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
   Box,
@@ -27,6 +27,7 @@ const Login = () => {
     setShowPassword(!showPassword);
   };
 
+  const { loading } = useSelector((state) => state.auth);
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -232,16 +233,24 @@ const Login = () => {
               </Box>
 
               <ButtonComp
-                title="Sign In"
+                title={loading ? "Signing in..." : "Sign In"}
                 type="submit"
                 fullwidth={true}
                 variant="contained"
+                disabled={loading}
                 sx={{
                   backgroundColor: "#1e3a8a",
                   mt: 2,
                   mb: 2,
                   py: 1.5,
-                  "&:hover": { backgroundColor: "#1e40af" },
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#1e40af",
+                  },
+                  "&.Mui-disabled": {
+                    backgroundColor: "rgba(30, 58, 138, 0.6)",
+                    color: "#fff",
+                  },
                 }}
               />
             </Box>

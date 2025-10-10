@@ -12,6 +12,7 @@ import {
   IconButton,
 } from "@mui/material";
 import {
+  Home,
   Dashboard,
   School,
   People,
@@ -23,22 +24,26 @@ import {
   Class,
   Assessment,
   Close,
+  Info,
+  Subject,
 } from "@mui/icons-material";
 
 const drawerWidth = 280;
 
 // Icon mapping for routes
 const iconMap = {
+  home: <Home />,
   dashboard: <Dashboard />,
   students: <People />,
   teachers: <School />,
   classes: <Class />,
-  subjects: <Book />,
+  subjects: <Subject />,
   assignments: <Assignment />,
   attendance: <EventNote />,
   reports: <Assessment />,
   settings: <Settings />,
   profile: <AccountCircle />,
+  about: <Info />,
 };
 
 export default function SideBar({ open, onClose }) {
