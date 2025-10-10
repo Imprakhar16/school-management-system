@@ -4,12 +4,11 @@ import ReusableModal from "../../components/modal";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { fetchAllSubjectsThunk, deleteSubjectThunk } from "../../features/subjects/subjectThunk";
-import { Link, useNavigate } from "react-router-dom";
-import { Box, Button, CircularProgress, Typography, Paper } from "@mui/material";
+import { useNavigate, Link } from "react-router-dom";
+import { Box, Button, CircularProgress, Typography, Paper, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
 import TableComponent from "../../components/table";
-import SearchInput from "../../components/searchInput";
 import Pagination from "../../components/pagination";
 import ButtonComp from "../../components/button";
 
@@ -20,25 +19,27 @@ const SubjectsList = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [searchName, setSearchName] = useState("");
-  const [searchCode, setSearchCode] = useState("");
-
+  const [search, setSearch] = useState({ name: "", code: "" });
   const [modalOpen, setModalOpen] = useState(false);
-
   const [subjectToDelete, setSubjectToDelete] = useState(null);
 
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
   }, [dispatch, currentPage, itemsPerPage]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSearch({ ...search, [name]: value });
+  };
+
   const filteredData = useMemo(() => {
     if (!data) return [];
     return data.filter(
       (subject) =>
-        subject?.name?.toLowerCase().includes(searchName.toLowerCase()) &&
-        subject?.code?.toLowerCase().includes(searchCode.toLowerCase())
+        subject?.name?.toLowerCase().includes(search.name.toLowerCase()) &&
+        subject?.code?.toLowerCase().includes(search.code.toLowerCase())
     );
-  }, [data, searchName, searchCode]);
+  }, [data, search.name, search.code]);
 
   const handleDelete = (_id) => {
     const subject = data.find((subj) => subj._id === _id);
@@ -70,39 +71,34 @@ const SubjectsList = () => {
 
   const columns = [
     {
-      field: "slNo",
-      headerName: "SL.No",
-      render: (row) => row.slNo,
-    },
-    {
       field: "name",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Subject Name</Typography>
-          <SearchInput
-            value={searchName}
-            onChange={setSearchName}
-            placeholder="Search Name"
-            debounceTime={300}
-          />
-        </Box>
-      ),
+      headerName: "Subject Name",
       render: (row) => row.name,
+      filter: (
+        <TextField
+          placeholder="Search Name"
+          name="name"
+          value={search.name}
+          onChange={handleChange}
+          size="small"
+          fullWidth
+        />
+      ),
     },
     {
       field: "code",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Sub-Code</Typography>
-          <SearchInput
-            value={searchCode}
-            onChange={setSearchCode}
-            placeholder="Search Code"
-            debounceTime={300}
-          />
-        </Box>
-      ),
+      headerName: "Sub-Code",
       render: (row) => row.code,
+      filter: (
+        <TextField
+          placeholder="Search Code"
+          name="code"
+          value={search.code}
+          onChange={handleChange}
+          size="small"
+          fullWidth
+        />
+      ),
     },
   ];
 
@@ -118,9 +114,9 @@ const SubjectsList = () => {
   );
 
   return (
-    <Box p={3}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5" fontWeight="bold">
+    <Paper sx={{ p: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
           Subjects List
         </Typography>
         <Link to="/addSubject">
@@ -133,23 +129,16 @@ const SubjectsList = () => {
         </Link>
       </Box>
 
-      <Paper sx={{ overflow: "hidden" }}>
-        {loading ? (
-          <Box display="flex" justifyContent="center" p={5}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <TableComponent
-            columns={columns}
-            data={filteredData.map((row, index) => ({
-              ...row,
-              slNo: (currentPage - 1) * itemsPerPage + (index + 1),
-            }))}
-            loading={loading}
-            customRowActions={customRowActions}
-          />
-        )}
-      </Paper>
+      <TableComponent
+        columns={columns}
+        data={filteredData}
+        loading={loading}
+        filterRow={{
+          name: columns[0].filter,
+          code: columns[1].filter,
+        }}
+        customRowActions={customRowActions}
+      />
 
       <Pagination
         page={currentPage}
@@ -186,7 +175,7 @@ const SubjectsList = () => {
           Are you sure you want to delete the subject <strong>{subjectToDelete?.name}</strong>?
         </Typography>
       </ReusableModal>
-    </Box>
+    </Paper>
   );
 };
 

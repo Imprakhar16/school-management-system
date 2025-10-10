@@ -26,10 +26,10 @@ const TableComponent = ({
           <TableRow>
             {columns?.map((col) => (
               <TableCell key={col?.field ?? Math.random()} sx={{ fontWeight: "bold" }}>
-                {col?.headerName ?? ""}
+                {col?.headerName ? String(col.headerName).toUpperCase() : ""}
               </TableCell>
             ))}
-            {customRowActions && <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>}
+            {customRowActions && <TableCell sx={{ fontWeight: "bold" }}>ACTIONS</TableCell>}
           </TableRow>
 
           {/* 🔽 Filter row just under the headers */}
