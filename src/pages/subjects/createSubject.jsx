@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createSubjectThunk, updateSubjectThunk } from "../../features/subjects/subjectThunk";
-import { resetSubjectState } from "../../features/subjects/subjectSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { showToast } from "../../components/toaster";
 import { Box, Typography, TextField, Button, Paper, Stack } from "@mui/material";
@@ -15,10 +14,9 @@ export default function AddSubject() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 👇 check if user came here to edit
   const editSubject = location.state?.subject || null;
 
-  const { loading, success, error } = useSelector((state) => state.subject);
+  const { loading } = useSelector((state) => state.subject);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -55,43 +53,34 @@ export default function AddSubject() {
         });
 
       if (editSubject?._id) {
-        // 🔹 Edit mode
         dispatch(
           updateSubjectThunk({
             _id: editSubject._id,
             updatedData: values,
           })
+            .unwrap()
+            .then(() => {
+              formik.resetForm();
+              navigate("/subjects");
+            })
         );
       } else {
-        // 🔹 Create mode
-        dispatch(createSubjectThunk(values));
+        dispatch(createSubjectThunk(values))
+          .unwrap()
+          .then(() => {
+            formik.resetForm();
+            navigate("/subjects");
+          });
       }
     },
   });
-
-  useEffect(() => {
-    if (success) {
-      showToast({
-        message: editSubject ? "Subject updated successfully!" : "Subject added successfully!",
-        status: "success",
-      });
-      formik.resetForm();
-      dispatch(resetSubjectState());
-      navigate("/subjects");
-    }
-    if (error) {
-      const errorMessage =
-        typeof error === "string" ? error : error.message || error.error || JSON.stringify(error);
-      showToast({ message: `Failed: ${errorMessage}`, status: "error" });
-    }
-  }, [success, error, dispatch, formik, navigate, editSubject]);
 
   return (
     <>
       <ButtonComp
         title=" Back"
         startIcon={<ArrowBackIcon />}
-        onClick={() => navigate("/teachers")}
+        onClick={() => navigate("/subjects")}
         sx={{
           mb: 2,
           color: "primary.main",
@@ -109,17 +98,12 @@ export default function AddSubject() {
             boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
           }}
         >
-          {/* <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-       
-        </Box> */}
-
+          +
           <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: "#1976d2" }}>
             {editSubject ? "Edit Subject" : "Add New Subject"}
           </Typography>
-
           <form onSubmit={formik.handleSubmit}>
             <Stack spacing={3}>
-              {/* Name */}
               <TextField
                 fullWidth
                 label="Subject Name *"
@@ -130,7 +114,6 @@ export default function AddSubject() {
                 helperText={formik.touched.name && formik.errors.name}
               />
 
-              {/* Code */}
               <TextField
                 fullWidth
                 label="Subject Code *"
@@ -141,7 +124,6 @@ export default function AddSubject() {
                 helperText={formik.touched.code && formik.errors.code}
               />
 
-              {/* Button */}
               <Button
                 fullWidth
                 type="submit"

@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, Typography, IconButton } from "@mui/material";
+import { Box, Paper, TextField, Typography, IconButton } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TableComponent from "../../components/table";
-import SearchInput from "../../components/searchInput";
 import { fetchAllTeachersThunk, deleteTeacherThunk } from "../../features/teachers/teacherThunk";
 import ButtonComp from "../../components/button";
 import Pagination from "../../components/pagination";
@@ -21,7 +20,7 @@ const TeachersList = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // Search states
+  // 🔍 Search states
   const [searchFirstName, setSearchFirstName] = useState("");
   const [searchLastName, setSearchLastName] = useState("");
   const [searchEmail, setSearchEmail] = useState("");
@@ -32,7 +31,7 @@ const TeachersList = () => {
   const [searchSubjects, setSearchSubjects] = useState("");
   const [searchClassIncharge, setSearchClassIncharge] = useState("");
 
-  // Delete confirm modal
+  // 🔹 Delete confirm modal
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
 
@@ -92,171 +91,43 @@ const TeachersList = () => {
     });
   };
 
-  // const handleDelete = () => {};
-
   const confirmDelete = async (id) => {
     await dispatch(deleteTeacherThunk(id)).unwrap();
     dispatch(fetchAllTeachersThunk({ page, limit: rowsPerPage }));
     setConfirmDeleteOpen(false);
   };
 
-  // 🔹 Table Columns
   const columns = [
-    {
-      field: "slno",
-      headerName: "Sl. No.",
-      render: (row) => row.slno,
-    },
-    {
-      field: "firstname",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">First Name</Typography>
-          <SearchInput
-            value={searchFirstName}
-            onChange={setSearchFirstName}
-            placeholder="Search..."
-            debounceTime={300}
-            size="small"
-          />
-        </Box>
-      ),
-      render: (row) => row.firstname,
-    },
-    {
-      field: "lastname",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Last Name</Typography>
-          <SearchInput
-            value={searchLastName}
-            onChange={setSearchLastName}
-            placeholder="Search..."
-            debounceTime={300}
-            size="small"
-          />
-        </Box>
-      ),
-      render: (row) => row.lastname,
-    },
-    {
-      field: "email",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Email</Typography>
-          <SearchInput
-            value={searchEmail}
-            onChange={setSearchEmail}
-            placeholder="Search..."
-            debounceTime={300}
-            size="small"
-          />
-        </Box>
-      ),
-      render: (row) => row.email,
-    },
-    {
-      field: "gender",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Gender</Typography>
-          <SearchInput
-            value={searchGender}
-            onChange={setSearchGender}
-            placeholder="Search..."
-            debounceTime={300}
-            size="small"
-          />
-        </Box>
-      ),
-      render: (row) => row.gender || "-",
-    },
-    {
-      field: "EmpId",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Employee ID</Typography>
-          <SearchInput
-            value={searchEmpId}
-            onChange={setSearchEmpId}
-            placeholder="Search..."
-            debounceTime={300}
-            size="small"
-          />
-        </Box>
-      ),
-      render: (row) => row.EmpId || "-",
-    },
+    { field: "firstname", headerName: "FIRSTNAME", render: (row) => row.firstname },
+    { field: "lastname", headerName: "LASTNAME", render: (row) => row.lastname },
+    { field: "email", headerName: "EMAIL", render: (row) => row.email },
+    { field: "gender", headerName: "GENDER", render: (row) => row.gender || "-" },
+    { field: "EmpId", headerName: "EMPLOYEE ID", render: (row) => row.EmpId || "-" },
     {
       field: "experienceDuration",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Experience Duration</Typography>
-          <SearchInput
-            value={searchExperienceDuration}
-            onChange={setSearchExperienceDuration}
-            placeholder="Search..."
-            debounceTime={300}
-            size="small"
-          />
-        </Box>
-      ),
+      headerName: "EXPERIENCE DURATION",
       render: (row) =>
         row.experienceDuration ? new Date(row.experienceDuration).toLocaleDateString() : "-",
     },
     {
       field: "experienceDetails",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Experience Details</Typography>
-          <SearchInput
-            value={searchExperienceDetails}
-            onChange={setSearchExperienceDetails}
-            placeholder="Search..."
-            debounceTime={300}
-            size="small"
-          />
-        </Box>
-      ),
+      headerName: "EXPERIENCE DETAILS",
       render: (row) => row.experienceDetails || "-",
     },
     {
       field: "subjects",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Subjects</Typography>
-          <SearchInput
-            value={searchSubjects}
-            onChange={setSearchSubjects}
-            placeholder="Search..."
-            debounceTime={300}
-            size="small"
-          />
-        </Box>
-      ),
+      headerName: "SUBJECTS",
       render: (row) => row.subjects?.map((s) => `${s.name} (${s.code})`).join(", ") || "-",
     },
     {
       field: "classincharge",
-      headerName: (
-        <Box>
-          <Typography variant="subtitle2">Class Incharge</Typography>
-          <SearchInput
-            value={searchClassIncharge}
-            onChange={setSearchClassIncharge}
-            placeholder="Search..."
-            debounceTime={300}
-            size="small"
-          />
-        </Box>
-      ),
+      headerName: "CLASS INCHARGE",
       render: (row) => row.classInchargeOf?.name || "-",
     },
   ];
 
-  // 🔹 Action Column with Icons
   const customRowActions = (row) => (
-    <Box display="flex" alignItems="center">
+    <Box display="flex" alignItems="center" gap={1}>
       <IconButton color="primary" onClick={() => handleEdit(row)} title="Edit" size="small">
         <EditIcon fontSize="small" />
       </IconButton>
@@ -274,16 +145,11 @@ const TeachersList = () => {
     </Box>
   );
 
-  const dataWithSlno = filteredData.map((row, index) => ({
-    ...row,
-    slno: (page - 1) * rowsPerPage + (index + 1),
-  }));
-
   return (
-    <Box p={3}>
+    <Paper sx={{ p: 3 }}>
       {/* Header */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5" fontWeight="bold">
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
           Teachers List
         </Typography>
         <Link to="/registerTeacher">
@@ -296,14 +162,112 @@ const TeachersList = () => {
         </Link>
       </Box>
 
-      {/* Table */}
-      <TableComponent
-        columns={columns}
-        data={dataWithSlno}
-        loading={loading}
-        customRowActions={customRowActions}
-        emptyMessage="No teachers found."
-      />
+      {/* Scrollable Table */}
+      <Box
+        sx={{
+          width: "100%",
+          overflowX: "auto",
+          "&::-webkit-scrollbar": { height: 8 },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#bdbdbd",
+            borderRadius: 4,
+          },
+          "&::-webkit-scrollbar-thumb:hover": { backgroundColor: "#9e9e9e" },
+        }}
+      >
+        <Box sx={{ minWidth: "1600px" }}>
+          <TableComponent
+            columns={columns}
+            data={filteredData}
+            loading={loading}
+            filterRow={{
+              firstname: (
+                <TextField
+                  placeholder="Search First Name"
+                  value={searchFirstName}
+                  onChange={(e) => setSearchFirstName(e.target.value)}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 140 }}
+                />
+              ),
+              lastname: (
+                <TextField
+                  placeholder="Search Last Name"
+                  value={searchLastName}
+                  onChange={(e) => setSearchLastName(e.target.value)}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 140 }}
+                />
+              ),
+              email: (
+                <TextField
+                  placeholder="Search Email"
+                  value={searchEmail}
+                  onChange={(e) => setSearchEmail(e.target.value)}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 180 }}
+                />
+              ),
+              gender: (
+                <TextField
+                  placeholder="Search Gender"
+                  value={searchGender}
+                  onChange={(e) => setSearchGender(e.target.value)}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 110 }}
+                />
+              ),
+              EmpId: (
+                <TextField
+                  placeholder="Search Emp ID"
+                  value={searchEmpId}
+                  onChange={(e) => setSearchEmpId(e.target.value)}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 120 }}
+                />
+              ),
+              experienceDuration: (
+                <TextField
+                  placeholder="Search Duration"
+                  value={searchExperienceDuration}
+                  onChange={(e) => setSearchExperienceDuration(e.target.value)}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 130 }}
+                />
+              ),
+              experienceDetails: (
+                <TextField
+                  placeholder="Search Details"
+                  value={searchExperienceDetails}
+                  onChange={(e) => setSearchExperienceDetails(e.target.value)}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 180 }}
+                />
+              ),
+              subjects: (
+                <TextField
+                  placeholder="Search Subjects"
+                  value={searchSubjects}
+                  onChange={(e) => setSearchSubjects(e.target.value)}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 200 }}
+                />
+              ),
+              classincharge: (
+                <TextField
+                  placeholder="Search Class Incharge"
+                  value={searchClassIncharge}
+                  onChange={(e) => setSearchClassIncharge(e.target.value)}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 170 }}
+                />
+              ),
+            }}
+            customRowActions={customRowActions}
+            emptyMessage="No teachers found."
+          />
+        </Box>
+      </Box>
 
       {/* Pagination */}
       <Pagination
@@ -315,7 +279,7 @@ const TeachersList = () => {
         total={pagination?.total || 0}
       />
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation */}
       <ReusableModal
         open={confirmDeleteOpen}
         onClose={() => setConfirmDeleteOpen(false)}
@@ -334,7 +298,7 @@ const TeachersList = () => {
       >
         <Typography>Are you sure you want to delete this teacher?</Typography>
       </ReusableModal>
-    </Box>
+    </Paper>
   );
 };
 

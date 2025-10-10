@@ -2,7 +2,6 @@ import React, { useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import {
   Box,
   Button,
@@ -40,7 +39,7 @@ const TeacherRegistration = () => {
   const { data: subjectsList = [], loading: subjectsLoading } = useSelector(
     (state) => state.subject
   );
-  const { loading } = useSelector((state) => state.class);
+  const { loading } = useSelector((state) => state.teacher);
 
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: 1, limit: 100 }));
@@ -68,7 +67,6 @@ const TeacherRegistration = () => {
       email: teacherData?.email || "",
       phoneNumber: teacherData?.phoneNumber || "",
       password: "",
-      // classincharge: extractClassId(teacherData?.classincharge) || "",
       experienceDuration: formatDateForInput(teacherData?.experienceDuration) || "",
       experienceDetails: teacherData?.experienceDetails || "",
       photoUrl: null,
@@ -109,7 +107,6 @@ const TeacherRegistration = () => {
       });
 
       if (isEdit && teacherData?._id) {
-        // Use updateTeacherThunk for editing
         await dispatch(
           updateTeacherThunk({
             id: teacherData._id,
@@ -135,7 +132,7 @@ const TeacherRegistration = () => {
     [formik]
   );
 
-  const isLoading = loading || subjectsLoading;
+  const isSubjectsLoading = subjectsLoading;
 
   return (
     <>
@@ -157,7 +154,7 @@ const TeacherRegistration = () => {
           {isEdit ? "Edit Teacher" : "Teacher Registration"}
         </Typography>
 
-        {isLoading ? (
+        {isSubjectsLoading ? (
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
             <CircularProgress />
           </Box>
@@ -386,8 +383,20 @@ const TeacherRegistration = () => {
               </Box>
             </Box>
 
-            <Button variant="contained" type="submit" color="primary" size="large">
-              {isEdit ? "Update Teacher" : "Register Teacher"}
+            <Button
+              variant="contained"
+              type="submit"
+              color="primary"
+              size="large"
+              disabled={loading}
+            >
+              {loading
+                ? isEdit
+                  ? "Updating..."
+                  : "Registering..."
+                : isEdit
+                  ? "Update Teacher"
+                  : "Register Teacher"}
             </Button>
           </form>
         )}
