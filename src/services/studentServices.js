@@ -28,8 +28,12 @@ export const createStudentService = async (formData) => {
 
 export const editStudentService = async (id, update) => {
   try {
-    const response = await axiosInstance.put(`${API_PATHS.STUDENT.UPDATE_STUDENT}/${id}`, update);
-    return response;
+    const response = await axiosInstance.put(`${API_PATHS.STUDENT.UPDATE_STUDENT}/${id}`, update, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
   } catch (error) {
     showToast({
       status: "error",

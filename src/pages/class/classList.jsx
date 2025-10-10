@@ -115,7 +115,7 @@ export default function ClassList() {
           title="Create Class"
           variant="contained"
           color="primary"
-          onClick={() => navigate("/addClass")}
+          onClick={() => navigate("/create-class")}
           fullwidth={false}
           startIcon={<AddIcon />}
         />
@@ -172,7 +172,10 @@ export default function ClassList() {
           <>
             <Box sx={{ display: "flex", columnGap: 2 }}>
               <Tooltip title="Edit Section">
-                <IconButton color="primary">
+                <IconButton
+                  color="primary"
+                  onClick={() => navigate("/create-class", { state: { classData: row } })}
+                >
                   <Edit />
                 </IconButton>
               </Tooltip>
@@ -216,7 +219,7 @@ export default function ClassList() {
           </>
         }
       >
-        <Typography>Are you want to delete this class?</Typography>
+        <Typography>Are you sure you want to delete this class?</Typography>
       </ReusableModal>
     </Paper>
   );

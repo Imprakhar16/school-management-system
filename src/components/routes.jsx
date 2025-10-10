@@ -60,7 +60,7 @@ export const privateRoutes = [
   },
   {
     name: "AddClass",
-    path: "/addClass",
+    path: "/create-class",
     element: <AddClass />,
     showInSidebar: false,
   },
