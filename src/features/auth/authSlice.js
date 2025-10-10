@@ -3,6 +3,7 @@ import { forgotPasswordThunk, loginThunk, resetPasswordThunk } from "./authThunk
 
 const initialState = {
   user: null,
+  role: null,
   token: null,
   loading: false,
   error: null,
@@ -24,6 +25,7 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginThunk.fulfilled, (state, action) => {
+        state.role = action.payload.data.user.role;
         state.loading = false;
         state.token = action.payload.data.token;
         state.user = action.payload.data.user;
