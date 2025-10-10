@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { showToast } from "../../components/toaster";
-import { createStudentThunk } from "../../features/students/studentsThunk";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -13,41 +12,25 @@ import {
   FormControlLabel,
   Radio,
   Divider,
-  Select,
   MenuItem,
-  InputLabel,
-  FormControl,
-  FormHelperText,
-  OutlinedInput,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import { classListThunk } from "../../features/class/classThunk";
+import { createStudentThunk, editStudentThunk } from "../../features/students/studentsThunk";
+import ButtonComp from "../../components/button";
+import { studentSchema } from "../../validations/validation";
 
 const genderOptions = ["male", "female", "other"];
 
-const validationSchema = Yup.object().shape({
-  firstname: Yup.string().required("First name is required"),
-  lastname: Yup.string().required("Last name is required"),
-  parentname: Yup.string().required("Father name is required"),
-  email: Yup.string().email("Invalid email"),
-  rollNo: Yup.string().required("Roll number is required"),
-  gender: Yup.string().required("Gender is required"),
-  password: Yup.string().min(6, "Min 6 characters").required("Password is required"),
-  class: Yup.string().required("Class is required"),
-  section: Yup.string().required("Section is required"),
-  phoneNumber: Yup.string()
-    .min(10, "Min 10 characters required")
-    .max(10, "Max 10 numbers")
-    .required("Contact is required"),
-});
-
 const StudentForm = () => {
-  const [aadharFile, setAadharFile] = useState(null);
-  const [photoFile, setPhotoFile] = useState(null);
-
   const { classes } = useSelector((state) => state.class);
-
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+  const studentData = location.state?.studentData;
+  const [aadharFile, setAadharFile] = useState(studentData?.identityVerification || null);
+  const [photoFile, setPhotoFile] = useState(studentData?.photoUrl || null);
 
   useEffect(() => {
     dispatch(classListThunk({ page: 1, limit: 100 }));
@@ -55,37 +38,54 @@ const StudentForm = () => {
 
   const formik = useFormik({
     initialValues: {
-      firstname: "",
-      lastname: "",
-      parentname: "",
-      email: "",
-      rollNo: "",
-      gender: "",
-      password: "",
-      class: "",
-      section: "",
-      phoneNumber: "",
+      firstname: studentData?.firstname || "",
+      lastname: studentData?.lastname || "",
+      parentname: studentData?.parentname || "",
+      email: studentData?.email || "",
+      rollNo: studentData?.rollNo || null,
+      gender: studentData?.gender || "",
+      password: studentData?.password || "",
+      class: studentData?.class?._id || "",
+      section: studentData?.section?._id || "",
+      phoneNumber: studentData?.phoneNumber || "",
     },
-    validationSchema,
+    validationSchema: studentSchema,
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: (values, { resetForm }) => {
+    enableReinitialize: true,
+
+    onSubmit: async (values) => {
       const formData = new FormData();
       for (const key in values) {
-        formData.append(key, values[key]);
+        if (key === "rollNo") {
+          formData.append(key, Number(values[key]));
+        } else {
+          formData.append(key, values[key]);
+        }
       }
-      if (photoFile) formData.append("photoUrl", photoFile);
-      if (aadharFile) formData.append("identityVerification", aadharFile);
 
-      dispatch(createStudentThunk(formData))
-        .unwrap()
-        .then(() => {
-          showToast({
-            status: "success",
-            message: "Student created successfully!",
-          });
+      if (photoFile instanceof File) formData.append("photoUrl", photoFile);
+      if (aadharFile instanceof File) formData.append("identityVerification", aadharFile);
+
+      if (studentData) {
+        await dispatch(editStudentThunk({ id: studentData._id, update: formData })).then(() => {
+          (navigate("/students"),
+            showToast({
+              status: "success",
+              message: "Student updated successfully!",
+            }));
         });
-      resetForm();
+      } else {
+        await dispatch(createStudentThunk(formData))
+          .unwrap()
+          .then(() => {
+            (navigate("/students"),
+              showToast({
+                status: "success",
+                message: "Student created successfully!",
+              }));
+          });
+      }
     },
   });
 
@@ -375,7 +375,7 @@ const StudentForm = () => {
                       color="success.main"
                       sx={{ mt: 1, display: "block" }}
                     >
-                      ✓ {aadharFile.name}
+                      ✓ {studentData ? studentData.identityVerification : aadharFile.name}
                     </Typography>
                   )}
                 </Box>
@@ -404,7 +404,7 @@ const StudentForm = () => {
                       color="success.main"
                       sx={{ mt: 1, display: "block" }}
                     >
-                      ✓ {photoFile.name}
+                      ✓ {studentData ? studentData.photoUrl : photoFile.name}
                     </Typography>
                   )}
                 </Box>
@@ -412,26 +412,22 @@ const StudentForm = () => {
             </Box>
 
             {/* Submit Button */}
-            <Button
+            <ButtonComp
+              title={
+                formik.isSubmitting ? (
+                  <CircularProgress size={24} />
+                ) : studentData ? (
+                  "Update Student"
+                ) : (
+                  "Create Student"
+                )
+              }
               type="submit"
               variant="contained"
-              size="large"
+              color="primary"
+              disabled={formik.isSubmitting}
               fullWidth
-              sx={{
-                py: 2,
-                fontSize: "16px",
-                fontWeight: "600",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
-                "&:hover": {
-                  boxShadow: "0 6px '20px rgba(102, 126, 234, 0.6)",
-                  transform: "translateY(-2px)",
-                },
-                transition: "all 0.3s ease",
-              }}
-            >
-              Submit Registration
-            </Button>
+            />
           </form>
         </Box>
       </Paper>

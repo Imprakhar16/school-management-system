@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import {
   Box,
   Paper,
@@ -17,9 +16,9 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ButtonComp from "../../components/button";
-import { createClassThunk } from "../../features/class/classThunk";
+import { createClassThunk, editClassThunk } from "../../features/class/classThunk";
 import { fetchSectionsThunk } from "../../features/section/sectionThunk";
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
 import { fetchAllTeachersThunk } from "../../features/teachers/teacherThunk";
@@ -28,27 +27,37 @@ import { addClassSchema } from "../../validations/validation";
 export default function AddClass() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const classData = location.state?.classData; //For edit
+
   const { sections } = useSelector((state) => state.sections);
   const { data } = useSelector((state) => state.subject);
   const { teachers } = useSelector((state) => state.teacher);
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      subjects: [],
-      sections: [],
-      classincharge: "",
+      name: classData?.name || "",
+      subjects: classData?.subjects?.map((s) => s._id) || [],
+      sections: classData?.sections?.map((s) => s._id) || [],
+      classincharge: classData?.classincharge?._id || "",
     },
     validationSchema: addClassSchema,
+    enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
-      dispatch(createClassThunk(values)).unwrap();
-      resetForm();
+      if (classData) {
+        await dispatch(editClassThunk({ id: classData._id, data: values })).unwrap();
+        resetForm();
+      } else {
+        await dispatch(createClassThunk(values)).unwrap();
+        resetForm();
+      }
     },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     formik.handleSubmit();
+    navigate("/classes");
   };
 
   useEffect(() => {
@@ -71,7 +80,7 @@ export default function AddClass() {
         </Box>
 
         <Typography variant="h5" gutterBottom>
-          Create Class
+          {classData ? "Edit Class" : "Create Class"}
         </Typography>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -81,6 +90,7 @@ export default function AddClass() {
             id="name"
             name="name"
             label="Class Name"
+            // disabled= {classData.name}
             value={formik.values.name}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -180,7 +190,15 @@ export default function AddClass() {
 
           <Box sx={{ mt: 2 }}>
             <ButtonComp
-              title={formik.isSubmitting ? <CircularProgress size={24} /> : "Create Class"}
+              title={
+                formik.isSubmitting ? (
+                  <CircularProgress size={24} />
+                ) : classData ? (
+                  "Update Class"
+                ) : (
+                  "Create Class"
+                )
+              }
               type="submit"
               variant="contained"
               color="primary"

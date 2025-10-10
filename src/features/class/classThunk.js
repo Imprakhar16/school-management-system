@@ -30,7 +30,7 @@ export const editClassThunk = createAsyncThunk(
   async ({ id, data }, { rejectWithValue }) => {
     try {
       const response = await editClass(id, data);
-      return response;
+      return response.data;
     } catch (err) {
       return rejectWithValue(err);
     }

@@ -32,8 +32,8 @@ const deleteSection = async (sectionId) => {
   const response = await axiosInstance.delete(`${API_PATHS.SECTION.DELETE}/${sectionId}`);
   return response.data;
 };
+
 export const updateSection = async ({ sectionId, data }) => {
-  console.log(sectionId);
   try {
     const response = await axiosInstance.put(`${API_PATHS.SECTION.UPDATE}/${sectionId}`, data);
     return response.data;

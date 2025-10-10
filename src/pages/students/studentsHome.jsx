@@ -90,7 +90,10 @@ const StudentsHome = () => {
       .unwrap()
       .then(() => {
         showToast({ status: "success", message: "Student deleted successfully" });
-        dispatch(fetchStudentThunk({ page, limit: limit }));
+        dispatch(fetchStudentThunk({ page, limit }));
+      })
+      .catch((error) => {
+        showToast({ status: "error", message: error?.message || "Failed to delete Class" });
       })
       .finally(() => {
         setDeleteStudentModal(false);
@@ -203,7 +206,12 @@ const StudentsHome = () => {
           <>
             <Box sx={{ display: "flex", columnGap: 2 }}>
               <Tooltip title="Edit Section">
-                <IconButton color="primary">
+                <IconButton
+                  color="primary"
+                  onClick={() => {
+                    navigate("/create-student", { state: { studentData: row } });
+                  }}
+                >
                   <Edit />
                 </IconButton>
               </Tooltip>
