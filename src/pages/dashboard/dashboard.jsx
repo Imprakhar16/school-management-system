@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Typography, Button, Box } from "@mui/material";
-import StatCard from "../../components/statcard";
+import StatCard from "../../components/statCard";
 import ChartCard from "../../components/chartCard";
 import EventList from "../../components/eventList";
 import { useSelector } from "react-redux";
