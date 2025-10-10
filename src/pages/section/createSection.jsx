@@ -30,7 +30,6 @@ const SectionForm = ({ onSuccess, onFailed }) => {
     },
     validationSchema: createSectionSchema,
     onSubmit: (values) => {
-      console.log(values);
       if (isEditMode) {
         dispatch(updateSectionThunk({ sectionId: editId, data: values }))
           .unwrap()
