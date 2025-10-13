@@ -90,7 +90,6 @@ export default function AddClass() {
             id="name"
             name="name"
             label="Class Name"
-            // disabled= {classData.name}
             value={formik.values.name}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}

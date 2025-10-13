@@ -21,7 +21,7 @@ export const createStudentService = async (formData) => {
   } catch (err) {
     showToast({
       status: "error",
-      message: err.message || "Failed creating student",
+      message: err.response?.data?.message || "Failed creating student",
     });
   }
 };
@@ -37,7 +37,7 @@ export const editStudentService = async (id, update) => {
   } catch (error) {
     showToast({
       status: "error",
-      message: error.message || "Failed Updating student",
+      message: error.response?.data?.message || "Failed Updating student",
     });
   }
 };
@@ -49,7 +49,7 @@ export const deleteStudentService = async (id) => {
   } catch (err) {
     showToast({
       status: "error",
-      message: err.message || "Failed deleting student",
+      message: err.response?.data?.message || "Failed deleting student",
     });
   }
 };

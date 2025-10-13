@@ -14,7 +14,7 @@ import { showToast } from "../../components/toaster";
 
 export default function ClassList() {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(2);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState(null);
@@ -44,7 +44,6 @@ export default function ClassList() {
     dispatch(deleteClassThunk(selectedClassId))
       .unwrap()
       .then(() => {
-        showToast({ status: "success", message: "Class deleted successfully" });
         dispatch(classListThunk({ page, limit: limit }));
       })
       .catch((error) => {
