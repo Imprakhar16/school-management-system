@@ -58,12 +58,12 @@ export default function AddSubject() {
             _id: editSubject._id,
             updatedData: values,
           })
-            .unwrap()
-            .then(() => {
-              formik.resetForm();
-              navigate("/subjects");
-            })
-        );
+        )
+          .unwrap()
+          .then(() => {
+            formik.resetForm();
+            navigate("/subjects");
+          });
       } else {
         dispatch(createSubjectThunk(values))
           .unwrap()
