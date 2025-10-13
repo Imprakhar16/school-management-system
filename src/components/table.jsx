@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableHead,
@@ -6,12 +6,11 @@ import {
   TableRow,
   TableCell,
   CircularProgress,
-  TablePagination,
   Typography,
   Box,
+  Button,
 } from "@mui/material";
-
-import Pagination from "./pagination";
+import { ArrowUpward } from "@mui/icons-material";
 
 const TableComponent = ({
   columns = [],
@@ -20,9 +19,58 @@ const TableComponent = ({
   customRowActions,
   filterRow,
   emptyMessage = "No data found.",
+  onDataChange,
 }) => {
+  const [sortedData, setSortedData] = useState(data);
+  const [isSorted, setIsSorted] = useState(false);
+
+  const handleSort = () => {
+    if (columns.length === 0 || data.length === 0) return;
+
+    const firstColumn = columns[0];
+    const sorted = [...data].sort((a, b) => {
+      const aVal = a[firstColumn.field];
+      const bVal = b[firstColumn.field];
+
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+
+      const aStr = String(aVal).toLowerCase();
+      const bStr = String(bVal).toLowerCase();
+
+      return aStr.localeCompare(bStr);
+    });
+
+    setSortedData(sorted);
+    setIsSorted(true);
+
+    if (onDataChange) {
+      onDataChange(sorted);
+    }
+  };
+
+  const displayData = isSorted ? sortedData : data;
+
   return (
     <>
+      <Box sx={{ mb: 2 }}>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<ArrowUpward />}
+          onClick={handleSort}
+          sx={{
+            textTransform: "none",
+            backgroundColor: "#1976d2",
+            "&:hover": {
+              backgroundColor: "#1565c0",
+            },
+          }}
+        >
+          Sort A-Z
+        </Button>
+      </Box>
+
       <Table>
         <TableHead>
           <TableRow>
@@ -34,7 +82,6 @@ const TableComponent = ({
             {customRowActions && <TableCell sx={{ fontWeight: "bold" }}>ACTIONS</TableCell>}
           </TableRow>
 
-          {/* 🔽 Filter row just under the headers */}
           {filterRow && (
             <TableRow
               sx={{
@@ -92,14 +139,14 @@ const TableComponent = ({
                 <CircularProgress />
               </TableCell>
             </TableRow>
-          ) : !data || data.length === 0 ? (
+          ) : !displayData || displayData.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length + (customRowActions ? 1 : 0)} align="center">
                 <Typography>{emptyMessage}</Typography>
               </TableCell>
             </TableRow>
           ) : (
-            data.map((row) => (
+            displayData.map((row) => (
               <TableRow key={row?._id ?? Math.random()}>
                 {columns?.map((col) => (
                   <TableCell key={col?.field ?? Math.random()}>
