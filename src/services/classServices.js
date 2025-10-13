@@ -10,7 +10,7 @@ export const classList = async ({ page, limit }) => {
     return response.data;
   } catch (err) {
     showToast({
-      message: err.message,
+      message: err.response?.data?.message || "Fetch class failed",
       status: "error",
     });
   }
@@ -26,7 +26,7 @@ export const createClass = async (body) => {
     return response.data;
   } catch (err) {
     showToast({
-      message: err.message,
+      message: err.response?.data?.message || "Class create failed",
       status: "error",
     });
   }
@@ -58,7 +58,7 @@ export const deleteClass = async (id) => {
     return response.data;
   } catch (err) {
     showToast({
-      message: err.message,
+      message: err.response?.data?.message || "Delete class failed",
       status: "error",
     });
   }

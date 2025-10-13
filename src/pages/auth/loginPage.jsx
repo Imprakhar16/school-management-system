@@ -5,14 +5,18 @@ import {
   Box,
   Grid,
   TextField,
-  Button,
+  IconButton,
+  InputAdornment,
   Typography,
   Paper,
-  InputAdornment,
-  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
   Link,
 } from "@mui/material";
-import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
+import { Visibility, VisibilityOff, Email, Lock, Person } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { loginThunk } from "../../features/auth/authThunk";
 import { loginSchema } from "../../validations/validation";
@@ -23,15 +27,16 @@ const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
+  const roleOptions = ["principal", "teacher", "student"];
 
+  const handleClickShowPassword = () => setShowPassword((prev) => !prev);
   const { loading } = useSelector((state) => state.auth);
+
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
+      role: "principal",
     },
     validationSchema: loginSchema,
     onSubmit: (values) => {
@@ -66,51 +71,35 @@ const Login = () => {
             xs={12}
             md={6}
             sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 4,
-              position: "relative",
+              padding: { xs: 3, sm: 6 },
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
+              height: "100%",
+              mt: { md: 6, xs: 2 },
             }}
           >
+            <Typography variant="h3" fontWeight="700" color="#1e3a8a" gutterBottom>
+              Welcome to
+            </Typography>
+            <Typography variant="h3" fontWeight="700" color="#1e3a8a" gutterBottom>
+              School Management
+            </Typography>
+            <Typography variant="h6" sx={{ mt: 1, color: "#475569" }}>
+              Streamline your educational institution
+            </Typography>
             <Box
+              component="img"
+              src="https://www.astiinfotech.com/wp-content/uploads/2024/02/upper-main-image-2.webp"
+              alt="School Management"
               sx={{
-                textAlign: "center",
-                color: "#1e3a8a",
-                zIndex: 1,
+                width: "100%",
+                maxWidth: 400,
+                mt: 4,
+                filter: "drop-shadow(0 10px 30px rgba(0,0,0,0.2))",
               }}
-            >
-              <Typography variant="h3" fontWeight="700" gutterBottom>
-                Welcome to
-              </Typography>
-              <Typography variant="h3" fontWeight="700" gutterBottom>
-                School Management
-              </Typography>
-              <Typography variant="h6" sx={{ mt: 2, opacity: 0.9 }}>
-                Streamline your educational institution
-              </Typography>
-
-              <Box
-                sx={{
-                  mt: 4,
-                  p: 3,
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  borderRadius: 4,
-                  backdropFilter: "blur(10px)",
-                }}
-              >
-                <Box
-                  component="img"
-                  src="https://www.astiinfotech.com/wp-content/uploads/2024/02/upper-main-image-2.webp"
-                  alt="School Management"
-                  sx={{
-                    width: "100%",
-                    maxWidth: 400,
-                    filter: "drop-shadow(0 10px 30px rgba(0,0,0,0.2))",
-                  }}
-                />
-              </Box>
-            </Box>
+            />
           </Grid>
 
           <Grid
@@ -118,141 +107,203 @@ const Login = () => {
             xs={12}
             md={6}
             sx={{
-              padding: { xs: 3, sm: 5 },
+              padding: { xs: 3, sm: 6 },
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
+              height: "100%",
+              mt: { md: 6, xs: 2 },
             }}
           >
-            <Typography
-              component="h1"
-              variant="h4"
-              fontWeight="700"
-              gutterBottom
-              sx={{ color: "#1e3a8a" }}
+            {/* Role Boxes */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                flexWrap: "wrap",
+                mb: 4,
+                width: "100%",
+                justifyContent: "flex-end",
+              }}
             >
-              Welcome Back
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, color: "#64748b" }}>
-              Please login to your account
-            </Typography>
-
-            <Box component="form" onSubmit={formik.handleSubmit} sx={{ width: "100%" }}>
-              <TextField
-                margin="normal"
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-                value={formik.values.email}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
-                onChange={formik.handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email sx={{ color: "#1e3a8a" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    "&:hover fieldset": { borderColor: "#1e3a8a" },
-                    "&.Mui-focused fieldset": { borderColor: "#1e3a8a" },
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": { color: "#1e3a8a" },
-                }}
-              />
-
-              <TextField
-                margin="normal"
-                fullWidth
-                name="password"
-                label="Password"
-                type={showPassword ? "text" : "password"}
-                id="password"
-                autoComplete="current-password"
-                value={formik.values.password}
-                error={formik.touched.password && Boolean(formik.errors.password)}
-                helperText={formik.touched.password && formik.errors.password}
-                onChange={formik.handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock sx={{ color: "#1e3a8a" }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        edge="end"
-                        sx={{ color: "#1e3a8a" }}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    "&:hover fieldset": { borderColor: "#1e3a8a" },
-                    "&.Mui-focused fieldset": { borderColor: "#1e3a8a" },
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": { color: "#1e3a8a" },
-                }}
-              />
-
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  mt: 1.5,
-                  mb: 2,
-                }}
-              >
-                <Link
-                  component="button"
-                  type="button"
-                  variant="body2"
-                  underline="hover"
-                  onClick={() => navigate("/forgot-password")}
+              {["Principal", "Teacher", "Student"].map((role) => (
+                <Paper
+                  key={role}
+                  elevation={3}
                   sx={{
-                    color: "#1e3a8a",
+                    px: 4,
+                    py: 2,
+                    borderRadius: 3,
+                    cursor: "pointer",
+                    textAlign: "center",
                     fontWeight: 600,
-                    "&:hover": { color: "#1e40af" },
+                    border: "2px solid transparent",
+                    transition: "all 0.3s ease",
+                    background:
+                      formik.values.role === role.toLowerCase()
+                        ? "linear-gradient(135deg, #1e3a8a, #3b82f6)"
+                        : "#f8fafc",
+                    color: formik.values.role === role.toLowerCase() ? "#fff" : "#1e3a8a",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #1e3a8a, #3b82f6)",
+                      color: "#fff",
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 6px 20px rgba(30,58,138,0.3)",
+                    },
                   }}
+                  onClick={() => formik.setFieldValue("role", role.toLowerCase())}
                 >
-                  Forgot password?
-                </Link>
-              </Box>
+                  {role}
+                </Paper>
+              ))}
+            </Box>
+            <Box sx={{ width: "100%", maxWidth: 420 }}>
+              <Typography variant="h4" fontWeight="700" color="#1e3a8a" gutterBottom>
+                Welcome Back 👋
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#64748b", mb: 3 }}>
+                Please login to your account
+              </Typography>
 
-              <ButtonComp
-                title={loading ? "Signing in..." : "Sign In"}
-                type="submit"
-                fullwidth={true}
-                variant="contained"
-                disabled={loading}
-                sx={{
-                  backgroundColor: "#1e3a8a",
-                  mt: 2,
-                  mb: 2,
-                  py: 1.5,
-                  color: "#fff",
-                  "&:hover": {
-                    backgroundColor: "#1e40af",
-                  },
-                  "&.Mui-disabled": {
-                    backgroundColor: "rgba(30, 58, 138, 0.6)",
+              <Box component="form" onSubmit={formik.handleSubmit} sx={{ width: "100%" }}>
+                {/* Email */}
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  id="email"
+                  name="email"
+                  label="Email Address"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email sx={{ color: "#1e3a8a" }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      "&:hover fieldset": { borderColor: "#1e3a8a" },
+                      "&.Mui-focused fieldset": { borderColor: "#1e3a8a" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#1e3a8a" },
+                  }}
+                />
+
+                {/* Password */}
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  id="password"
+                  name="password"
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  error={formik.touched.password && Boolean(formik.errors.password)}
+                  helperText={formik.touched.password && formik.errors.password}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock sx={{ color: "#1e3a8a" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={handleClickShowPassword} sx={{ color: "#1e3a8a" }}>
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      "&:hover fieldset": { borderColor: "#1e3a8a" },
+                      "&.Mui-focused fieldset": { borderColor: "#1e3a8a" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#1e3a8a" },
+                  }}
+                />
+
+                {/* Role Dropdown */}
+                <FormControl fullWidth margin="normal" variant="outlined">
+                  <InputLabel id="role-label">Select Role</InputLabel>
+                  <Select
+                    labelId="role-label"
+                    id="role"
+                    name="role"
+                    value={formik.values.role}
+                    onChange={formik.handleChange}
+                    input={
+                      <OutlinedInput
+                        label="Select Role"
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <Person sx={{ color: "#1e3a8a" }} />
+                          </InputAdornment>
+                        }
+                      />
+                    }
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                        "&:hover fieldset": { borderColor: "#1e3a8a" },
+                        "&.Mui-focused fieldset": { borderColor: "#1e3a8a" },
+                      },
+                      "& .MuiInputLabel-root.Mui-focused": { color: "#1e3a8a" },
+                    }}
+                  >
+                    {roleOptions.map((role, index) => (
+                      <MenuItem key={index} value={role}>
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {formik.touched.role && formik.errors.role && (
+                    <Typography color="error" variant="caption">
+                      {formik.errors.role}
+                    </Typography>
+                  )}
+                </FormControl>
+
+                <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+                  <Link
+                    component="button"
+                    onClick={() => navigate("/forgot-password")}
+                    sx={{
+                      color: "#1e3a8a",
+                      fontWeight: 600,
+                      "&:hover": { color: "#1e40af" },
+                    }}
+                  >
+                    Forgot password?
+                  </Link>
+                </Box>
+
+                <ButtonComp
+                  title={loading ? "Signing in..." : "Sign In"}
+                  type="submit"
+                  fullwidth={true}
+                  disabled={loading}
+                  sx={{
+                    backgroundColor: "#1e3a8a",
+                    mt: 3,
+                    py: 1.5,
                     color: "#fff",
-                  },
-                }}
-              />
+                    "&:hover": { backgroundColor: "#1e40af" },
+                    "&.Mui-disabled": {
+                      backgroundColor: "rgba(30,58,138,0.6)",
+                      color: "#fff",
+                    },
+                  }}
+                />
+              </Box>
             </Box>
           </Grid>
         </Grid>
