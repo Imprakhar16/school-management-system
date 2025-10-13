@@ -127,7 +127,7 @@ const Login = () => {
                 justifyContent: "flex-end",
               }}
             >
-              {["Principal", "Teacher", "Student"].map((role) => (
+              {roleOptions.map((role) => (
                 <Paper
                   key={role}
                   elevation={3}
