@@ -116,7 +116,6 @@ const TeacherRegistration = () => {
           .unwrap()
           .then(() => (resetForm(), navigate("/teachers")));
       } else {
-        // Use registerTeacherThunk for creating new teacher
         await dispatch(registerTeacherThunk(formData))
           .unwrap()
           .then(() => (resetForm(), navigate("/teachers")));

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableHead,
@@ -8,9 +8,9 @@ import {
   CircularProgress,
   Typography,
   Box,
-  Button,
+  IconButton,
 } from "@mui/material";
-import { ArrowUpward } from "@mui/icons-material";
+import { ArrowUpward, ArrowDownward } from "@mui/icons-material";
 
 const TableComponent = ({
   columns = [],
@@ -22,144 +22,158 @@ const TableComponent = ({
   onDataChange,
 }) => {
   const [sortedData, setSortedData] = useState(data);
-  const [isSorted, setIsSorted] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ field: null, order: null });
 
-  const handleSort = () => {
-    if (columns.length === 0 || data.length === 0) return;
+  useEffect(() => {
+    setSortedData(data);
+  }, [data]);
 
-    const firstColumn = columns[0];
+  const handleSort = (field, order) => {
+    if (data.length === 0) return;
+
     const sorted = [...data].sort((a, b) => {
-      const aVal = a[firstColumn.field];
-      const bVal = b[firstColumn.field];
+      const aVal = a[field];
+      const bVal = b[field];
 
       if (aVal == null) return 1;
       if (bVal == null) return -1;
 
+      if (!isNaN(aVal) && !isNaN(bVal)) {
+        return order === "asc" ? aVal - bVal : bVal - aVal;
+      }
+
       const aStr = String(aVal).toLowerCase();
       const bStr = String(bVal).toLowerCase();
 
-      return aStr.localeCompare(bStr);
+      return order === "asc" ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
     });
 
     setSortedData(sorted);
-    setIsSorted(true);
+    setSortConfig({ field, order });
 
     if (onDataChange) {
       onDataChange(sorted);
     }
   };
 
-  const displayData = isSorted ? sortedData : data;
-
   return (
-    <>
-      <Box sx={{ mb: 2 }}>
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<ArrowUpward />}
-          onClick={handleSort}
-          sx={{
-            textTransform: "none",
-            backgroundColor: "#1976d2",
-            "&:hover": {
-              backgroundColor: "#1565c0",
-            },
-          }}
-        >
-          Sort A-Z
-        </Button>
-      </Box>
-
-      <Table>
-        <TableHead>
-          <TableRow>
-            {columns?.map((col) => (
-              <TableCell key={col?.field ?? Math.random()} sx={{ fontWeight: "bold" }}>
-                {col?.headerName ? String(col.headerName).toUpperCase() : ""}
-              </TableCell>
-            ))}
-            {customRowActions && <TableCell sx={{ fontWeight: "bold" }}>ACTIONS</TableCell>}
-          </TableRow>
-
-          {filterRow && (
-            <TableRow
+    <Table>
+      <TableHead>
+        <TableRow>
+          {columns?.map((col) => (
+            <TableCell
+              key={col?.field ?? Math.random()}
               sx={{
-                backgroundColor: "#fafafa",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
               }}
             >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
+                {/* Header Name */}
+                <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                  {col?.headerName ? String(col.headerName).toUpperCase() : ""}
+                </Typography>
+
+                {/* Add sort icons for all columns */}
+                <Box sx={{ display: "flex", alignItems: "center", ml: 0.5 }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleSort(col.field, "asc")}
+                    sx={{
+                      p: 0,
+                      color:
+                        sortConfig.field === col.field && sortConfig.order === "asc"
+                          ? "#1976d2"
+                          : "#9e9e9e",
+                      "&:hover": { color: "#1976d2" },
+                    }}
+                  >
+                    <ArrowUpward fontSize="inherit" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleSort(col.field, "desc")}
+                    sx={{
+                      p: 0,
+                      ml: 0.2,
+                      color:
+                        sortConfig.field === col.field && sortConfig.order === "desc"
+                          ? "#1976d2"
+                          : "#9e9e9e",
+                      "&:hover": { color: "#1976d2" },
+                    }}
+                  >
+                    <ArrowDownward fontSize="inherit" />
+                  </IconButton>
+                </Box>
+              </Box>
+            </TableCell>
+          ))}
+          {customRowActions && <TableCell sx={{ fontWeight: "bold" }}>ACTIONS</TableCell>}
+        </TableRow>
+
+        {filterRow && (
+          <TableRow sx={{ backgroundColor: "#fafafa" }}>
+            {columns?.map((col) => (
+              <TableCell key={col?.field ?? Math.random()} sx={{ py: 0.5 }}>
+                {filterRow[col.field] ? (
+                  <Box
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        height: 30,
+                        fontSize: 13,
+                        borderRadius: 1.5,
+                        "& fieldset": { borderColor: "#ddd" },
+                        "&:hover fieldset": { borderColor: "#bdbdbd" },
+                        "&.Mui-focused fieldset": { borderColor: "#90caf9" },
+                      },
+                      "& input::placeholder": {
+                        fontSize: 12,
+                        color: "#9e9e9e",
+                      },
+                    }}
+                  >
+                    {filterRow[col.field]}
+                  </Box>
+                ) : null}
+              </TableCell>
+            ))}
+            {customRowActions && <TableCell />}
+          </TableRow>
+        )}
+      </TableHead>
+
+      <TableBody>
+        {loading ? (
+          <TableRow>
+            <TableCell
+              colSpan={columns.length + (customRowActions ? 1 : 0)}
+              align="center"
+              sx={{ py: 5 }}
+            >
+              <CircularProgress />
+            </TableCell>
+          </TableRow>
+        ) : !sortedData || sortedData.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={columns.length + (customRowActions ? 1 : 0)} align="center">
+              <Typography>{emptyMessage}</Typography>
+            </TableCell>
+          </TableRow>
+        ) : (
+          sortedData.map((row) => (
+            <TableRow key={row?._id ?? Math.random()}>
               {columns?.map((col) => (
-                <TableCell
-                  key={col?.field ?? Math.random()}
-                  sx={{
-                    py: 0.5,
-                  }}
-                >
-                  {filterRow[col.field] ? (
-                    <Box
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          height: 30,
-                          fontSize: 13,
-                          borderRadius: 1.5,
-                          "& fieldset": {
-                            borderColor: "#ddd",
-                          },
-                          "&:hover fieldset": {
-                            borderColor: "#bdbdbd",
-                          },
-                          "&.Mui-focused fieldset": {
-                            borderColor: "#90caf9",
-                          },
-                        },
-                        "& input::placeholder": {
-                          fontSize: 12,
-                          color: "#9e9e9e",
-                        },
-                      }}
-                    >
-                      {filterRow[col.field]}
-                    </Box>
-                  ) : null}
+                <TableCell key={col?.field ?? Math.random()}>
+                  {col?.render ? col.render(row) : (row?.[col.field] ?? "—")}
                 </TableCell>
               ))}
-              {customRowActions && <TableCell />}
+              {customRowActions && <TableCell>{customRowActions(row)}</TableCell>}
             </TableRow>
-          )}
-        </TableHead>
-
-        <TableBody>
-          {loading ? (
-            <TableRow>
-              <TableCell
-                colSpan={columns.length + (customRowActions ? 1 : 0)}
-                align="center"
-                sx={{ py: 5 }}
-              >
-                <CircularProgress />
-              </TableCell>
-            </TableRow>
-          ) : !displayData || displayData.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length + (customRowActions ? 1 : 0)} align="center">
-                <Typography>{emptyMessage}</Typography>
-              </TableCell>
-            </TableRow>
-          ) : (
-            displayData.map((row) => (
-              <TableRow key={row?._id ?? Math.random()}>
-                {columns?.map((col) => (
-                  <TableCell key={col?.field ?? Math.random()}>
-                    {col?.render ? col.render(row) : (row?.[col.field] ?? "—")}
-                  </TableCell>
-                ))}
-                {customRowActions && <TableCell>{customRowActions(row)}</TableCell>}
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </>
+          ))
+        )}
+      </TableBody>
+    </Table>
   );
 };
 

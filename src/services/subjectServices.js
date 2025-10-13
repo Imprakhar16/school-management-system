@@ -61,7 +61,6 @@ export const updateSubject = async (_id, updatedData) => {
       `${API_PATHS.SUBJECT.UPDATE_SUBJECT}/${_id}`,
       updatedData
     );
-    console.log("service--->", response.data);
     showToast({
       message: "Subject updated successfully",
       status: "success",
