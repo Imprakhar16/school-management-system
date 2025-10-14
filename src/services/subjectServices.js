@@ -2,9 +2,21 @@ import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 import { showToast } from "../components/toaster";
 
+// Create subject -->
 export const createSubject = async (body) => {
-  const response = await axiosInstance.post(API_PATHS.SUBJECT.CREATE_SUBJECT, body);
-  return response.data;
+  try {
+    const response = await axiosInstance.post(API_PATHS.SUBJECT.CREATE_SUBJECT, body);
+    showToast({
+      message: "Subject Created",
+      status: "success",
+    });
+    return response.data;
+  } catch (error) {
+    showToast({
+      message: error.response.data.message || "Failed to create subjects",
+      status: "error",
+    });
+  }
 };
 
 // Fetch all subjects --->
