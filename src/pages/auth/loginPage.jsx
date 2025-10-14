@@ -274,7 +274,6 @@ const Login = () => {
 
                 <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
                   <Link
-                    component="button"
                     onClick={() => navigate("/forgot-password")}
                     sx={{
                       color: "#1e3a8a",

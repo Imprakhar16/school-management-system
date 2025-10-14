@@ -14,7 +14,7 @@ import { showToast } from "../../components/toaster";
 
 export default function ClassList() {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(2);
+  const [limit, setLimit] = useState(5);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState(null);
