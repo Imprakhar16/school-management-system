@@ -86,3 +86,7 @@ export const studentSchema = Yup.object().shape({
     .max(10, "Max 10 numbers")
     .required("Contact is required"),
 });
+
+export const examTypeSchema = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+});

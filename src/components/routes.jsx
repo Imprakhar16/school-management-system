@@ -14,6 +14,9 @@ import AddClass from "../pages/class/addClass.jsx";
 import SectionHome from "../pages/section/sectionsHome.jsx";
 import SectionForm from "../pages/section/createSection.jsx";
 import Home from "../pages/dashboard/dashboard.jsx";
+import About from "../pages/about/about.jsx";
+import ExamTypeList from "../pages/examination/examTypeList.jsx";
+import CreateExamType from "../pages/examination/createExamType.jsx";
 
 export const privateRoutes = [
   {
@@ -83,9 +86,21 @@ export const privateRoutes = [
     showInSidebar: false,
   },
   {
+    name: "Examination Type",
+    path: "/exam-type",
+    element: <ExamTypeList />,
+    showInSidebar: true,
+  },
+  {
+    name: "CreateExam Type",
+    path: "/createExam-type",
+    element: <CreateExamType />,
+    showInSidebar: false,
+  },
+  {
     name: "About",
     path: "/about",
-    element: <h1>About</h1>,
+    element: <About />,
     showInSidebar: true,
   },
   {
