@@ -1,137 +1,118 @@
-import React, { useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
+  getTeacherThunk,
+  registerTeacherThunk,
+  updateTeacherThunk,
+} from "../../features/teachers/teacherThunk";
+import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
+import {
   Box,
-  Button,
-  TextField,
   Typography,
+  TextField,
+  Button,
+  Paper,
+  Stack,
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  OutlinedInput,
   RadioGroup,
   FormControlLabel,
   Radio,
-  Divider,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Chip,
-  OutlinedInput,
   CircularProgress,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-
-import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
-import { registerTeacherThunk, updateTeacherThunk } from "../../features/teachers/teacherThunk";
 import ButtonComp from "../../components/button";
-
 import { createTeacherSchema } from "../../validations/validation";
+import { useNavigate, useParams } from "react-router-dom";
 
-const TeacherRegistration = () => {
+export default function TeacherRegistration() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
 
-  // Get teacher data from navigation state
-  const teacherData = location.state?.teacherData;
-  const isEdit = location.state?.isEdit || false;
-
-  const { data: subjectsList = [], loading: subjectsLoading } = useSelector(
-    (state) => state.subject
-  );
-  const { loading } = useSelector((state) => state.teacher);
+  const { teacherDetails, loading } = useSelector((state) => state.teacher);
+  const { data: subjectsList = [] } = useSelector((state) => state.subject);
 
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: 1, limit: 100 }));
   }, [dispatch]);
 
-  // Helper function to format date for input field
+  useEffect(() => {
+    if (isEdit) {
+      dispatch(getTeacherThunk(id));
+    }
+  }, [dispatch, id, isEdit]);
+
+  const extractSubjectIds = (subjects) =>
+    Array.isArray(subjects) ? subjects.map((sub) => (typeof sub === "object" ? sub._id : sub)) : [];
+
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     return date.toISOString().split("T")[0];
   };
 
-  // Helper function to extract IDs from subjects
-  const extractSubjectIds = (subjects) => {
-    if (!subjects || !Array.isArray(subjects)) return [];
-    return subjects.map((sub) => (typeof sub === "object" ? sub._id : sub));
-  };
-
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      EmpId: teacherData?.EmpId || "",
-      firstname: teacherData?.firstname || "",
-      lastname: teacherData?.lastname || "",
-      gender: teacherData?.gender || "",
-      email: teacherData?.email || "",
-      phoneNumber: teacherData?.phoneNumber || "",
+      EmpId: teacherDetails?.EmpId || "",
+      firstname: teacherDetails?.firstname || "",
+      lastname: teacherDetails?.lastname || "",
+      gender: teacherDetails?.gender || "",
+      email: teacherDetails?.email || "",
+      phoneNumber: teacherDetails?.phoneNumber || "",
       password: "",
-      experienceDuration: formatDateForInput(teacherData?.experienceDuration) || "",
-      experienceDetails: teacherData?.experienceDetails || "",
-      photoUrl: null,
-      experienceCertificate: null,
-      identityVerification: null,
-      subjects: extractSubjectIds(teacherData?.subjects) || [],
-      isEdit: isEdit,
+      experienceDuration: formatDateForInput(teacherDetails?.experienceDuration) || "",
+      experienceDetails: teacherDetails?.experienceDetails || "",
+      subjects: extractSubjectIds(teacherDetails?.subjects) || [],
+      isActive: teacherDetails?.isActive ?? true,
     },
-    validationSchema: createTeacherSchema,
-    validateOnChange: false,
-    onSubmit: async (values, { resetForm }) => {
+    validationSchema: loading ? null : createTeacherSchema,
+
+    onSubmit: (values, { resetForm }) => {
       const formData = new FormData();
 
       Object.entries(values).forEach(([key, val]) => {
-        if (key === "isEdit") {
-          return;
-        } else if (key === "subjects" && Array.isArray(val)) {
-          val.forEach((subId) => formData.append("subjects[]", subId));
-        } else if (
-          key === "photoUrl" ||
-          key === "experienceCertificate" ||
-          key === "identityVerification"
-        ) {
-          // Only append files if they are newly selected
-          if (val) formData.append(key, val, val.name);
+        if (key === "subjects" && Array.isArray(val)) {
+          val.forEach((s) => formData.append("subjects[]", s));
         } else if (key === "EmpId") {
           formData.append("EmpId", Number(val));
         } else if (key === "experienceDuration") {
           formData.append("experienceDuration", new Date(val).toISOString());
-        } else if (key === "password") {
-          // Only include password if it's filled
-          if (val) formData.append(key, val);
-        } else if (key === "classincharge" && val) {
-          formData.append(key, val);
-        } else if (key !== "classincharge") {
+        } else if (key === "isActive") {
+          formData.append("isActive", String(val));
+        } else if (key === "password" && !val && isEdit) {
+          // Skip empty password in edit mode
+        } else {
           formData.append(key, val);
         }
       });
 
-      if (isEdit && teacherData?._id) {
-        await dispatch(
-          updateTeacherThunk({
-            id: teacherData._id,
-            body: formData,
-          })
-        )
-          .unwrap()
-          .then(() => (resetForm(), navigate("/teachers")));
+      if (isEdit) {
+        dispatch(updateTeacherThunk({ id, body: formData }));
       } else {
-        await dispatch(registerTeacherThunk(formData))
-          .unwrap()
-          .then(() => (resetForm(), navigate("/teachers")));
+        dispatch(registerTeacherThunk(formData));
       }
+
+      resetForm();
+      navigate("/teachers");
     },
   });
 
-  const handleFileChange = useCallback(
-    (field) => (event) => {
-      const file = event.currentTarget.files?.[0] || null;
-      formik.setFieldValue(field, file);
-    },
-    [formik]
-  );
-
-  const isSubjectsLoading = subjectsLoading;
+  if (isEdit && loading && !teacherDetails) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -148,61 +129,43 @@ const TeacherRegistration = () => {
         }}
       />
 
-      <Box maxWidth="700px" mx="auto" mt={4} p={4} boxShadow={3} borderRadius={3} bgcolor="white">
-        <Typography variant="h4" mb={2} textAlign="center" color="primary">
-          {isEdit ? "Edit Teacher" : "Teacher Registration"}
-        </Typography>
+      <Box sx={{ maxWidth: 800, mx: "auto", my: 5, px: 2 }}>
+        <Paper sx={{ p: 4, borderRadius: 2, boxShadow: "0 3px 10px rgba(0,0,0,0.1)" }}>
+          <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: "#1976d2" }}>
+            {isEdit ? "Edit Teacher" : "Add New Teacher"}
+          </Typography>
 
-        {isSubjectsLoading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-            <CircularProgress />
-          </Box>
-        ) : (
-          <form
-            onSubmit={formik.handleSubmit}
-            style={{ display: "flex", flexDirection: "column", gap: 20 }}
-          >
-            <Box>
-              <Typography variant="h6" color="primary">
-                Personal Information
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
+          <form onSubmit={formik.handleSubmit}>
+            <Stack spacing={3}>
+              {/* BASIC DETAILS */}
               <TextField
                 fullWidth
-                label="Employee ID"
-                name="EmpId"
-                value={formik.values.EmpId}
-                onChange={formik.handleChange}
-                error={!!formik.errors.EmpId}
-                helperText={formik.errors.EmpId}
-                sx={{ mb: 2 }}
+                label="Employee ID *"
+                {...formik.getFieldProps("EmpId")}
+                error={formik.touched.EmpId && Boolean(formik.errors.EmpId)}
+                helperText={formik.touched.EmpId && formik.errors.EmpId}
               />
               <TextField
                 fullWidth
-                label="First Name"
-                name="firstname"
-                value={formik.values.firstname}
-                onChange={formik.handleChange}
-                error={!!formik.errors.firstname}
-                helperText={formik.errors.firstname}
-                sx={{ mb: 2 }}
+                label="First Name *"
+                {...formik.getFieldProps("firstname")}
+                error={formik.touched.firstname && Boolean(formik.errors.firstname)}
+                helperText={formik.touched.firstname && formik.errors.firstname}
               />
               <TextField
                 fullWidth
-                label="Last Name"
-                name="lastname"
-                value={formik.values.lastname}
-                onChange={formik.handleChange}
-                error={!!formik.errors.lastname}
-                helperText={formik.errors.lastname}
-                sx={{ mb: 2 }}
+                label="Last Name *"
+                {...formik.getFieldProps("lastname")}
+                error={formik.touched.lastname && Boolean(formik.errors.lastname)}
+                helperText={formik.touched.lastname && formik.errors.lastname}
               />
-              <Typography variant="body1" sx={{ mt: 1 }}>
+
+              <Typography variant="subtitle1" sx={{ mt: 1 }}>
                 Gender
               </Typography>
               <RadioGroup
                 row
-                name="gender"
+                {...formik.getFieldProps("gender")}
                 value={formik.values.gender}
                 onChange={formik.handleChange}
               >
@@ -210,24 +173,47 @@ const TeacherRegistration = () => {
                 <FormControlLabel value="female" control={<Radio />} label="Female" />
                 <FormControlLabel value="other" control={<Radio />} label="Other" />
               </RadioGroup>
-              {formik.errors.gender && (
-                <Typography color="error">{formik.errors.gender}</Typography>
-              )}
-            </Box>
 
-            <Box>
-              <Typography variant="h6" color="primary">
-                Subjects
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <FormControl fullWidth error={!!formik.errors.subjects}>
-                <InputLabel id="subjects-label">Select Subjects</InputLabel>
+              {/* CONTACT */}
+              {!isEdit && (
+                <TextField
+                  fullWidth
+                  label="Email *"
+                  {...formik.getFieldProps("email")}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                />
+              )}
+              <TextField
+                fullWidth
+                label="Phone Number *"
+                {...formik.getFieldProps("phoneNumber")}
+                error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
+                helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
+              />
+              {!isEdit && (
+                <TextField
+                  fullWidth
+                  label="Password *"
+                  type="password"
+                  {...formik.getFieldProps("password")}
+                  error={formik.touched.password && Boolean(formik.errors.password)}
+                  helperText={formik.touched.password && formik.errors.password}
+                />
+              )}
+
+              {/* SUBJECTS */}
+              <FormControl
+                fullWidth
+                error={formik.touched.subjects && Boolean(formik.errors.subjects)}
+              >
+                <InputLabel id="subjects-label">Subjects</InputLabel>
                 <Select
                   labelId="subjects-label"
                   multiple
+                  input={<OutlinedInput label="Subjects" />}
                   value={formik.values.subjects}
                   onChange={(e) => formik.setFieldValue("subjects", e.target.value)}
-                  input={<OutlinedInput label="Select Subjects" />}
                   renderValue={(selected) => (
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                       {selected.map((id) => {
@@ -243,165 +229,53 @@ const TeacherRegistration = () => {
                     </MenuItem>
                   ))}
                 </Select>
-                {formik.errors.subjects && (
-                  <Typography color="error" sx={{ mt: 1 }}>
-                    {formik.errors.subjects}
-                  </Typography>
-                )}
               </FormControl>
-            </Box>
 
-            <Box>
-              <Typography variant="h6" color="primary">
-                Contact & Class
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                error={!!formik.errors.email}
-                helperText={formik.errors.email}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Phone Number"
-                name="phoneNumber"
-                value={formik.values.phoneNumber}
-                onChange={formik.handleChange}
-                error={!!formik.errors.phoneNumber}
-                helperText={formik.errors.phoneNumber}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label={isEdit ? "Password (required)" : "Password"}
-                name="password"
-                type="password"
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                error={!!formik.errors.password}
-                helperText={formik.errors.password}
-                sx={{ mb: 2 }}
-              />
-            </Box>
-
-            <Box>
-              <Typography variant="h6" color="primary">
-                Experience
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
+              {/* EXPERIENCE */}
               <TextField
                 fullWidth
                 type="date"
                 label="Experience Duration"
-                name="experienceDuration"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.experienceDuration}
-                onChange={formik.handleChange}
-                error={!!formik.errors.experienceDuration}
-                helperText={formik.errors.experienceDuration}
-                sx={{ mb: 2 }}
+                {...formik.getFieldProps("experienceDuration")}
               />
               <TextField
                 fullWidth
                 multiline
                 rows={3}
                 label="Experience Details"
-                name="experienceDetails"
-                value={formik.values.experienceDetails}
-                onChange={formik.handleChange}
-                error={!!formik.errors.experienceDetails}
-                helperText={formik.errors.experienceDetails}
+                {...formik.getFieldProps("experienceDetails")}
               />
-            </Box>
 
-            <Box>
-              <Typography variant="h6" color="primary">
-                Upload Documents
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  Photo {!isEdit && "*"}
-                  {isEdit && teacherData?.photoUrl && (
-                    <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
-                      (Current file exists - upload new to replace)
-                    </Typography>
-                  )}
-                </Typography>
-                <input type="file" accept="image/*" onChange={handleFileChange("photoUrl")} />
-                {formik.errors.photoUrl && (
-                  <Typography color="error" sx={{ mt: 1 }}>
-                    {formik.errors.photoUrl}
-                  </Typography>
-                )}
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  Experience Certificate {!isEdit && "*"}
-                  {isEdit && teacherData?.experienceCertificate && (
-                    <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
-                      (Current file exists - upload new to replace)
-                    </Typography>
-                  )}
-                </Typography>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={handleFileChange("experienceCertificate")}
-                />
-                {formik.errors.experienceCertificate && (
-                  <Typography color="error" sx={{ mt: 1 }}>
-                    {formik.errors.experienceCertificate}
-                  </Typography>
-                )}
-              </Box>
-              <Box>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  Identity Verification {!isEdit && "*"}
-                  {isEdit && teacherData?.identityVerification && (
-                    <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
-                      (Current file exists - upload new to replace)
-                    </Typography>
-                  )}
-                </Typography>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={handleFileChange("identityVerification")}
-                />
-                {formik.errors.identityVerification && (
-                  <Typography color="error" sx={{ mt: 1 }}>
-                    {formik.errors.identityVerification}
-                  </Typography>
-                )}
-              </Box>
-            </Box>
+              {/* ACTIVE STATUS */}
+              <FormControl fullWidth>
+                <InputLabel id="isActive-label">Status</InputLabel>
+                <Select
+                  labelId="isActive-label"
+                  value={formik.values.isActive ? "true" : "false"}
+                  onChange={(e) => formik.setFieldValue("isActive", e.target.value === "true")}
+                  label="Status"
+                >
+                  <MenuItem value="true">Active</MenuItem>
+                  <MenuItem value="false">Inactive</MenuItem>
+                </Select>
+              </FormControl>
 
-            <Button
-              variant="contained"
-              type="submit"
-              color="primary"
-              size="large"
-              disabled={loading}
-            >
-              {loading
-                ? isEdit
-                  ? "Updating..."
-                  : "Registering..."
-                : isEdit
-                  ? "Update Teacher"
-                  : "Register Teacher"}
-            </Button>
+              <Divider />
+
+              <Button type="submit" variant="contained" color="primary" disabled={loading}>
+                {loading
+                  ? isEdit
+                    ? "Updating..."
+                    : "Registering..."
+                  : isEdit
+                    ? "Update Teacher"
+                    : "Register Teacher"}
+              </Button>
+            </Stack>
           </form>
-        )}
+        </Paper>
       </Box>
     </>
   );
-};
-
-export default TeacherRegistration;
+}

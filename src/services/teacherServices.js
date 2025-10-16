@@ -43,6 +43,20 @@ export const fetchAllTeachers = async ({ page, limit, search }) => {
   }
 };
 
+// Get teacher by Id -->
+export const getTeacher = async (id) => {
+  try {
+    const response = await axiosInstance.get(`${API_PATHS.TEACHER.GET_BY_ID}/${id}`);
+    return response.data;
+  } catch (error) {
+    showToast({
+      message: error.response.data.message || "failed to get teacher",
+      status: "error",
+    });
+    throw error.response?.data || error;
+  }
+};
+
 // Update teacher --->
 export const updateTeacher = async (id, body) => {
   try {

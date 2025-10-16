@@ -2,78 +2,56 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { createSubjectThunk, updateSubjectThunk } from "../../features/subjects/subjectThunk";
-import { useNavigate, useLocation } from "react-router-dom";
-import { showToast } from "../../components/toaster";
-import { Box, Typography, TextField, Button, Paper, Stack } from "@mui/material";
+import {
+  createSubjectThunk,
+  updateSubjectThunk,
+  getSubjectThunk,
+} from "../../features/subjects/subjectThunk";
+import { useNavigate, useParams } from "react-router-dom";
+import { Box, Typography, TextField, Button, Paper, Stack, CircularProgress } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ButtonComp from "../../components/button";
+import { subjectSchema } from "../../validations/validation";
 
 export default function AddSubject() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
 
-  const editSubject = location.state?.subject || null;
-
-  const { loading } = useSelector((state) => state.subject);
+  const { subjectDetails, loading } = useSelector((state) => state.subject);
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!token)
-      showToast({
-        message: "Please login first to add or edit subjects",
-        status: "info",
-      });
-  }, []);
+    if (isEdit) {
+      dispatch(getSubjectThunk(id));
+    }
+  }, [dispatch, id, isEdit]);
 
   const formik = useFormik({
-    initialValues: {
-      name: editSubject?.name || "",
-      code: editSubject?.code || "",
-    },
     enableReinitialize: true,
-    validationSchema: Yup.object({
-      name: Yup.string()
-        .required("Name is required")
-        .min(2, "Name must be at least 2 characters")
-        .max(100, "Name must not exceed 100 characters"),
-      code: Yup.string()
-        .required("Code is required")
-        .matches(/^[A-Z0-9-]+$/i, "Code must contain only letters, numbers, and hyphens")
-        .min(2, "Code must be at least 2 characters")
-        .max(20, "Code must not exceed 20 characters"),
-    }),
+    initialValues: {
+      name: subjectDetails?.name || "",
+      code: subjectDetails?.code || "",
+    },
+    validationSchema: loading ? null : subjectSchema,
     onSubmit: (values) => {
-      const token = localStorage.getItem("authToken");
-      if (!token)
-        return showToast({
-          message: "Please login first",
-          status: "info",
-        });
-
-      if (editSubject?._id) {
-        dispatch(
-          updateSubjectThunk({
-            _id: editSubject._id,
-            updatedData: values,
-          })
-        )
-          .unwrap()
-          .then(() => {
-            formik.resetForm();
-            navigate("/subjects");
-          });
+      if (isEdit) {
+        dispatch(updateSubjectThunk({ _id: id, updatedData: values }));
       } else {
-        dispatch(createSubjectThunk(values))
-          .unwrap()
-          .then(() => {
-            formik.resetForm();
-            navigate("/subjects");
-          });
+        dispatch(createSubjectThunk(values));
       }
+      formik.resetForm();
+      navigate("/subjects");
     },
   });
+
+  if (isEdit && loading && !subjectDetails) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -98,10 +76,10 @@ export default function AddSubject() {
             boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
           }}
         >
-          +
           <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: "#1976d2" }}>
-            {editSubject ? "Edit Subject" : "Add New Subject"}
+            {isEdit ? "Edit Subject" : "Add New Subject"}
           </Typography>
+
           <form onSubmit={formik.handleSubmit}>
             <Stack spacing={3}>
               <TextField
@@ -132,10 +110,10 @@ export default function AddSubject() {
                 disabled={loading}
               >
                 {loading
-                  ? editSubject
+                  ? isEdit
                     ? "Updating..."
                     : "Adding..."
-                  : editSubject
+                  : isEdit
                     ? "Update Subject"
                     : "Add Subject"}
               </Button>

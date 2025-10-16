@@ -4,6 +4,7 @@ import {
   registerTeacher,
   updateTeacher,
   deleteTeacher,
+  getTeacher,
 } from "../../services/teacherServices";
 
 //Register
@@ -30,6 +31,21 @@ export const fetchAllTeachersThunk = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || error.message || "Failed to fetch subjects"
+      );
+    }
+  }
+);
+
+// Get teacher
+export const getTeacherThunk = createAsyncThunk(
+  "teacher/getTeacher",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await getTeacher(id);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Failed to get teacher"
       );
     }
   }

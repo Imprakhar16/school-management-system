@@ -4,11 +4,13 @@ import {
   deleteSubjectThunk,
   fetchAllSubjectsThunk,
   updateSubjectThunk,
+  getSubjectThunk,
 } from "./subjectThunk";
 
 const initialState = {
   data: [], // subjects list
   pagination: {}, // pagination info
+  subjectDetails: null,
   loading: false,
   error: null,
   success: false,
@@ -90,11 +92,23 @@ const subjectSlice = createSlice({
           state.data[index] = action.payload;
         }
       })
-
       .addCase(updateSubjectThunk.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
         state.error = action.payload || "Failed to update subject";
+      })
+      .addCase(getSubjectThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getSubjectThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.subjectDetails = action.payload.subjectDetails;
+      })
+      .addCase(getSubjectThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to get subject";
       });
   },
 });

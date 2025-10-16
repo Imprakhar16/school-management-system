@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Box, Paper, TextField, Typography, IconButton } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import { fetchAllTeachersThunk, deleteTeacherThunk } from "../../features/teache
 import ButtonComp from "../../components/button";
 import Pagination from "../../components/pagination";
 import ReusableModal from "../../components/modal";
+import { renderArrayChips } from "../../helper/renderHelper";
 
 const TeachersList = () => {
   const dispatch = useDispatch();
@@ -20,18 +21,21 @@ const TeachersList = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // 🔍 Search states
-  const [searchFirstName, setSearchFirstName] = useState("");
-  const [searchLastName, setSearchLastName] = useState("");
-  const [searchEmail, setSearchEmail] = useState("");
-  const [searchGender, setSearchGender] = useState("");
-  const [searchEmpId, setSearchEmpId] = useState("");
-  const [searchExperienceDuration, setSearchExperienceDuration] = useState("");
-  const [searchExperienceDetails, setSearchExperienceDetails] = useState("");
-  const [searchSubjects, setSearchSubjects] = useState("");
-  const [searchClassIncharge, setSearchClassIncharge] = useState("");
+  // Search
+  const [search, setSearch] = useState({
+    firstname: "",
+    lastname: "",
+    email: "",
+    gender: "",
+    EmpId: "",
+    experienceDuration: "",
+    experienceDetails: "",
+    subjects: "",
+    classincharge: "",
+    isActive: "",
+  });
 
-  // 🔹 Delete confirm modal
+  // Delete confirm modal
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
 
@@ -39,51 +43,48 @@ const TeachersList = () => {
     dispatch(fetchAllTeachersThunk({ page, limit: rowsPerPage }));
   }, [dispatch, page, rowsPerPage]);
 
-  // 🔍 Filtered Data
-  const filteredData = useMemo(() => {
-    if (!teachers) return [];
-    return teachers.filter((teacher) => {
-      const match = (field, search) => field?.toLowerCase().includes(search.toLowerCase()) ?? false;
-      const subjectsText = teacher?.subjects?.map((s) => s.name).join(", ") || "";
-      const classInchargeText = teacher?.classInchargeOf?.name || "";
-      const empIdText = teacher?.EmpId?.toString() || "";
-      const experienceDurationText = teacher?.experienceDuration
-        ? new Date(teacher.experienceDuration).toLocaleDateString()
-        : "";
-
-      return (
-        match(teacher.firstname, searchFirstName) &&
-        match(teacher.lastname, searchLastName) &&
-        match(teacher.email, searchEmail) &&
-        match(teacher.gender, searchGender) &&
-        match(empIdText, searchEmpId) &&
-        match(experienceDurationText, searchExperienceDuration) &&
-        match(teacher.experienceDetails || "", searchExperienceDetails) &&
-        match(subjectsText, searchSubjects) &&
-        match(classInchargeText, searchClassIncharge)
-      );
+  // Handle search input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSearch({
+      ...search,
+      [name]: value.toLowerCase(),
     });
-  }, [
-    teachers,
-    searchFirstName,
-    searchLastName,
-    searchEmail,
-    searchGender,
-    searchEmpId,
-    searchExperienceDuration,
-    searchExperienceDetails,
-    searchSubjects,
-    searchClassIncharge,
-  ]);
+  };
 
-  // 🔹 Handlers
+  // Filtered Data
+  const filteredData = teachers?.filter((teacher) => {
+    const subjectsText = teacher?.subjects?.map((s) => s.name).join(", ") || "";
+    const classInchargeText = teacher?.classInchargeOf?.name || "";
+    const empIdText = teacher?.EmpId?.toString() || "";
+    const experienceDurationText = teacher?.experienceDuration
+      ? new Date(teacher.experienceDuration).toLocaleDateString()
+      : "";
+
+    return (
+      teacher.firstname?.toLowerCase().includes(search.firstname) &&
+      teacher.lastname?.toLowerCase().includes(search.lastname) &&
+      teacher.email?.toLowerCase().includes(search.email) &&
+      teacher.gender?.toLowerCase().includes(search.gender) &&
+      empIdText.includes(search.EmpId) &&
+      experienceDurationText.toLowerCase().includes(search.experienceDuration) &&
+      (teacher.experienceDetails || "").toLowerCase().includes(search.experienceDetails) &&
+      subjectsText.toLowerCase().includes(search.subjects) &&
+      classInchargeText.toLowerCase().includes(search.classincharge) &&
+      (typeof teacher?.isActive === "string"
+        ? teacher.isActive.toLowerCase().includes(search.isActive)
+        : String(teacher?.isActive).toLowerCase().includes(search.isActive)) // Handles boolean or other values
+    );
+  });
+
+  // Handlers
   const handlePageChange = (newPage) => {
     setPage(newPage);
     dispatch(fetchAllTeachersThunk({ page: newPage, limit: rowsPerPage }));
   };
 
   const handleEdit = (teacher) => {
-    navigate("/registerTeacher", {
+    navigate(`/updateTeacher/${teacher._id}`, {
       state: {
         teacherData: teacher,
         isEdit: true,
@@ -117,12 +118,25 @@ const TeachersList = () => {
     {
       field: "subjects",
       headerName: "SUBJECTS",
-      render: (row) => row.subjects?.map((s) => `${s.name} (${s.code})`).join(", ") || "-",
+      render: (row) => renderArrayChips(row.subjects, (s) => `${s.name} (${s.code})`),
     },
     {
       field: "classincharge",
       headerName: "CLASS INCHARGE",
       render: (row) => row.classInchargeOf?.name || "-",
+    },
+    {
+      field: "isActive",
+      headerName: "STATUS",
+      render: (row) => (
+        <Typography
+          sx={{
+            color: row.isActive ? "green" : "red",
+          }}
+        >
+          {row.isActive ? "Active" : "Inactive"}
+        </Typography>
+      ),
     },
   ];
 
@@ -184,8 +198,9 @@ const TeachersList = () => {
               firstname: (
                 <TextField
                   placeholder="Search First Name"
-                  value={searchFirstName}
-                  onChange={(e) => setSearchFirstName(e.target.value)}
+                  name="firstname"
+                  value={search.firstname}
+                  onChange={handleChange}
                   size="small"
                   sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 140 }}
                 />
@@ -193,8 +208,9 @@ const TeachersList = () => {
               lastname: (
                 <TextField
                   placeholder="Search Last Name"
-                  value={searchLastName}
-                  onChange={(e) => setSearchLastName(e.target.value)}
+                  name="lastname"
+                  value={search.lastname}
+                  onChange={handleChange}
                   size="small"
                   sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 140 }}
                 />
@@ -202,8 +218,9 @@ const TeachersList = () => {
               email: (
                 <TextField
                   placeholder="Search Email"
-                  value={searchEmail}
-                  onChange={(e) => setSearchEmail(e.target.value)}
+                  name="email"
+                  value={search.email}
+                  onChange={handleChange}
                   size="small"
                   sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 180 }}
                 />
@@ -211,8 +228,9 @@ const TeachersList = () => {
               gender: (
                 <TextField
                   placeholder="Search Gender"
-                  value={searchGender}
-                  onChange={(e) => setSearchGender(e.target.value)}
+                  name="gender"
+                  value={search.gender}
+                  onChange={handleChange}
                   size="small"
                   sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 110 }}
                 />
@@ -220,8 +238,9 @@ const TeachersList = () => {
               EmpId: (
                 <TextField
                   placeholder="Search Emp ID"
-                  value={searchEmpId}
-                  onChange={(e) => setSearchEmpId(e.target.value)}
+                  name="EmpId"
+                  value={search.EmpId}
+                  onChange={handleChange}
                   size="small"
                   sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 120 }}
                 />
@@ -229,8 +248,9 @@ const TeachersList = () => {
               experienceDuration: (
                 <TextField
                   placeholder="Search Duration"
-                  value={searchExperienceDuration}
-                  onChange={(e) => setSearchExperienceDuration(e.target.value)}
+                  name="experienceDuration"
+                  value={search.experienceDuration}
+                  onChange={handleChange}
                   size="small"
                   sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 130 }}
                 />
@@ -238,8 +258,9 @@ const TeachersList = () => {
               experienceDetails: (
                 <TextField
                   placeholder="Search Details"
-                  value={searchExperienceDetails}
-                  onChange={(e) => setSearchExperienceDetails(e.target.value)}
+                  name="experienceDetails"
+                  value={search.experienceDetails}
+                  onChange={handleChange}
                   size="small"
                   sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 180 }}
                 />
@@ -247,8 +268,9 @@ const TeachersList = () => {
               subjects: (
                 <TextField
                   placeholder="Search Subjects"
-                  value={searchSubjects}
-                  onChange={(e) => setSearchSubjects(e.target.value)}
+                  name="subjects"
+                  value={search.subjects}
+                  onChange={handleChange}
                   size="small"
                   sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 200 }}
                 />
@@ -256,11 +278,23 @@ const TeachersList = () => {
               classincharge: (
                 <TextField
                   placeholder="Search Class Incharge"
-                  value={searchClassIncharge}
-                  onChange={(e) => setSearchClassIncharge(e.target.value)}
+                  name="classincharge"
+                  value={search.classincharge}
+                  onChange={handleChange}
                   size="small"
                   sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 170 }}
                 />
+              ),
+              isActive: (
+                <TextField
+                  style={{ color: teachers.isActive === true ? "green" : "red" }}
+                  placeholder="Search Status"
+                  name="isActive"
+                  value={search.isActive}
+                  onChange={handleChange}
+                  size="small"
+                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 200 }}
+                ></TextField>
               ),
             }}
             customRowActions={customRowActions}

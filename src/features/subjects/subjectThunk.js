@@ -3,6 +3,7 @@ import {
   fetchAllSubjects,
   deleteSubject,
   updateSubject,
+  getSubject,
 } from "../../services/subjectServices";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 export const createSubjectThunk = createAsyncThunk(
@@ -26,6 +27,20 @@ export const fetchAllSubjectsThunk = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || error.message || "Failed to fetch subjects"
+      );
+    }
+  }
+);
+
+export const getSubjectThunk = createAsyncThunk(
+  "subject/getSubject",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await getSubject(id);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error.response.data?.message || error.message || "Failed to get subject"
       );
     }
   }

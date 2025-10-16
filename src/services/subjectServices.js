@@ -20,16 +20,29 @@ export const createSubject = async (body) => {
 };
 
 // Fetch all subjects --->
-export const fetchAllSubjects = async ({ page, limit, search }) => {
+// Fetch all subjects with filters
+export const fetchAllSubjects = async ({ page, limit, filters = {} }) => {
   try {
-    const params = { page, limit };
-    if (search) params.search = search;
-
+    const params = { page, limit, ...filters };
     const response = await axiosInstance.get(API_PATHS.SUBJECT.ALL_SUBJECTS, { params });
     return response.data;
   } catch (error) {
     showToast({
-      message: error.response.data.message || "Failed to fetch subjects",
+      message: error.response?.data?.message || "Failed to fetch subjects",
+      status: "error",
+    });
+    throw error.response?.data || error;
+  }
+};
+
+// Get subject by ID --->
+export const getSubject = async (id) => {
+  try {
+    const response = await axiosInstance.get(`${API_PATHS.SUBJECT.GET_BY_ID}/${id}`);
+    return response.data;
+  } catch (error) {
+    showToast({
+      message: error.response.data.message || "Failed to get subject",
       status: "error",
     });
     throw error.response?.data || error;

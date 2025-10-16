@@ -69,6 +69,19 @@ export const createTeacherSchema = Yup.object({
     .of(Yup.string())
     .min(1, "At least one subject must be selected")
     .required("Subjects are required"),
+  isActive: Yup.boolean().required("Active status is required"),
+});
+
+export const subjectSchema = Yup.object({
+  name: Yup.string()
+    .required("Name is required")
+    .min(2, "Name must be at least 2 characters")
+    .max(100, "Name must not exceed 100 characters"),
+  code: Yup.string()
+    .required("Code is required")
+    .matches(/^[A-Z0-9-]+$/i, "Code must contain only letters, numbers, and hyphens")
+    .min(2, "Code must be at least 2 characters")
+    .max(20, "Code must not exceed 20 characters"),
 });
 
 export const studentSchema = Yup.object().shape({
