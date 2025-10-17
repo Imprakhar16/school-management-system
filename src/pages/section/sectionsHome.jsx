@@ -31,12 +31,11 @@ const SectionHome = () => {
   useEffect(() => {
     dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
   }, [page, rowsPerPage, debouncedSearch, dispatch]);
-
+ 
   const handleDeleteClick = (id) => {
     setSelectedSectionId(id);
     setDeleteModalOpen(true);
   };
-
   const handleConfirmDelete = () => {
     if (!selectedSectionId) return;
 
@@ -105,7 +104,7 @@ const SectionHome = () => {
             title="Create Section"
             variant="contained"
             color="primary"
-            onClick={() => navigate("/sections/form", { state: null })}
+            onClick={() => navigate("/sections/add", { state: null })}
             startIcon={<AddIcon />}
           />
         </Box>
@@ -141,7 +140,7 @@ const SectionHome = () => {
               <Tooltip title="Edit Section">
                 <IconButton
                   color="primary"
-                  onClick={() => navigate("/sections/form", { state: { section: row } })}
+                  onClick={() => navigate(`/sections/edit/${row._id}`)}
                 >
                   <EditIcon />
                 </IconButton>
