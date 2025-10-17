@@ -20,9 +20,9 @@ export const createSubjectThunk = createAsyncThunk(
 
 export const fetchAllSubjectsThunk = createAsyncThunk(
   "subject/fetchAllSubjects",
-  async ({ page, limit, search }, { rejectWithValue }) => {
+  async ({ page, limit, filters }, { rejectWithValue }) => {
     try {
-      const response = await fetchAllSubjects({ page, limit, search });
+      const response = await fetchAllSubjects({ page, limit, filters });
       return response;
     } catch (error) {
       return rejectWithValue(

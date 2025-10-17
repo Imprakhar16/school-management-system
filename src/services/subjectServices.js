@@ -19,7 +19,6 @@ export const createSubject = async (body) => {
   }
 };
 
-// Fetch all subjects --->
 // Fetch all subjects with filters
 export const fetchAllSubjects = async ({ page, limit, filters = {} }) => {
   try {
