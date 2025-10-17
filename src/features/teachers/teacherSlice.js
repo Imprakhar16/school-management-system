@@ -76,11 +76,12 @@ const teacherSlice = createSlice({
       .addCase(updateTeacherThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        state.teacher = action.payload.updatedTeacher;
-        // Update teacher in list if exists
-        const index = state.teachers.findIndex((t) => t._id === action.payload.updatedTeacher._id);
-        if (index !== -1) state.teachers[index] = action.payload.updatedTeacher;
+        const updated = action.payload.updatedTeacher;
+        state.teacher = updated;
+        const index = state.teachers.findIndex((t) => t._id === updated._id);
+        if (index !== -1) state.teachers[index] = updated;
       })
+
       .addCase(updateTeacherThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
