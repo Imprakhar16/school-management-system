@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, Paper, TextField, Typography, IconButton, Tooltip } from "@mui/material";
+import { Box, Paper, TextField, Typography, IconButton, Tooltip, MenuItem } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
@@ -30,6 +30,7 @@ const StudentsHome = () => {
     email: "",
     class: "",
     section: "",
+    isActive: "",
   });
   useEffect(() => {
     dispatch(fetchStudentThunk({ page, limit }));
@@ -52,6 +53,12 @@ const StudentsHome = () => {
       headerName: "SECTION",
       render: (row) => (row.section?.name ? row.section.name : "-"),
     },
+    {
+      field: "isActive",
+      headerName: "STATUS",
+      render: (row) =>
+        row.isActive === true ? "Active" : row.isActive === false ? "Inactive" : "-",
+    },
   ];
 
   const handleChange = (e) => {
@@ -62,17 +69,20 @@ const StudentsHome = () => {
     });
   };
 
-  const filteredData = students?.filter(
-    (s) =>
-      String(s.rollNo)?.includes(search.rollNo) &&
+  const filteredData = students?.filter((s) => {
+    String(s.rollNo)?.includes(search.rollNo) &&
       s.firstname?.toLowerCase().includes(search.firstname) &&
       s.lastname?.toLowerCase().includes(search.lastname) &&
       s.parentname?.toLowerCase().includes(search.parentname) &&
       s.gender.toLowerCase().includes(search.gender) &&
       s.email.toLowerCase().includes(search.email) &&
       String(s.class?.name)?.includes(search.class) &&
-      s.section?.name.toLowerCase().includes(search.section)
-  );
+      s.section?.name.toLowerCase().includes(search.section);
+
+    const matchActive = search.isActive === "" ? true : s.isActive === (search.isActive === "true");
+
+    return matchActive;
+  });
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -200,6 +210,21 @@ const StudentsHome = () => {
               size="small"
               fullWidth
             />
+          ),
+          isActive: (
+            <TextField
+              select
+              placeholder="Search Status"
+              name="isActive"
+              value={search.isActive}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="true">Active</MenuItem>
+              <MenuItem value="false">Inactive</MenuItem>
+            </TextField>
           ),
         }}
         customRowActions={(row) => (

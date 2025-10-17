@@ -127,7 +127,7 @@ const Login = () => {
                 justifyContent: "flex-end",
               }}
             >
-              {["Principal", "Teacher", "Student"].map((role) => (
+              {roleOptions.map((role) => (
                 <Paper
                   key={role}
                   elevation={3}
@@ -274,7 +274,6 @@ const Login = () => {
 
                 <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
                   <Link
-                    component="button"
                     onClick={() => navigate("/forgot-password")}
                     sx={{
                       color: "#1e3a8a",

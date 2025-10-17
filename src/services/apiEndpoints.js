@@ -37,6 +37,11 @@ const API_PATHS = {
     UPDATE_TEACHER: "teacher/update",
     DELETE_TEACHER: "teacher/delete",
   },
+  EXAMINATION: {
+    CREATE_EXAMTYPE: "/examtype/create",
+    EXAMTYPE_LIST: "/examtype/getAll",
+    UPDATE_EXAMTYPE: "/examType/update",
+  },
 };
 
 export default API_PATHS;

@@ -73,64 +73,83 @@ export default function SideBar({ open, onClose }) {
         },
       }}
     >
-      <IconButton onClick={onClose} sx={{ color: "#fff", alignSelf: "flex-end", m: 1 }}>
-        <Close />
-      </IconButton>
-      {/* Navigation Links */}
-      <List sx={{ px: 2, pt: 3 }}>
-        {privateRoutes
-          .filter((route) => route.showInSidebar)
-          .map((route) => {
-            const isActive = location.pathname === route.path;
-            return (
-              <ListItem key={route.path} disablePadding sx={{ mb: 1 }}>
-                <ListItemButton
-                  component={Link}
-                  to={route.path}
-                  sx={{
-                    borderRadius: 2,
-                    py: 1.5,
-                    transition: "all 0.3s ease",
-                    bgcolor: isActive ? "rgba(255, 255, 255, 0.25)" : "transparent",
-                    "&:hover": {
-                      bgcolor: "rgba(255, 255, 255, 0.15)",
-                      transform: "translateX(8px)",
-                    },
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      left: 0,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: isActive ? 4 : 0,
-                      height: "70%",
-                      bgcolor: "#fff",
-                      borderRadius: "0 4px 4px 0",
-                      transition: "width 0.3s ease",
-                    },
-                  }}
-                >
-                  <ListItemIcon
+      <Box
+        sx={{
+          overflowY: "auto",
+          flexGrow: 1,
+          pb: 2,
+          "&::-webkit-scrollbar": {
+            width: "5px",
+            height: "1px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgba(255,255,255,0.3)",
+            borderRadius: "px",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: "rgba(255,255,255,0.5)",
+          },
+        }}
+      >
+        <IconButton onClick={onClose} sx={{ color: "#fff", alignSelf: "flex-end", m: 1 }}>
+          <Close />
+        </IconButton>
+        {/* Navigation Links */}
+        <List sx={{ px: 2, pt: 3 }}>
+          {privateRoutes
+            .filter((route) => route.showInSidebar)
+            .map((route) => {
+              const isActive = location.pathname === route.path;
+              return (
+                <ListItem key={route.path} disablePadding sx={{ mb: 1 }}>
+                  <ListItemButton
+                    component={Link}
+                    to={route.path}
                     sx={{
-                      color: "#fff",
-                      minWidth: 45,
-                      opacity: isActive ? 1 : 0.8,
+                      borderRadius: 2,
+                      py: 1.5,
+                      transition: "all 0.3s ease",
+                      bgcolor: isActive ? "rgba(255, 255, 255, 0.25)" : "transparent",
+                      "&:hover": {
+                        bgcolor: "rgba(255, 255, 255, 0.15)",
+                        transform: "translateX(8px)",
+                      },
+                      "&::before": {
+                        content: '""',
+                        position: "absolute",
+                        left: 0,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        width: isActive ? 4 : 0,
+                        height: "70%",
+                        bgcolor: "#fff",
+                        borderRadius: "0 4px 4px 0",
+                        transition: "width 0.3s ease",
+                      },
                     }}
                   >
-                    {getIcon(route.name)}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={route.name}
-                    primaryTypographyProps={{
-                      fontWeight: isActive ? 600 : 400,
-                      fontSize: "0.95rem",
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-      </List>
+                    <ListItemIcon
+                      sx={{
+                        color: "#fff",
+                        minWidth: 45,
+                        opacity: isActive ? 1 : 0.8,
+                      }}
+                    >
+                      {getIcon(route.name)}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={route.name}
+                      primaryTypographyProps={{
+                        fontWeight: isActive ? 600 : 400,
+                        fontSize: "0.95rem",
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+        </List>
+      </Box>
     </Drawer>
   );
 }

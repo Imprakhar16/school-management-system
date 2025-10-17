@@ -15,6 +15,10 @@ import {
   MenuItem,
   Paper,
   CircularProgress,
+  FormControl,
+  Select,
+  OutlinedInput,
+  InputLabel,
 } from "@mui/material";
 import { classListThunk } from "../../features/class/classThunk";
 import { createStudentThunk, editStudentThunk } from "../../features/students/studentsThunk";
@@ -48,6 +52,7 @@ const StudentForm = () => {
       class: studentData?.class?._id || "",
       section: studentData?.section?._id || "",
       phoneNumber: studentData?.phoneNumber || "",
+      isActive: true,
     },
     validationSchema: studentSchema,
     validateOnChange: true,
@@ -300,6 +305,26 @@ const StudentForm = () => {
                       </MenuItem>
                     ))}
                 </TextField>
+
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="status-label">Status</InputLabel>
+                  <Select
+                    labelId="status-label"
+                    id="isActive"
+                    name="isActive"
+                    value={formik.values.isActive.toString()}
+                    onChange={(e) => formik.setFieldValue("isActive", e.target.value === "true")}
+                    input={<OutlinedInput label="Status" />}
+                  >
+                    <MenuItem value="true">Active</MenuItem>
+                    <MenuItem value="false">Inactive</MenuItem>
+                  </Select>
+                  {formik.touched.isActive && formik.errors.isActive && (
+                    <Typography color="error" variant="caption">
+                      {formik.errors.isActive}
+                    </Typography>
+                  )}
+                </FormControl>
               </Box>
             </Box>
 
