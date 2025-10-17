@@ -13,6 +13,7 @@ const API_PATHS = {
   SUBJECT: {
     CREATE_SUBJECT: "subject/create",
     ALL_SUBJECTS: "subject/subjects",
+    GET_BY_ID: "subject/details",
     UPDATE_SUBJECT: "subject/update",
     DELETE_SUBJECT: "subject/delete",
   },
@@ -32,6 +33,7 @@ const API_PATHS = {
     LOGIN: "teacher/login",
     REGISTER: "teacher/create",
     ALL_TEACHERS: "teacher/teachers",
+    GET_BY_ID: "teacher/details",
     UPDATE_TEACHER: "teacher/update",
     DELETE_TEACHER: "teacher/delete",
   },

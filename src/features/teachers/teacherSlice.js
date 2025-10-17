@@ -4,11 +4,13 @@ import {
   fetchAllTeachersThunk,
   updateTeacherThunk,
   deleteTeacherThunk,
+  getTeacherThunk,
 } from "./teacherThunk";
 
 const initialState = {
   teacher: null,
   teachers: [],
+  teacherDetails: null,
   meta: null,
   loading: false,
   error: null,
@@ -97,6 +99,19 @@ const teacherSlice = createSlice({
       .addCase(deleteTeacherThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(getTeacherThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getTeacherThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.teacherDetails = action.payload.teacherDetails;
+      })
+      .addCase(getTeacherThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to get teacher";
       });
   },
 });

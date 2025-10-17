@@ -110,8 +110,20 @@ export const privateRoutes = [
     showInSidebar: false,
   },
   {
+    name: "Update-Teacher",
+    path: "/updateTeacher/:id",
+    element: <TeacherRegistration />,
+    showInSidebar: false,
+  },
+  {
     name: "Add-Subject",
     path: "/addSubject",
+    element: <AddSubject />,
+    showInSidebar: false,
+  },
+  {
+    name: "Update-Subject",
+    path: "/updateSubject/:id",
     element: <AddSubject />,
     showInSidebar: false,
   },
