@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import { Box, TextField, CircularProgress, Typography, Button } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
-import { createSectionThunk, updateSectionThunk } from "../../features/section/sectionThunk";
+import {
+  createSectionThunk,
+  getSectionDetailThunk,
+  updateSectionThunk,
+} from "../../features/section/sectionThunk";
 import { showToast } from "../../components/toaster";
 import ButtonComp from "../../components/button";
 import { createSectionSchema } from "../../validations/validation";
@@ -14,20 +18,31 @@ import { pageBack } from "../../constants/constantsUI";
 const SectionForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { state } = useLocation();
+  const { id } = useParams();
+  const { sectionDetails, loading } = useSelector((state) => state.sections);
 
-  const isEditMode = Boolean(state?.section);
-  const sectionData = state?.section;
+  const isEditMode = id ? true : false;
+
+  const getDetails = async () => {
+    if (id) {
+      dispatch(getSectionDetailThunk(id));
+    } else {
+      return null;
+    }
+  };
+  useEffect(() => {
+    getDetails();
+  }, [id]);
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: sectionData?.name || "",
+      name: sectionDetails?.name || "",
     },
     validationSchema: createSectionSchema,
     onSubmit: (values, { setSubmitting }) => {
       const action = isEditMode
-        ? updateSectionThunk({ sectionId: sectionData._id, data: values })
+        ? updateSectionThunk({ sectionId: sectionDetails._id, data: values })
         : createSectionThunk(values);
 
       dispatch(action)
@@ -72,7 +87,7 @@ const SectionForm = () => {
             id="name"
             name="name"
             label="Section Name"
-            value={formik.values.name}
+            value={loading ? "" : formik.values.name}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             error={formik.touched.name && Boolean(formik.errors.name)}

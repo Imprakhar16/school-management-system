@@ -25,6 +25,11 @@ const fetchSections = async ({ page, limit, search }) => {
   }
 };
 
+const getSectionDetail = async (sectionId) => {
+  const response = await axiosInstance.get(`${API_PATHS.SECTION.GET_DETAILS}/${sectionId}`);
+  return response.data;
+};
+
 const createSection = async (data) => {
   try {
     const response = await axiosInstance.post(API_PATHS.SECTION.CREATE, data);
@@ -73,4 +78,5 @@ export default {
   createSection,
   deleteSection,
   updateSection,
+  getSectionDetail,
 };

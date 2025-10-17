@@ -12,8 +12,9 @@ import StudentForm from "../pages/students/createStudents.jsx";
 import ClassList from "../pages/class/classList.jsx";
 import AddClass from "../pages/class/addClass.jsx";
 import SectionHome from "../pages/section/sectionsHome.jsx";
-import SectionForm from "../pages/section/createSection.jsx";
+import SectionForm from "../pages/section/sectionForm.jsx";
 import Home from "../pages/dashboard/dashboard.jsx";
+import CreateExam from "../pages/examination/createExam.jsx";
 
 export const privateRoutes = [
   {
@@ -71,8 +72,14 @@ export const privateRoutes = [
     showInSidebar: true,
   },
   {
-    name: "Section",
-    path: "/sections/form",
+    name: "Section-add",
+    path: "/sections/add",
+    element: <SectionForm />,
+    showInSidebar: false,
+  },
+  {
+    name: "Section-edit",
+    path: "/sections/edit/:id",
     element: <SectionForm />,
     showInSidebar: false,
   },
@@ -99,6 +106,12 @@ export const privateRoutes = [
     path: "/addSubject",
     element: <AddSubject />,
     showInSidebar: false,
+  },
+  {
+    name: "Create-Exam",
+    path: "/createExam",
+    element: <CreateExam />,
+    showInSidebar: true,
   },
   // Add other private routes here as needed
 ];

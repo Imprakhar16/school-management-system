@@ -3,6 +3,7 @@ import {
   createSectionThunk,
   deleteSectionThunk,
   fetchSectionsThunk,
+  getSectionDetailThunk,
   updateSectionThunk,
 } from "./sectionThunk";
 
@@ -10,6 +11,7 @@ const sectionSlice = createSlice({
   name: "sections",
   initialState: {
     sections: [],
+    sectionDetails: null,
     loading: false,
     error: null,
     totalCount: null,
@@ -78,6 +80,20 @@ const sectionSlice = createSlice({
       .addCase(updateSectionThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to update section";
+      })
+
+      .addCase(getSectionDetailThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getSectionDetailThunk.fulfilled, (state, action) => {
+        console.log(action);
+        state.loading = false;
+        state.sectionDetails = action.payload.sectionDetails;
+      })
+      .addCase(getSectionDetailThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to get section details";
       });
   },
 });
