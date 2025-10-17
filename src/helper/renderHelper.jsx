@@ -1,8 +1,6 @@
 import { Box } from "@mui/material";
 
 export const renderArrayChips = (items, getLabel) => {
-  console.log(items);
-
   if (!items || items.length === 0) return "-";
 
   return items.map((item, idx) => (
