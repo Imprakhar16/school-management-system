@@ -28,10 +28,9 @@ export const registerTeacher = async (body) => {
 };
 
 // fetch all teachers -->
-export const fetchAllTeachers = async ({ page, limit, search }) => {
+export const fetchAllTeachers = async ({ page, limit, filters = {} }) => {
   try {
-    const params = { page, limit };
-    if (search) params.search = search;
+    const params = { page, limit, ...filters };
     const response = await axiosInstance.get(API_PATHS.TEACHER.ALL_TEACHERS, { params });
     return response.data;
   } catch (error) {

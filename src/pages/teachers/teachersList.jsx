@@ -11,6 +11,7 @@ import ButtonComp from "../../components/button";
 import Pagination from "../../components/pagination";
 import ReusableModal from "../../components/modal";
 import { renderArrayChips } from "../../helper/renderHelper";
+import useDebounce from "../../hooks/useDebounce";
 
 const TeachersList = () => {
   const dispatch = useDispatch();
@@ -20,69 +21,48 @@ const TeachersList = () => {
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  // Search
   const [search, setSearch] = useState({
     firstname: "",
     lastname: "",
     email: "",
     gender: "",
     EmpId: "",
-    experienceDuration: "",
+    experienceStart: "",
+    experienceEnd: "",
     experienceDetails: "",
     subjects: "",
-    classincharge: "",
+    classInchargeOf: "",
     isActive: "",
   });
 
-  // Delete confirm modal
+  const debouncedSearch = useDebounce(search, 500);
+
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchAllTeachersThunk({ page, limit: rowsPerPage }));
-  }, [dispatch, page, rowsPerPage]);
+    const filters = {};
 
-  // Handle search input changes
+    Object.keys(debouncedSearch).forEach((key) => {
+      if (debouncedSearch[key]) filters[key] = debouncedSearch[key];
+    });
+
+    dispatch(fetchAllTeachersThunk({ page, limit: rowsPerPage, filters }));
+  }, [dispatch, page, rowsPerPage, debouncedSearch]);
+
+  // 🔹 Handle search changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSearch({
-      ...search,
-      [name]: value.toLowerCase(),
-    });
+    setSearch({ ...search, [name]: value });
+    setPage(1);
   };
 
-  // Filtered Data
-  const filteredData = teachers?.filter((teacher) => {
-    const subjectsText = teacher?.subjects?.map((s) => s.name).join(", ") || "";
-    const classInchargeText = teacher?.classInchargeOf?.name || "";
-    const empIdText = teacher?.EmpId?.toString() || "";
-    const experienceDurationText = teacher?.experienceDuration
-      ? new Date(teacher.experienceDuration).toLocaleDateString()
-      : "";
-
-    return (
-      teacher.firstname?.toLowerCase().includes(search.firstname) &&
-      teacher.lastname?.toLowerCase().includes(search.lastname) &&
-      teacher.email?.toLowerCase().includes(search.email) &&
-      teacher.gender?.toLowerCase().includes(search.gender) &&
-      empIdText.includes(search.EmpId) &&
-      experienceDurationText.toLowerCase().includes(search.experienceDuration) &&
-      (teacher.experienceDetails || "").toLowerCase().includes(search.experienceDetails) &&
-      subjectsText.toLowerCase().includes(search.subjects) &&
-      classInchargeText.toLowerCase().includes(search.classincharge) &&
-      (typeof teacher?.isActive === "string"
-        ? teacher.isActive.toLowerCase().includes(search.isActive)
-        : String(teacher?.isActive).toLowerCase().includes(search.isActive)) // Handles boolean or other values
-    );
-  });
-
-  // Handlers
+  // 🔹 Handle pagination
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    dispatch(fetchAllTeachersThunk({ page: newPage, limit: rowsPerPage }));
   };
 
+  // 🔹 Edit teacher
   const handleEdit = (teacher) => {
     navigate(`/updateTeacher/${teacher._id}`, {
       state: {
@@ -92,12 +72,14 @@ const TeachersList = () => {
     });
   };
 
+  // 🔹 Delete teacher
   const confirmDelete = async (id) => {
     await dispatch(deleteTeacherThunk(id)).unwrap();
     dispatch(fetchAllTeachersThunk({ page, limit: rowsPerPage }));
     setConfirmDeleteOpen(false);
   };
 
+  // 🔹 Table columns
   const columns = [
     { field: "firstname", headerName: "FIRSTNAME", render: (row) => row.firstname },
     { field: "lastname", headerName: "LASTNAME", render: (row) => row.lastname },
@@ -105,10 +87,15 @@ const TeachersList = () => {
     { field: "gender", headerName: "GENDER", render: (row) => row.gender || "-" },
     { field: "EmpId", headerName: "EMPLOYEE ID", render: (row) => row.EmpId || "-" },
     {
-      field: "experienceDuration",
-      headerName: "EXPERIENCE DURATION",
+      field: "experienceStart",
+      headerName: "EXPERIENCE START",
       render: (row) =>
-        row.experienceDuration ? new Date(row.experienceDuration).toLocaleDateString() : "-",
+        row.experienceStart ? new Date(row.experienceStart).toLocaleDateString() : "-",
+    },
+    {
+      field: "experienceEnd",
+      headerName: "EXPERIENCE END",
+      render: (row) => (row.experienceEnd ? new Date(row.experienceEnd).toLocaleDateString() : "-"),
     },
     {
       field: "experienceDetails",
@@ -121,7 +108,7 @@ const TeachersList = () => {
       render: (row) => renderArrayChips(row.subjects, (s) => `${s.name} (${s.code})`),
     },
     {
-      field: "classincharge",
+      field: "classInchargeOf",
       headerName: "CLASS INCHARGE",
       render: (row) => row.classInchargeOf?.name || "-",
     },
@@ -129,11 +116,7 @@ const TeachersList = () => {
       field: "isActive",
       headerName: "STATUS",
       render: (row) => (
-        <Typography
-          sx={{
-            color: row.isActive ? "green" : "red",
-          }}
-        >
+        <Typography sx={{ color: row.isActive ? "green" : "red" }}>
           {row.isActive ? "Active" : "Inactive"}
         </Typography>
       ),
@@ -176,132 +159,115 @@ const TeachersList = () => {
         </Link>
       </Box>
 
-      {/* Scrollable Table */}
-      <Box
-        sx={{
-          width: "100%",
-          overflowX: "auto",
-          "&::-webkit-scrollbar": { height: 8 },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "#bdbdbd",
-            borderRadius: 4,
-          },
-          "&::-webkit-scrollbar-thumb:hover": { backgroundColor: "#9e9e9e" },
+      {/* Table with filter inputs */}
+      <TableComponent
+        columns={columns}
+        data={teachers}
+        loading={loading}
+        filterRow={{
+          firstname: (
+            <TextField
+              placeholder="Search First Name"
+              name="firstname"
+              value={search.firstname}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          lastname: (
+            <TextField
+              placeholder="Search Last Name"
+              name="lastname"
+              value={search.lastname}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          email: (
+            <TextField
+              placeholder="Search Email"
+              name="email"
+              value={search.email}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          gender: (
+            <TextField
+              placeholder="Search Gender"
+              name="gender"
+              value={search.gender}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          EmpId: (
+            <TextField
+              placeholder="Search Emp ID"
+              name="EmpId"
+              value={search.EmpId}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          experienceStart: (
+            <TextField
+              placeholder="Search Start"
+              name="experienceStart"
+              value={search.experienceStart}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          experienceEnd: (
+            <TextField
+              placeholder="Search End"
+              name="experienceEnd"
+              value={search.experienceEnd}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          experienceDetails: (
+            <TextField
+              placeholder="Search Details"
+              name="experienceDetails"
+              value={search.experienceDetails}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          subjects: (
+            <TextField
+              placeholder="Search Subjects"
+              name="subjects"
+              value={search.subjects}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          classInchargeOf: (
+            <TextField
+              placeholder="Search Class Incharge"
+              name="classInchargeOf"
+              value={search.classInchargeOf}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
+          isActive: (
+            <TextField
+              placeholder="Search Status"
+              name="isActive"
+              value={search.isActive}
+              onChange={handleChange}
+              size="small"
+            />
+          ),
         }}
-      >
-        <Box sx={{ minWidth: "1600px" }}>
-          <TableComponent
-            columns={columns}
-            data={filteredData}
-            loading={loading}
-            filterRow={{
-              firstname: (
-                <TextField
-                  placeholder="Search First Name"
-                  name="firstname"
-                  value={search.firstname}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 140 }}
-                />
-              ),
-              lastname: (
-                <TextField
-                  placeholder="Search Last Name"
-                  name="lastname"
-                  value={search.lastname}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 140 }}
-                />
-              ),
-              email: (
-                <TextField
-                  placeholder="Search Email"
-                  name="email"
-                  value={search.email}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 180 }}
-                />
-              ),
-              gender: (
-                <TextField
-                  placeholder="Search Gender"
-                  name="gender"
-                  value={search.gender}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 110 }}
-                />
-              ),
-              EmpId: (
-                <TextField
-                  placeholder="Search Emp ID"
-                  name="EmpId"
-                  value={search.EmpId}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 120 }}
-                />
-              ),
-              experienceDuration: (
-                <TextField
-                  placeholder="Search Duration"
-                  name="experienceDuration"
-                  value={search.experienceDuration}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 130 }}
-                />
-              ),
-              experienceDetails: (
-                <TextField
-                  placeholder="Search Details"
-                  name="experienceDetails"
-                  value={search.experienceDetails}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 180 }}
-                />
-              ),
-              subjects: (
-                <TextField
-                  placeholder="Search Subjects"
-                  name="subjects"
-                  value={search.subjects}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 200 }}
-                />
-              ),
-              classincharge: (
-                <TextField
-                  placeholder="Search Class Incharge"
-                  name="classincharge"
-                  value={search.classincharge}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 170 }}
-                />
-              ),
-              isActive: (
-                <TextField
-                  style={{ color: teachers.isActive === true ? "green" : "red" }}
-                  placeholder="Search Status"
-                  name="isActive"
-                  value={search.isActive}
-                  onChange={handleChange}
-                  size="small"
-                  sx={{ height: 32, "& .MuiInputBase-root": { height: 32 }, width: 200 }}
-                ></TextField>
-              ),
-            }}
-            customRowActions={customRowActions}
-            emptyMessage="No teachers found."
-          />
-        </Box>
-      </Box>
+        customRowActions={customRowActions}
+        emptyMessage="No teachers found."
+      />
 
       {/* Pagination */}
       <Pagination
@@ -313,7 +279,7 @@ const TeachersList = () => {
         total={pagination?.total || 0}
       />
 
-      {/* Delete Confirmation */}
+      {/* Delete Confirmation Modal */}
       <ReusableModal
         open={confirmDeleteOpen}
         onClose={() => setConfirmDeleteOpen(false)}

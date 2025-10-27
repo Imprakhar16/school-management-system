@@ -23,10 +23,9 @@ export const registerTeacherThunk = createAsyncThunk(
 //Fetch All Tearchers
 export const fetchAllTeachersThunk = createAsyncThunk(
   "subject/fetchAllTeachers",
-  async ({ page, limit, search }, { rejectWithValue }) => {
+  async ({ page, limit, filters }, { rejectWithValue }) => {
     try {
-      const response = await fetchAllTeachers({ page, limit, search });
-
+      const response = await fetchAllTeachers({ page, limit, filters });
       return response;
     } catch (error) {
       return rejectWithValue(
