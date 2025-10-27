@@ -19,6 +19,7 @@ const API_PATHS = {
   },
   SECTION: {
     GET: "section/sections",
+    GET_DETAILS: "/section/details",
     CREATE: "section/create",
     DELETE: "section/delete",
     UPDATE: "section/update",
@@ -41,6 +42,7 @@ const API_PATHS = {
     CREATE_EXAMTYPE: "/examtype/create",
     EXAMTYPE_LIST: "/examtype/getAll",
     UPDATE_EXAMTYPE: "/examType/update",
+    CREATE: "exam/create",
   },
 };
 

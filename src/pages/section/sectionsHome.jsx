@@ -36,7 +36,6 @@ const SectionHome = () => {
     setSelectedSectionId(id);
     setDeleteModalOpen(true);
   };
-
   const handleConfirmDelete = () => {
     if (!selectedSectionId) return;
 
@@ -105,7 +104,7 @@ const SectionHome = () => {
             title="Create Section"
             variant="contained"
             color="primary"
-            onClick={() => navigate("/sections/form", { state: null })}
+            onClick={() => navigate("/sections/add", { state: null })}
             startIcon={<AddIcon />}
           />
         </Box>
@@ -139,10 +138,7 @@ const SectionHome = () => {
           customRowActions={(row) => (
             <>
               <Tooltip title="Edit Section">
-                <IconButton
-                  color="primary"
-                  onClick={() => navigate("/sections/form", { state: { section: row } })}
-                >
+                <IconButton color="primary" onClick={() => navigate(`/sections/edit/${row._id}`)}>
                   <EditIcon />
                 </IconButton>
               </Tooltip>
