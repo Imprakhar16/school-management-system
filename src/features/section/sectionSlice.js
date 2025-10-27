@@ -87,7 +87,6 @@ const sectionSlice = createSlice({
         state.error = null;
       })
       .addCase(getSectionDetailThunk.fulfilled, (state, action) => {
-       
         state.loading = false;
         state.sectionDetails = action.payload.sectionDetails;
       })

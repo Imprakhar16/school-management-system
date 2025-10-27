@@ -39,13 +39,10 @@ const API_PATHS = {
     DELETE_TEACHER: "teacher/delete",
   },
   EXAMINATION: {
-<<<<<<< HEAD
     CREATE_EXAMTYPE: "/examtype/create",
     EXAMTYPE_LIST: "/examtype/getAll",
     UPDATE_EXAMTYPE: "/examType/update",
-=======
     CREATE: "exam/create",
->>>>>>> 9de5cba (add exam dummy form and also integrate get section  by id api to edit)
   },
 };
 

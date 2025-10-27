@@ -31,7 +31,7 @@ const SectionHome = () => {
   useEffect(() => {
     dispatch(fetchSectionsThunk({ page, limit: rowsPerPage, search: debouncedSearch }));
   }, [page, rowsPerPage, debouncedSearch, dispatch]);
- 
+
   const handleDeleteClick = (id) => {
     setSelectedSectionId(id);
     setDeleteModalOpen(true);
@@ -138,10 +138,7 @@ const SectionHome = () => {
           customRowActions={(row) => (
             <>
               <Tooltip title="Edit Section">
-                <IconButton
-                  color="primary"
-                  onClick={() => navigate(`/sections/edit/${row._id}`)}
-                >
+                <IconButton color="primary" onClick={() => navigate(`/sections/edit/${row._id}`)}>
                   <EditIcon />
                 </IconButton>
               </Tooltip>

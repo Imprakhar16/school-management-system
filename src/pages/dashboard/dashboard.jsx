@@ -1,29 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Grid, Typography, Button, Box, Paper, Stack, Divider } from "@mui/material";
 import StatCard from "../../components/statcard";
 import ChartCard from "../../components/chartCard";
 import EventList from "../../components/eventList";
-import { fetchAllTeachers } from "../../services/teacherServices";
-import { fetchStudent } from "../../services/studentServices";
+import { useDispatch, useSelector } from "react-redux";
+import { dashboardThunk } from "../../features/dashboard/dashboardThunk";
 
 const Home = () => {
-  const [totalTeachers, setTotalTeachers] = useState(0);
-  const [totalStudents, setTotalStudents] = useState(0);
-  const role = localStorage.getItem("role");
-  useEffect(() => {
-    const getTeachers = async () => {
-      const data = await fetchAllTeachers({ page: 1, limit: 1000 });
-      setTotalTeachers(data?.meta?.totalTeachers || 0);
-    };
-    getTeachers();
-  }, []);
+  const dispatch = useDispatch();
 
+  const role = localStorage.getItem("role");
+
+  const { data, loading } = useSelector((state) => state.dashboard);
   useEffect(() => {
-    const getStudents = async () => {
-      const data = await fetchStudent({ page: 1, limit: 1000 });
-      setTotalStudents(data?.meta?.totalStudents || 0);
-    };
-    getStudents();
+    dispatch(dashboardThunk());
   }, []);
 
   return (
@@ -40,8 +30,9 @@ const Home = () => {
         }}
       >
         <Typography variant="h4" fontWeight={600}>
-          Welcome, {role}
+          Welcome, {role ? role.charAt(0).toUpperCase() + role.slice(1).toLowerCase() : ""}
         </Typography>
+
         <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
           Here’s what’s happening today at your school
         </Typography>
@@ -50,16 +41,23 @@ const Home = () => {
       {/* Stats */}
       <Grid container spacing={3} mb={3}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Students" value={totalStudents} color="#42a5f5" />
+          <StatCard
+            title="Total Students"
+            value={loading ? "-" : data.students.total}
+            active={loading ? undefined : data.students.active}
+          />
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Teachers" value={totalTeachers} color="#66bb6a" />
+          <StatCard
+            title="Total Teachers"
+            value={loading ? "-" : data.teachers.total}
+            active={loading ? undefined : data.teachers.active}
+          />
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Fees Collected" value="$25,000" color="#ffb74d" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Today's Attendance" value="1,050" color="#ab47bc" />
+          <StatCard title="Total Classes" value={data.classes.total} />
         </Grid>
       </Grid>
 
@@ -109,7 +107,7 @@ const Home = () => {
         elevation={2}
         sx={{
           p: 3,
-          mt: 4,
+          mt: { xs: 5, md: 9 },
           borderRadius: 3,
         }}
       >

@@ -24,7 +24,6 @@ const CreateExam = () => {
 
   useEffect(() => {
     dispatch(classListThunk({ page: 1, limit: 50 }));
-    
   }, [dispatch]);
 
   const formik = useFormik({

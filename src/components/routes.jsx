@@ -133,12 +133,7 @@ export const privateRoutes = [
     path: "/updateSubject/:id",
     element: <AddSubject />,
     showInSidebar: false,
-    name: "Create-Exam",
-    path: "/createExam",
-    element: <CreateExam />,
-    showInSidebar: true,
   },
-  // Add other private routes here as needed
 ];
 
 export const publicRoutes = [
