@@ -39,6 +39,12 @@ export const privateRoutes = [
     showInSidebar: false,
   },
   {
+    name: "EditStudent",
+    path: "/editStudent/:id",
+    element: <StudentForm />,
+    showInSidebar: false,
+  },
+  {
     name: "Teachers",
     path: "/teachers",
     element: <TeachersList />,
@@ -65,6 +71,12 @@ export const privateRoutes = [
   {
     name: "AddClass",
     path: "/create-class",
+    element: <AddClass />,
+    showInSidebar: false,
+  },
+  {
+    name: "EditClass",
+    path: "/editClass/:id",
     element: <AddClass />,
     showInSidebar: false,
   },

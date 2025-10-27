@@ -1,8 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { classListThunk, createClassThunk, deleteClassThunk, editClassThunk } from "./classThunk";
+import {
+  classDetailThunk,
+  classListThunk,
+  createClassThunk,
+  deleteClassThunk,
+  editClassThunk,
+} from "./classThunk";
 
 const initialState = {
   classes: [],
+  class: null,
   loading: null,
   error: null,
   totalCount: null,
@@ -23,11 +30,24 @@ const classSlice = createSlice({
       })
       .addCase(classListThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.classes = action.payload.classes;
+        state.classes = action.payload.classes || [];
         state.totalCount = action.payload.meta.totalClasses || 0;
-        state.totalPages = action.payload.meta.totalPages || 0;
+        state.totalPages = action.payload.meta.totalPages || 1;
       })
       .addCase(classListThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.error;
+      })
+
+      .addCase(classDetailThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(classDetailThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.class = action.payload.classDetails;
+      })
+      .addCase(classDetailThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.error;
       })

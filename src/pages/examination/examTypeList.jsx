@@ -32,7 +32,7 @@ export default function ExamTypeList() {
 
   useEffect(() => {
     dispatch(getExamTypeThunk({ page, limit }));
-  }, [dispatch]);
+  }, [dispatch, page, limit]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

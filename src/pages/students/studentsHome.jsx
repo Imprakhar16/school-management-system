@@ -10,6 +10,7 @@ import TableComponent from "../../components/table";
 import Pagination from "../../components/pagination";
 import { useNavigate } from "react-router-dom";
 import ReusableModal from "../../components/modal";
+import useDebounce from "../../hooks/useDebounce";
 
 const StudentsHome = () => {
   const dispatch = useDispatch();
@@ -32,9 +33,12 @@ const StudentsHome = () => {
     section: "",
     isActive: "",
   });
+
+  const debouncedSearch = useDebounce(search, 500);
+
   useEffect(() => {
-    dispatch(fetchStudentThunk({ page, limit }));
-  }, [dispatch, page, limit]);
+    dispatch(fetchStudentThunk({ page, limit, search: debouncedSearch }));
+  }, [dispatch, page, limit, debouncedSearch]);
 
   const columns = [
     { field: "rollNo", headerName: "ROLLNO" },
@@ -65,24 +69,9 @@ const StudentsHome = () => {
     const { name, value } = e.target;
     setSearch({
       ...search,
-      [name]: value.toLowerCase(),
+      [name]: value,
     });
   };
-
-  const filteredData = students?.filter((s) => {
-    String(s.rollNo)?.includes(search.rollNo) &&
-      s.firstname?.toLowerCase().includes(search.firstname) &&
-      s.lastname?.toLowerCase().includes(search.lastname) &&
-      s.parentname?.toLowerCase().includes(search.parentname) &&
-      s.gender.toLowerCase().includes(search.gender) &&
-      s.email.toLowerCase().includes(search.email) &&
-      String(s.class?.name)?.includes(search.class) &&
-      s.section?.name.toLowerCase().includes(search.section);
-
-    const matchActive = search.isActive === "" ? true : s.isActive === (search.isActive === "true");
-
-    return matchActive;
-  });
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -128,7 +117,7 @@ const StudentsHome = () => {
 
       <TableComponent
         columns={columns}
-        data={filteredData}
+        data={students}
         loading={loading}
         filterRow={{
           rollNo: (
@@ -234,7 +223,7 @@ const StudentsHome = () => {
                 <IconButton
                   color="primary"
                   onClick={() => {
-                    navigate("/create-student", { state: { studentData: row } });
+                    navigate(`/editStudent/${row._id}`, { state: { studentData: row } });
                   }}
                 >
                   <Edit />

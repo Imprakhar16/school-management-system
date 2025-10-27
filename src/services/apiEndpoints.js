@@ -7,6 +7,7 @@ const API_PATHS = {
   STUDENT: {
     CREATE_STUDENT: "/student/create",
     ALL_STUDENTS: "/student/students",
+    STUDENTS_BY_ID: "/student/details",
     UPDATE_STUDENT: "/student/update",
     DELETE_STUDENT: "/student/delete",
   },
@@ -27,6 +28,7 @@ const API_PATHS = {
   ClASS: {
     CLASS_LIST: "/class/classes",
     CREATE_CLASS: "/class/create",
+    CLASS_BY_ID: "/class/details",
     EDIT_CLASS: "/class/update",
     DELETE_CLASS: "/class/delete",
   },
