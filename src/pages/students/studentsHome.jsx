@@ -11,6 +11,9 @@ import Pagination from "../../components/pagination";
 import { useNavigate } from "react-router-dom";
 import ReusableModal from "../../components/modal";
 import useDebounce from "../../hooks/useDebounce";
+import { classListThunk } from "../../features/class/classThunk";
+import { fetchSectionsThunk } from "../../features/section/sectionThunk";
+import { convertToIds } from "../../helper/filterHelper";
 
 const StudentsHome = () => {
   const dispatch = useDispatch();
@@ -19,6 +22,8 @@ const StudentsHome = () => {
   const [limit, setLimit] = useState(10);
 
   const { students, loading, totalPages, totalStudents } = useSelector((state) => state.student);
+  const { classes } = useSelector((state) => state.class);
+  const { sections } = useSelector((state) => state.sections);
   const [deleteStudentModal, setDeleteStudentModal] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
 
@@ -29,16 +34,25 @@ const StudentsHome = () => {
     parentname: "",
     gender: "",
     email: "",
-    class: "",
-    section: "",
+    classId: "",
+    sectionId: "",
     isActive: "",
   });
 
   const debouncedSearch = useDebounce(search, 500);
 
   useEffect(() => {
-    dispatch(fetchStudentThunk({ page, limit, search: debouncedSearch }));
-  }, [dispatch, page, limit, debouncedSearch]);
+    dispatch(classListThunk(1, 100));
+    dispatch(fetchSectionsThunk(1, 50));
+  }, [dispatch]);
+
+  useEffect(() => {
+    const filters = convertToIds(debouncedSearch, {
+      classes,
+      sections,
+    });
+    dispatch(fetchStudentThunk({ page, limit, search: filters }));
+  }, [dispatch, page, limit, debouncedSearch, classes, sections]);
 
   const columns = [
     { field: "rollNo", headerName: "ROLLNO" },
@@ -183,8 +197,8 @@ const StudentsHome = () => {
           class: (
             <TextField
               placeholder="Search Class"
-              name="class"
-              value={search.class}
+              name="classId"
+              value={search.classId}
               onChange={handleChange}
               size="small"
               fullWidth
@@ -193,8 +207,8 @@ const StudentsHome = () => {
           section: (
             <TextField
               placeholder="Search Section"
-              name="section"
-              value={search.section}
+              name="sectionId"
+              value={search.sectionId}
               onChange={handleChange}
               size="small"
               fullWidth

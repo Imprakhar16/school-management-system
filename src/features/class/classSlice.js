@@ -30,7 +30,7 @@ const classSlice = createSlice({
       })
       .addCase(classListThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.classes = action.payload.classes || [];
+        state.classes = action.payload.classes;
         state.totalCount = action.payload.meta.totalClasses || 0;
         state.totalPages = action.payload.meta.totalPages || 1;
       })

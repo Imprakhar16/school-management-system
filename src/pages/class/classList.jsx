@@ -28,7 +28,7 @@ export default function ClassList() {
   const dispatch = useDispatch();
   const { classes, loading, totalPages, totalCount } = useSelector((state) => state.class);
 
-  const { students } = useSelector((state) => state.student);
+  const { data: subjects } = useSelector((state) => state.subject);
   const { sections } = useSelector((state) => state.sections);
   const { teachers } = useSelector((state) => state.teacher);
 
@@ -42,19 +42,19 @@ export default function ClassList() {
   const debouncedSearch = useDebounce(search, 500);
 
   useEffect(() => {
-    dispatch(fetchSectionsThunk());
-    dispatch(fetchAllSubjectsThunk());
-    dispatch(fetchAllTeachersThunk());
+    dispatch(fetchSectionsThunk(1, 100));
+    dispatch(fetchAllSubjectsThunk(1, 100));
+    dispatch(fetchAllTeachersThunk(1, 100));
   }, [dispatch]);
 
   useEffect(() => {
     const filters = convertToIds(debouncedSearch, {
-      students,
+      subjects,
       sections,
       teachers,
     });
     dispatch(classListThunk({ page, limit, search: filters }));
-  }, [dispatch, limit, page, debouncedSearch, students, sections, teachers]);
+  }, [dispatch, limit, page, debouncedSearch, subjects, sections, teachers]);
 
   const handleDelete = (id) => {
     setSelectedClassId(id);

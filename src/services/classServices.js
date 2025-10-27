@@ -25,7 +25,6 @@ export const classList = async (page, limit, search = {}) => {
 export const classDetail = async (id) => {
   try {
     const response = await axiosInstance.get(`${API_PATHS.ClASS.CLASS_BY_ID}/${id}`);
-    console.log(response.data);
     return response.data;
   } catch (err) {
     showToast({
