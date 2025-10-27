@@ -75,16 +75,16 @@ export default function SideBar({ open, onClose }) {
     >
       <Box
         sx={{
+          height: "calc(100vh - 80px)",
           overflowY: "auto",
-          flexGrow: 1,
+          overflowX: "hidden",
           pb: 2,
           "&::-webkit-scrollbar": {
-            width: "5px",
-            height: "1px",
+            width: "6px",
           },
           "&::-webkit-scrollbar-thumb": {
             backgroundColor: "rgba(255,255,255,0.3)",
-            borderRadius: "px",
+            borderRadius: "3px",
           },
           "&::-webkit-scrollbar-thumb:hover": {
             backgroundColor: "rgba(255,255,255,0.5)",
