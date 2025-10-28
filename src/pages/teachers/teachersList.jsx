@@ -88,15 +88,23 @@ const TeachersList = () => {
     { field: "EmpId", headerName: "EMPLOYEE ID", render: (row) => row.EmpId || "-" },
     {
       field: "experienceStart",
-      headerName: "EXPERIENCE START",
+      headerName: "EXPERIENCE DURATION",
       render: (row) =>
-        row.experienceStart ? new Date(row.experienceStart).toLocaleDateString() : "-",
+        row.experienceStart
+          ? `${new Date(row.experienceStart).toLocaleDateString()} - ${row.experienceEnd ? new Date(row.experienceEnd).toLocaleDateString() : "-"}`
+          : "-",
     },
-    {
-      field: "experienceEnd",
-      headerName: "EXPERIENCE END",
-      render: (row) => (row.experienceEnd ? new Date(row.experienceEnd).toLocaleDateString() : "-"),
-    },
+    // {
+    //   field: "experienceStart",
+    //   headerName: "EXPERIENCE START",
+    //   render: (row) =>
+    //     row.experienceStart ? new Date(row.experienceStart).toLocaleDateString() : "-",
+    // },
+    // {
+    //   field: "experienceEnd",
+    //   headerName: "EXPERIENCE END",
+    //   render: (row) => (row.experienceEnd ? new Date(row.experienceEnd).toLocaleDateString() : "-"),
+    // },
     {
       field: "experienceDetails",
       headerName: "EXPERIENCE DETAILS",
@@ -105,7 +113,7 @@ const TeachersList = () => {
     {
       field: "subjects",
       headerName: "SUBJECTS",
-      render: (row) => renderArrayChips(row.subjects, (s) => `${s.name} (${s.code})`),
+      render: (row) => renderArrayChips(row.subjects, (sub) => sub.name || sub.code),
     },
     {
       field: "classInchargeOf",
@@ -212,22 +220,31 @@ const TeachersList = () => {
           ),
           experienceStart: (
             <TextField
-              placeholder="Search Start"
+              placeholder="Search Date (mm-dd-yyyy)"
               name="experienceStart"
               value={search.experienceStart}
               onChange={handleChange}
               size="small"
+              disabled
+              sx={{
+                "& .MuiInputBase-root.Mui-disabled": {
+                  cursor: "not-allowed",
+                },
+                "& .MuiInputBase-root.Mui-disabled input": {
+                  cursor: "not-allowed",
+                },
+              }}
             />
           ),
-          experienceEnd: (
-            <TextField
-              placeholder="Search End"
-              name="experienceEnd"
-              value={search.experienceEnd}
-              onChange={handleChange}
-              size="small"
-            />
-          ),
+          // experienceEnd: (
+          //   <TextField
+          //     placeholder="Search End"
+          //     name="experienceEnd"
+          //     value={search.experienceEnd}
+          //     onChange={handleChange}
+          //     size="small"
+          //   />
+          // ),
           experienceDetails: (
             <TextField
               placeholder="Search Details"
