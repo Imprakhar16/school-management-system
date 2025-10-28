@@ -223,6 +223,9 @@ const StudentsHome = () => {
               onChange={handleChange}
               size="small"
               fullWidth
+              SelectProps={{
+                displayEmpty: true,
+              }}
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="true">Active</MenuItem>

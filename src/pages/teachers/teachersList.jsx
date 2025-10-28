@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, Paper, TextField, Typography, IconButton } from "@mui/material";
+import { Box, Paper, TextField, Typography, IconButton, MenuItem } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -180,6 +180,7 @@ const TeachersList = () => {
               value={search.firstname}
               onChange={handleChange}
               size="small"
+              fullWidth
             />
           ),
           lastname: (
@@ -189,6 +190,7 @@ const TeachersList = () => {
               value={search.lastname}
               onChange={handleChange}
               size="small"
+              fullWidth
             />
           ),
           email: (
@@ -198,6 +200,7 @@ const TeachersList = () => {
               value={search.email}
               onChange={handleChange}
               size="small"
+              fullWidth
             />
           ),
           gender: (
@@ -207,6 +210,7 @@ const TeachersList = () => {
               value={search.gender}
               onChange={handleChange}
               size="small"
+              fullWidth
             />
           ),
           EmpId: (
@@ -216,15 +220,17 @@ const TeachersList = () => {
               value={search.EmpId}
               onChange={handleChange}
               size="small"
+              fullWidth
             />
           ),
           experienceStart: (
             <TextField
-              placeholder="Search Date (mm-dd-yyyy)"
+              placeholder="Search Date (MM-DD-YYYY)"
               name="experienceStart"
               value={search.experienceStart}
               onChange={handleChange}
               size="small"
+              fullWidth
               disabled
               sx={{
                 "& .MuiInputBase-root.Mui-disabled": {
@@ -252,6 +258,7 @@ const TeachersList = () => {
               value={search.experienceDetails}
               onChange={handleChange}
               size="small"
+              fullWidth
             />
           ),
           subjects: (
@@ -261,6 +268,7 @@ const TeachersList = () => {
               value={search.subjects}
               onChange={handleChange}
               size="small"
+              fullWidth
             />
           ),
           classInchargeOf: (
@@ -270,16 +278,26 @@ const TeachersList = () => {
               value={search.classInchargeOf}
               onChange={handleChange}
               size="small"
+              fullWidth
             />
           ),
           isActive: (
             <TextField
+              select
               placeholder="Search Status"
               name="isActive"
               value={search.isActive}
               onChange={handleChange}
               size="small"
-            />
+              fullWidth
+              SelectProps={{
+                displayEmpty: true,
+              }}
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="true">Active</MenuItem>
+              <MenuItem value="false">Inactive</MenuItem>
+            </TextField>
           ),
         }}
         customRowActions={customRowActions}
