@@ -64,7 +64,6 @@ const TeacherRegistration = () => {
     return subjects.map((sub) => (typeof sub === "object" ? sub._id : sub));
   };
 
-  // Formik initial values
   const getInitialValues = () => ({
     EmpId: teacherDetails?.EmpId || "",
     firstname: teacherDetails?.firstname || "",
@@ -73,7 +72,8 @@ const TeacherRegistration = () => {
     email: teacherDetails?.email || "",
     phoneNumber: teacherDetails?.phoneNumber || "",
     password: "",
-    experienceDuration: formatDateForInput(teacherDetails?.experienceDuration) || "",
+    experienceStart: formatDateForInput(teacherDetails?.experienceStart) || null,
+    experienceEnd: formatDateForInput(teacherDetails?.experienceEnd) || null,
     experienceDetails: teacherDetails?.experienceDetails || "",
     photoUrl: null,
     experienceCertificate: null,
@@ -100,8 +100,11 @@ const TeacherRegistration = () => {
       if (values.EmpId) {
         formData.append("EmpId", Number(values.EmpId));
       }
-      if (values.experienceDuration) {
-        formData.append("experienceDuration", new Date(values.experienceDuration).toISOString());
+      if (values.experienceStart) {
+        formData.append("experienceStart", new Date(values.experienceStart).toISOString());
+      }
+      if (values.experienceEnd) {
+        formData.append("experienceEnd", new Date(values.experienceEnd).toISOString());
       }
       formData.append("email", values.email);
       if (!isEdit) {
@@ -345,13 +348,25 @@ const TeacherRegistration = () => {
               <TextField
                 fullWidth
                 type="date"
-                label="Experience Duration"
-                name="experienceDuration"
+                label="Experience Start"
+                name="experienceStart"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.experienceDuration}
+                value={formik.values.experienceStart}
                 onChange={formik.handleChange}
-                error={!!formik.errors.experienceDuration}
-                helperText={formik.errors.experienceeDuration}
+                error={!!formik.errors.experienceStart}
+                helperText={formik.errors.experienceStart}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                type="date"
+                label="Experience End"
+                name="experienceEnd"
+                InputLabelProps={{ shrink: true }}
+                value={formik.values.experienceEnd}
+                onChange={formik.handleChange}
+                error={!!formik.errors.experienceEnd}
+                helperText={formik.errors.experienceEnd}
                 sx={{ mb: 2 }}
               />
               <TextField

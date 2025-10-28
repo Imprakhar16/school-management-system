@@ -46,9 +46,8 @@ export const createTeacherSchema = Yup.object({
       then: (schema) => schema.required("Password is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
-  experienceDuration: Yup.date()
-    .typeError("Invalid date")
-    .required("Experience duration is required"),
+  experienceStart: Yup.date().typeError("Invalid date").required("Experience duration is required"),
+  experienceEnd: Yup.date().typeError("Invalid date").required("Experience duration is required"),
   experienceDetails: Yup.string().required("Experience details are required"),
   photoUrl: Yup.mixed().when("isEdit", {
     is: false,
