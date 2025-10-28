@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
@@ -22,101 +22,123 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
-import { registerTeacherThunk, updateTeacherThunk } from "../../features/teachers/teacherThunk";
+import {
+  getTeacherThunk,
+  registerTeacherThunk,
+  updateTeacherThunk,
+} from "../../features/teachers/teacherThunk";
 import ButtonComp from "../../components/button";
-
 import { createTeacherSchema } from "../../validations/validation";
 
 const TeacherRegistration = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Get teacher data from navigation state
-  const teacherData = location.state?.teacherData;
-  const isEdit = location.state?.isEdit || false;
+  const { id } = useParams();
+  const isEdit = Boolean(id);
 
   const { data: subjectsList = [], loading: subjectsLoading } = useSelector(
     (state) => state.subject
   );
-  const { loading } = useSelector((state) => state.teacher);
+  const { teacherDetails, loading } = useSelector((state) => state.teacher);
 
+  // Fetch subjects
   useEffect(() => {
     dispatch(fetchAllSubjectsThunk({ page: 1, limit: 100 }));
   }, [dispatch]);
 
-  // Helper function to format date for input field
+  // Fetch teacher if edit mode
+  useEffect(() => {
+    if (isEdit) {
+      dispatch(getTeacherThunk(id));
+    }
+  }, [dispatch, isEdit, id]);
+
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     return date.toISOString().split("T")[0];
   };
 
-  // Helper function to extract IDs from subjects
   const extractSubjectIds = (subjects) => {
     if (!subjects || !Array.isArray(subjects)) return [];
     return subjects.map((sub) => (typeof sub === "object" ? sub._id : sub));
   };
 
+  const getInitialValues = () => ({
+    EmpId: teacherDetails?.EmpId || "",
+    firstname: teacherDetails?.firstname || "",
+    lastname: teacherDetails?.lastname || "",
+    gender: teacherDetails?.gender || "",
+    email: teacherDetails?.email || "",
+    phoneNumber: teacherDetails?.phoneNumber || "",
+    password: "",
+    experienceStart: formatDateForInput(teacherDetails?.experienceStart) || null,
+    experienceEnd: formatDateForInput(teacherDetails?.experienceEnd) || null,
+    experienceDetails: teacherDetails?.experienceDetails || "",
+    photoUrl: null,
+    experienceCertificate: null,
+    identityVerification: null,
+    subjects: extractSubjectIds(teacherDetails?.subjects) || [],
+    isActive: teacherDetails?.isActive ?? true,
+  });
+
   const formik = useFormik({
-    initialValues: {
-      EmpId: teacherData?.EmpId || "",
-      firstname: teacherData?.firstname || "",
-      lastname: teacherData?.lastname || "",
-      gender: teacherData?.gender || "",
-      email: teacherData?.email || "",
-      phoneNumber: teacherData?.phoneNumber || "",
-      password: "",
-      experienceDuration: formatDateForInput(teacherData?.experienceDuration) || "",
-      experienceDetails: teacherData?.experienceDetails || "",
-      photoUrl: null,
-      experienceCertificate: null,
-      identityVerification: null,
-      subjects: extractSubjectIds(teacherData?.subjects) || [],
-      isEdit: isEdit,
-    },
+    enableReinitialize: true,
+    initialValues: getInitialValues(),
     validationSchema: createTeacherSchema,
     validateOnChange: false,
+
     onSubmit: async (values, { resetForm }) => {
       const formData = new FormData();
 
-      Object.entries(values).forEach(([key, val]) => {
-        if (key === "isEdit") {
-          return;
-        } else if (key === "subjects" && Array.isArray(val)) {
-          val.forEach((subId) => formData.append("subjects[]", subId));
-        } else if (
-          key === "photoUrl" ||
-          key === "experienceCertificate" ||
-          key === "identityVerification"
-        ) {
-          // Only append files if they are newly selected
-          if (val) formData.append(key, val, val.name);
-        } else if (key === "EmpId") {
-          formData.append("EmpId", Number(val));
-        } else if (key === "experienceDuration") {
-          formData.append("experienceDuration", new Date(val).toISOString());
-        } else if (key === "password") {
-          // Only include password if it's filled
-          if (val) formData.append(key, val);
-        } else if (key === "classincharge" && val) {
-          formData.append(key, val);
-        } else if (key !== "classincharge") {
-          formData.append(key, val);
+      formData.append("firstname", values.firstname);
+      formData.append("lastname", values.lastname);
+      formData.append("gender", values.gender);
+      formData.append("phoneNumber", values.phoneNumber);
+      formData.append("experienceDetails", values.experienceDetails);
+      formData.append("isActive", String(values.isActive));
+      if (values.EmpId) {
+        formData.append("EmpId", Number(values.EmpId));
+      }
+      if (values.experienceStart) {
+        formData.append("experienceStart", new Date(values.experienceStart).toISOString());
+      }
+      if (values.experienceEnd) {
+        formData.append("experienceEnd", new Date(values.experienceEnd).toISOString());
+      }
+      formData.append("email", values.email);
+      if (!isEdit) {
+        if (values.password) {
+          formData.append("password", values.password);
         }
-      });
-
-      if (isEdit && teacherData?._id) {
-        await dispatch(
-          updateTeacherThunk({
-            id: teacherData._id,
-            body: formData,
-          })
-        )
+      }
+      if (Array.isArray(values.subjects) && values.subjects.length > 0) {
+        values.subjects.forEach((subId) => {
+          formData.append("subjects[]", subId);
+        });
+      }
+      if (values.photoUrl instanceof File) {
+        formData.append("photoUrl", values.photoUrl, values.photoUrl.name);
+      }
+      if (values.experienceCertificate instanceof File) {
+        formData.append(
+          "experienceCertificate",
+          values.experienceCertificate,
+          values.experienceCertificate.name
+        );
+      }
+      if (values.identityVerification instanceof File) {
+        formData.append(
+          "identityVerification",
+          values.identityVerification,
+          values.identityVerification.name
+        );
+      }
+      if (isEdit && teacherDetails?._id) {
+        await dispatch(updateTeacherThunk({ id: teacherDetails._id, body: formData }))
           .unwrap()
           .then(() => (resetForm(), navigate("/teachers")));
       } else {
-        // Use registerTeacherThunk for creating new teacher
         await dispatch(registerTeacherThunk(formData))
           .unwrap()
           .then(() => (resetForm(), navigate("/teachers")));
@@ -132,7 +154,13 @@ const TeacherRegistration = () => {
     [formik]
   );
 
-  const isSubjectsLoading = subjectsLoading;
+  if (isEdit && !teacherDetails) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -154,7 +182,7 @@ const TeacherRegistration = () => {
           {isEdit ? "Edit Teacher" : "Teacher Registration"}
         </Typography>
 
-        {isSubjectsLoading ? (
+        {subjectsLoading ? (
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
             <CircularProgress />
           </Box>
@@ -163,21 +191,12 @@ const TeacherRegistration = () => {
             onSubmit={formik.handleSubmit}
             style={{ display: "flex", flexDirection: "column", gap: 20 }}
           >
+            {/* PERSONAL INFO */}
             <Box>
               <Typography variant="h6" color="primary">
                 Personal Information
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              <TextField
-                fullWidth
-                label="Employee ID"
-                name="EmpId"
-                value={formik.values.EmpId}
-                onChange={formik.handleChange}
-                error={!!formik.errors.EmpId}
-                helperText={formik.errors.EmpId}
-                sx={{ mb: 2 }}
-              />
               <TextField
                 fullWidth
                 label="First Name"
@@ -198,6 +217,16 @@ const TeacherRegistration = () => {
                 helperText={formik.errors.lastname}
                 sx={{ mb: 2 }}
               />
+              <TextField
+                fullWidth
+                label="Employee ID"
+                name="EmpId"
+                value={formik.values.EmpId}
+                onChange={formik.handleChange}
+                error={!!formik.errors.EmpId}
+                helperText={formik.errors.EmpId}
+                sx={{ mb: 2 }}
+              />
               <Typography variant="body1" sx={{ mt: 1 }}>
                 Gender
               </Typography>
@@ -216,6 +245,7 @@ const TeacherRegistration = () => {
               )}
             </Box>
 
+            {/* SUBJECTS */}
             <Box>
               <Typography variant="h6" color="primary">
                 Subjects
@@ -252,11 +282,13 @@ const TeacherRegistration = () => {
               </FormControl>
             </Box>
 
+            {/* CONTACT INFO */}
             <Box>
               <Typography variant="h6" color="primary">
-                Contact & Class
+                Contact & Status
               </Typography>
               <Divider sx={{ mb: 2 }} />
+
               <TextField
                 fullWidth
                 label="Email"
@@ -267,6 +299,7 @@ const TeacherRegistration = () => {
                 helperText={formik.errors.email}
                 sx={{ mb: 2 }}
               />
+
               <TextField
                 fullWidth
                 label="Phone Number"
@@ -277,19 +310,36 @@ const TeacherRegistration = () => {
                 helperText={formik.errors.phoneNumber}
                 sx={{ mb: 2 }}
               />
-              <TextField
-                fullWidth
-                label={isEdit ? "Password (required)" : "Password"}
-                name="password"
-                type="password"
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                error={!!formik.errors.password}
-                helperText={formik.errors.password}
-                sx={{ mb: 2 }}
-              />
+              {!isEdit && (
+                <TextField
+                  fullWidth
+                  label="Password"
+                  name="password"
+                  type="password"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  error={!!formik.errors.password}
+                  helperText={formik.errors.password}
+                  sx={{ mb: 2 }}
+                />
+              )}
+
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel id="isActive-label">Is Active</InputLabel>
+                <Select
+                  labelId="isActive-label"
+                  name="isActive"
+                  value={formik.values.isActive ? "true" : "false"}
+                  onChange={(e) => formik.setFieldValue("isActive", e.target.value === "true")}
+                  label="Is Active"
+                >
+                  <MenuItem value="true">Active</MenuItem>
+                  <MenuItem value="false">Inactive</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
 
+            {/* EXPERIENCE */}
             <Box>
               <Typography variant="h6" color="primary">
                 Experience
@@ -298,13 +348,25 @@ const TeacherRegistration = () => {
               <TextField
                 fullWidth
                 type="date"
-                label="Experience Duration"
-                name="experienceDuration"
+                label="Experience Start"
+                name="experienceStart"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.experienceDuration}
+                value={formik.values.experienceStart}
                 onChange={formik.handleChange}
-                error={!!formik.errors.experienceDuration}
-                helperText={formik.errors.experienceDuration}
+                error={!!formik.errors.experienceStart}
+                helperText={formik.errors.experienceStart}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                type="date"
+                label="Experience End"
+                name="experienceEnd"
+                InputLabelProps={{ shrink: true }}
+                value={formik.values.experienceEnd}
+                onChange={formik.handleChange}
+                error={!!formik.errors.experienceEnd}
+                helperText={formik.errors.experienceEnd}
                 sx={{ mb: 2 }}
               />
               <TextField
@@ -320,67 +382,34 @@ const TeacherRegistration = () => {
               />
             </Box>
 
+            {/* FILE UPLOADS */}
             <Box>
               <Typography variant="h6" color="primary">
                 Upload Documents
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  Photo {!isEdit && "*"}
-                  {isEdit && teacherData?.photoUrl && (
-                    <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
-                      (Current file exists - upload new to replace)
+              {["photoUrl", "experienceCertificate", "identityVerification"].map((field, idx) => (
+                <Box sx={{ mb: 2 }} key={idx}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    {field.replace(/([A-Z])/g, " $1").trim()}
+                    {isEdit && teacherDetails?.[field] && (
+                      <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
+                        (Existing file - upload new to replace)
+                      </Typography>
+                    )}
+                  </Typography>
+                  <input
+                    type="file"
+                    accept={field === "photoUrl" ? "image/*" : "image/*,application/pdf"}
+                    onChange={handleFileChange(field)}
+                  />
+                  {formik.errors[field] && (
+                    <Typography color="error" sx={{ mt: 1 }}>
+                      {formik.errors[field]}
                     </Typography>
                   )}
-                </Typography>
-                <input type="file" accept="image/*" onChange={handleFileChange("photoUrl")} />
-                {formik.errors.photoUrl && (
-                  <Typography color="error" sx={{ mt: 1 }}>
-                    {formik.errors.photoUrl}
-                  </Typography>
-                )}
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  Experience Certificate {!isEdit && "*"}
-                  {isEdit && teacherData?.experienceCertificate && (
-                    <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
-                      (Current file exists - upload new to replace)
-                    </Typography>
-                  )}
-                </Typography>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={handleFileChange("experienceCertificate")}
-                />
-                {formik.errors.experienceCertificate && (
-                  <Typography color="error" sx={{ mt: 1 }}>
-                    {formik.errors.experienceCertificate}
-                  </Typography>
-                )}
-              </Box>
-              <Box>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  Identity Verification {!isEdit && "*"}
-                  {isEdit && teacherData?.identityVerification && (
-                    <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
-                      (Current file exists - upload new to replace)
-                    </Typography>
-                  )}
-                </Typography>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={handleFileChange("identityVerification")}
-                />
-                {formik.errors.identityVerification && (
-                  <Typography color="error" sx={{ mt: 1 }}>
-                    {formik.errors.identityVerification}
-                  </Typography>
-                )}
-              </Box>
+                </Box>
+              ))}
             </Box>
 
             <Button

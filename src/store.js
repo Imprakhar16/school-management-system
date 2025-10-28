@@ -5,7 +5,8 @@ import sectionReducer from "./features/section/sectionSlice";
 import classReducer from "./features/class/classSlice";
 import teacherReducer from "./features/teachers/teacherSlice";
 import studentReducer from "./features/students/studentSlice";
-
+import examTypeReducer from "./features/examType/examTypeSlice";
+import dashboardReducer from "./features/dashboard/dashboardSlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -14,6 +15,8 @@ const store = configureStore({
     class: classReducer,
     teacher: teacherReducer,
     student: studentReducer,
+    examType: examTypeReducer,
+    dashboard: dashboardReducer,
   },
 });
 

@@ -28,15 +28,28 @@ export const registerTeacher = async (body) => {
 };
 
 // fetch all teachers -->
-export const fetchAllTeachers = async ({ page, limit, search }) => {
+export const fetchAllTeachers = async ({ page, limit, filters = {} }) => {
   try {
-    const params = { page, limit };
-    if (search) params.search = search;
+    const params = { page, limit, ...filters };
     const response = await axiosInstance.get(API_PATHS.TEACHER.ALL_TEACHERS, { params });
     return response.data;
   } catch (error) {
     showToast({
       message: error.response.data.message || "Failed to fetch teachers",
+      status: "error",
+    });
+    throw error.response?.data || error;
+  }
+};
+
+// Get teacher by Id -->
+export const getTeacher = async (id) => {
+  try {
+    const response = await axiosInstance.get(`${API_PATHS.TEACHER.GET_BY_ID}/${id}`);
+    return response.data;
+  } catch (error) {
+    showToast({
+      message: error.response.data.message || "failed to get teacher",
       status: "error",
     });
     throw error.response?.data || error;

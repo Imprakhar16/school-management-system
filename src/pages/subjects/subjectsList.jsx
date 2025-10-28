@@ -1,13 +1,13 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import useDebounce from "../../hooks/useDebounce";
 import ReusableModal from "../../components/modal";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { fetchAllSubjectsThunk, deleteSubjectThunk } from "../../features/subjects/subjectThunk";
 import { useNavigate, Link } from "react-router-dom";
-import { Box, Button, CircularProgress, Typography, Paper, TextField } from "@mui/material";
+import { Box, Button, Typography, Paper, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { showToast } from "../../components/toaster";
 import TableComponent from "../../components/table";
 import Pagination from "../../components/pagination";
 import ButtonComp from "../../components/button";
@@ -23,50 +23,36 @@ const SubjectsList = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [subjectToDelete, setSubjectToDelete] = useState(null);
 
+  const debouncedSearch = useDebounce(search, 500);
+
   useEffect(() => {
-    dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
-  }, [dispatch, currentPage, itemsPerPage]);
+    const filters = {};
+    if (debouncedSearch.name) filters.name = debouncedSearch.name;
+    if (debouncedSearch.code) filters.code = debouncedSearch.code;
+
+    dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage, filters }));
+  }, [dispatch, currentPage, itemsPerPage, debouncedSearch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSearch({ ...search, [name]: value });
+    setCurrentPage(1); // reset to first page on new search
   };
-
-  const filteredData = useMemo(() => {
-    if (!data) return [];
-    return data.filter(
-      (subject) =>
-        subject?.name?.toLowerCase().includes(search.name.toLowerCase()) &&
-        subject?.code?.toLowerCase().includes(search.code.toLowerCase())
-    );
-  }, [data, search.name, search.code]);
 
   const handleDelete = (_id) => {
     const subject = data.find((subj) => subj._id === _id);
-    if (!subject) {
-      return showToast({ message: "❌ Invalid subject ID!", status: "error" });
-    }
     setSubjectToDelete(subject);
     setModalOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (!subjectToDelete?._id) return;
-    try {
-      await dispatch(deleteSubjectThunk(subjectToDelete._id)).unwrap();
-      showToast({ message: "Subject deleted successfully!", status: "success" });
-      dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
-    } catch (err) {
-      showToast({ message: ` Failed to delete: ${err}`, status: "error" });
-    } finally {
-      setModalOpen(false);
-      setSubjectToDelete(null);
-    }
+    await dispatch(deleteSubjectThunk(subjectToDelete._id)).unwrap();
+    dispatch(fetchAllSubjectsThunk({ page: currentPage, limit: itemsPerPage }));
+    setModalOpen(false);
   };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    dispatch(fetchAllSubjectsThunk({ page: newPage, limit: itemsPerPage }));
   };
 
   const columns = [
@@ -104,7 +90,10 @@ const SubjectsList = () => {
 
   const customRowActions = (subject) => (
     <>
-      <Button size="small" onClick={() => navigate("/addSubject", { state: { subject } })}>
+      <Button
+        size="small"
+        onClick={() => navigate(`/updateSubject/${subject._id}`, { state: { subject } })}
+      >
         <EditIcon />
       </Button>
       <Button size="small" color="error" onClick={() => handleDelete(subject._id)}>
@@ -131,7 +120,7 @@ const SubjectsList = () => {
 
       <TableComponent
         columns={columns}
-        data={filteredData}
+        data={data}
         loading={loading}
         filterRow={{
           name: columns[0].filter,

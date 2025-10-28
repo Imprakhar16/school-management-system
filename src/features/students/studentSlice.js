@@ -4,12 +4,14 @@ import {
   createStudentThunk,
   editStudentThunk,
   deleteStudentThunk,
+  fetchStudentByIdThunk,
 } from "./studentsThunk";
 
 const fetchStudentSlice = createSlice({
   name: "students",
   initialState: {
     students: [],
+    studentDetail: null,
     loading: false,
     error: null,
     totalPages: null,
@@ -30,6 +32,19 @@ const fetchStudentSlice = createSlice({
         state.totalStudents = action.payload.meta.totalStudents;
       })
       .addCase(fetchStudentThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.error;
+      })
+
+      .addCase(fetchStudentByIdThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchStudentByIdThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.studentDetail = action.payload.studentDetails;
+      })
+      .addCase(fetchStudentByIdThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.error;
       })

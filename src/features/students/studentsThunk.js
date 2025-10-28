@@ -5,16 +5,29 @@ import {
   createStudentService,
   editStudentService,
   deleteStudentService,
+  fetchStudentById,
 } from "../../services/studentServices";
 
 export const fetchStudentThunk = createAsyncThunk(
   "student/fetchStudent",
-  async ({ page, limit }, { rejectWithValue }) => {
+  async ({ page, limit, search }, { rejectWithValue }) => {
     try {
-      const response = await fetchStudent(page, limit);
+      const response = await fetchStudent(page, limit, search);
       return response;
     } catch (err) {
       return rejectWithValue("Students Fetch failed", err);
+    }
+  }
+);
+
+export const fetchStudentByIdThunk = createAsyncThunk(
+  "student/fetchStudentById",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await fetchStudentById(id);
+      return response;
+    } catch (err) {
+      return rejectWithValue("Student fetch failed", err);
     }
   }
 );

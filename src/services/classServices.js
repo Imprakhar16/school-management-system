@@ -2,15 +2,33 @@ import { showToast } from "../components/toaster";
 import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 
-export const classList = async ({ page, limit }) => {
+export const classList = async (page, limit, search = {}) => {
   try {
-    const response = await axiosInstance.get(
-      `${API_PATHS.ClASS.CLASS_LIST}?page=${page}&limit=${limit}`
-    );
+    const params = { page, limit, ...search };
+
+    Object.keys(params).forEach((key) => {
+      if (params[key] === "" || params[key] === undefined) {
+        delete params[key];
+      }
+    });
+
+    const response = await axiosInstance.get(`${API_PATHS.ClASS.CLASS_LIST}`, { params });
     return response.data;
   } catch (err) {
     showToast({
-      message: err.message,
+      message: err.response?.data?.message || "Fetch class failed",
+      status: "error",
+    });
+  }
+};
+
+export const classDetail = async (id) => {
+  try {
+    const response = await axiosInstance.get(`${API_PATHS.ClASS.CLASS_BY_ID}/${id}`);
+    return response.data;
+  } catch (err) {
+    showToast({
+      message: err.response?.data?.message || "Fetch class detail failed",
       status: "error",
     });
   }
@@ -26,7 +44,7 @@ export const createClass = async (body) => {
     return response.data;
   } catch (err) {
     showToast({
-      message: err.message,
+      message: err.response?.data?.message || "Class create failed",
       status: "error",
     });
   }
@@ -58,7 +76,7 @@ export const deleteClass = async (id) => {
     return response.data;
   } catch (err) {
     showToast({
-      message: err.message,
+      message: err.response?.data?.message || "Delete class failed",
       status: "error",
     });
   }

@@ -4,17 +4,22 @@ import { useNavigate } from "react-router-dom";
 import { Tooltip, Paper, Typography, Box, IconButton, TextField, Button } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import { classListThunk, deleteClassThunk } from "../../features/class/classThunk";
+import { fetchSectionsThunk } from "../../features/section/sectionThunk";
+import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
+import { fetchAllTeachersThunk } from "../../features/teachers/teacherThunk";
 import ButtonComp from "../../components/button";
 import TableComponent from "../../components/table";
 import { renderArrayChips } from "../../helper/renderHelper";
+import { convertToIds } from "../../helper/filterHelper.js";
 import Pagination from "../../components/pagination";
 import AddIcon from "@mui/icons-material/Add";
 import ReusableModal from "../../components/modal";
 import { showToast } from "../../components/toaster";
+import useDebounce from "../../hooks/useDebounce";
 
 export default function ClassList() {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(5);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState(null);
@@ -23,16 +28,33 @@ export default function ClassList() {
   const dispatch = useDispatch();
   const { classes, loading, totalPages, totalCount } = useSelector((state) => state.class);
 
+  const { data: subjects } = useSelector((state) => state.subject);
+  const { sections } = useSelector((state) => state.sections);
+  const { teachers } = useSelector((state) => state.teacher);
+
   const [search, setSearch] = useState({
-    searchClass: "",
-    searchSubject: "",
-    searchSection: "",
-    searchIncharge: "",
+    name: "",
+    subjectsId: "",
+    sectionId: "",
+    classincharge: "",
   });
 
+  const debouncedSearch = useDebounce(search, 500);
+
   useEffect(() => {
-    dispatch(classListThunk({ page, limit }));
-  }, [dispatch, limit, page]);
+    dispatch(fetchSectionsThunk(1, 100));
+    dispatch(fetchAllSubjectsThunk(1, 100));
+    dispatch(fetchAllTeachersThunk(1, 100));
+  }, [dispatch]);
+
+  useEffect(() => {
+    const filters = convertToIds(debouncedSearch, {
+      subjects,
+      sections,
+      teachers,
+    });
+    dispatch(classListThunk({ page, limit, search: filters }));
+  }, [dispatch, limit, page, debouncedSearch, subjects, sections, teachers]);
 
   const handleDelete = (id) => {
     setSelectedClassId(id);
@@ -44,7 +66,6 @@ export default function ClassList() {
     dispatch(deleteClassThunk(selectedClassId))
       .unwrap()
       .then(() => {
-        showToast({ status: "success", message: "Class deleted successfully" });
         dispatch(classListThunk({ page, limit: limit }));
       })
       .catch((error) => {
@@ -88,23 +109,6 @@ export default function ClassList() {
         row.classincharge ? `${row.classincharge.firstname} ${row.classincharge.lastname}` : "N/A",
     },
   ];
-
-  const filteredData = classes?.filter((e) => {
-    return (
-      (!search.searchClass ||
-        String(e.name).toLowerCase().includes(search.searchClass.toLowerCase())) &&
-      (!search.searchSubject ||
-        e.subjects?.some((sub) =>
-          String(sub.code).toLowerCase().includes(search.searchSubject.toLowerCase())
-        )) &&
-      (!search.searchSection ||
-        e.sections?.some((sec) =>
-          sec.name.toLowerCase().includes(search.searchSection.toLowerCase())
-        )) &&
-      (!search.searchIncharge ||
-        e.classIncharge?.firstname?.toLowerCase().includes(search.searchIncharge.toLowerCase()))
-    );
-  });
   return (
     <Paper sx={{ p: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
@@ -123,15 +127,15 @@ export default function ClassList() {
 
       <TableComponent
         columns={columns}
-        data={filteredData}
+        data={classes}
         loading={loading}
         onChange={handleChange}
         filterRow={{
           name: (
             <TextField
               placeholder="Search Class"
-              name="searchClass"
-              value={search.searchClass}
+              name="name"
+              value={search.name}
               onChange={handleChange}
               size="small"
               fullWidth
@@ -140,8 +144,8 @@ export default function ClassList() {
           subjects: (
             <TextField
               placeholder="Search Subject"
-              name="searchSubject"
-              value={search.searchSubject}
+              name="subjectsId"
+              value={search.subjectsId}
               onChange={handleChange}
               size="small"
               fullWidth
@@ -150,8 +154,8 @@ export default function ClassList() {
           sections: (
             <TextField
               placeholder="Search Section"
-              name="searchSection"
-              value={search.searchSection}
+              name="sectionId"
+              value={search.sectionId}
               onChange={handleChange}
               size="small"
               fullWidth
@@ -160,8 +164,8 @@ export default function ClassList() {
           classincharge: (
             <TextField
               placeholder="Search Incharge"
-              name="searchIncharge"
-              value={search.searchIncharge}
+              name="classincharge"
+              value={search.classincharge}
               onChange={handleChange}
               size="small"
               fullWidth
@@ -172,10 +176,7 @@ export default function ClassList() {
           <>
             <Box sx={{ display: "flex", columnGap: 2 }}>
               <Tooltip title="Edit Section">
-                <IconButton
-                  color="primary"
-                  onClick={() => navigate("/create-class", { state: { classData: row } })}
-                >
+                <IconButton color="primary" onClick={() => navigate(`/editClass/${row._id}`)}>
                   <Edit />
                 </IconButton>
               </Tooltip>

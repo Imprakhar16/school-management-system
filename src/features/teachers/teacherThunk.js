@@ -4,6 +4,7 @@ import {
   registerTeacher,
   updateTeacher,
   deleteTeacher,
+  getTeacher,
 } from "../../services/teacherServices";
 
 //Register
@@ -22,14 +23,28 @@ export const registerTeacherThunk = createAsyncThunk(
 //Fetch All Tearchers
 export const fetchAllTeachersThunk = createAsyncThunk(
   "subject/fetchAllTeachers",
-  async ({ page, limit, search }, { rejectWithValue }) => {
+  async ({ page, limit, filters }, { rejectWithValue }) => {
     try {
-      const response = await fetchAllTeachers({ page, limit, search });
-
+      const response = await fetchAllTeachers({ page, limit, filters });
       return response;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || error.message || "Failed to fetch subjects"
+      );
+    }
+  }
+);
+
+// Get teacher
+export const getTeacherThunk = createAsyncThunk(
+  "teacher/getTeacher",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await getTeacher(id);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Failed to get teacher"
       );
     }
   }

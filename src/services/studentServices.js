@@ -1,12 +1,22 @@
-import React from "react";
 import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 import { showToast } from "../components/toaster";
 
-export const fetchStudent = async (page, limit) => {
-  const response = await axiosInstance.get(
-    `${API_PATHS.STUDENT.ALL_STUDENTS}?page=${page}&limit=${limit}`
-  );
+export const fetchStudent = async (page, limit, filters = {}) => {
+  const params = { page, limit, ...filters };
+
+  Object.keys(params).forEach((key) => {
+    if (params[key] === "" || params[key] === undefined) {
+      delete params[key];
+    }
+  });
+
+  const response = await axiosInstance.get(`${API_PATHS.STUDENT.ALL_STUDENTS}`, { params });
+  return response.data;
+};
+
+export const fetchStudentById = async (id) => {
+  const response = await axiosInstance.get(`${API_PATHS.STUDENT.STUDENTS_BY_ID}/${id}`);
   return response.data;
 };
 
@@ -21,7 +31,7 @@ export const createStudentService = async (formData) => {
   } catch (err) {
     showToast({
       status: "error",
-      message: err.message || "Failed creating student",
+      message: err.response?.data?.message || "Failed creating student",
     });
   }
 };
@@ -37,7 +47,7 @@ export const editStudentService = async (id, update) => {
   } catch (error) {
     showToast({
       status: "error",
-      message: error.message || "Failed Updating student",
+      message: error.response?.data?.message || "Failed Updating student",
     });
   }
 };
@@ -49,7 +59,7 @@ export const deleteStudentService = async (id) => {
   } catch (err) {
     showToast({
       status: "error",
-      message: err.message || "Failed deleting student",
+      message: err.response?.data?.message || "Failed deleting student",
     });
   }
 };

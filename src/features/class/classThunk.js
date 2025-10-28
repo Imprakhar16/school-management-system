@@ -1,14 +1,32 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { createClass, classList, editClass, deleteClass } from "../../services/classServices";
+import {
+  createClass,
+  classList,
+  editClass,
+  deleteClass,
+  classDetail,
+} from "../../services/classServices";
 
 export const classListThunk = createAsyncThunk(
   "class/classList",
-  async ({ page, limit }, { rejectWithValue }) => {
+  async ({ page, limit, search }, { rejectWithValue }) => {
     try {
-      const response = await classList({ page, limit });
+      const response = await classList(page, limit, search);
       return response;
     } catch (err) {
       return rejectWithValue("class Fetch Failed", err);
+    }
+  }
+);
+
+export const classDetailThunk = createAsyncThunk(
+  "class/classDetail",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await classDetail(id);
+      return response;
+    } catch (err) {
+      return rejectWithValue("Class detail fetch failed", err);
     }
   }
 );

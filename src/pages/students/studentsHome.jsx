@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, Paper, TextField, Typography, IconButton, Tooltip } from "@mui/material";
+import { Box, Paper, TextField, Typography, IconButton, Tooltip, MenuItem } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
 import { showToast } from "../../components/toaster";
@@ -10,6 +10,10 @@ import TableComponent from "../../components/table";
 import Pagination from "../../components/pagination";
 import { useNavigate } from "react-router-dom";
 import ReusableModal from "../../components/modal";
+import useDebounce from "../../hooks/useDebounce";
+import { classListThunk } from "../../features/class/classThunk";
+import { fetchSectionsThunk } from "../../features/section/sectionThunk";
+import { convertToIds } from "../../helper/filterHelper";
 
 const StudentsHome = () => {
   const dispatch = useDispatch();
@@ -18,6 +22,8 @@ const StudentsHome = () => {
   const [limit, setLimit] = useState(10);
 
   const { students, loading, totalPages, totalStudents } = useSelector((state) => state.student);
+  const { classes } = useSelector((state) => state.class);
+  const { sections } = useSelector((state) => state.sections);
   const [deleteStudentModal, setDeleteStudentModal] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
 
@@ -28,12 +34,25 @@ const StudentsHome = () => {
     parentname: "",
     gender: "",
     email: "",
-    class: "",
-    section: "",
+    classId: "",
+    sectionId: "",
+    isActive: "",
   });
+
+  const debouncedSearch = useDebounce(search, 500);
+
   useEffect(() => {
-    dispatch(fetchStudentThunk({ page, limit }));
-  }, [dispatch, page, limit]);
+    dispatch(classListThunk(1, 100));
+    dispatch(fetchSectionsThunk(1, 50));
+  }, [dispatch]);
+
+  useEffect(() => {
+    const filters = convertToIds(debouncedSearch, {
+      classes,
+      sections,
+    });
+    dispatch(fetchStudentThunk({ page, limit, search: filters }));
+  }, [dispatch, page, limit, debouncedSearch, classes, sections]);
 
   const columns = [
     { field: "rollNo", headerName: "ROLLNO" },
@@ -52,27 +71,21 @@ const StudentsHome = () => {
       headerName: "SECTION",
       render: (row) => (row.section?.name ? row.section.name : "-"),
     },
+    {
+      field: "isActive",
+      headerName: "STATUS",
+      render: (row) =>
+        row.isActive === true ? "Active" : row.isActive === false ? "Inactive" : "-",
+    },
   ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSearch({
       ...search,
-      [name]: value.toLowerCase(),
+      [name]: value,
     });
   };
-
-  const filteredData = students?.filter(
-    (s) =>
-      String(s.rollNo)?.includes(search.rollNo) &&
-      s.firstname?.toLowerCase().includes(search.firstname) &&
-      s.lastname?.toLowerCase().includes(search.lastname) &&
-      s.parentname?.toLowerCase().includes(search.parentname) &&
-      s.gender.toLowerCase().includes(search.gender) &&
-      s.email.toLowerCase().includes(search.email) &&
-      String(s.class?.name)?.includes(search.class) &&
-      s.section?.name.toLowerCase().includes(search.section)
-  );
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -118,7 +131,7 @@ const StudentsHome = () => {
 
       <TableComponent
         columns={columns}
-        data={filteredData}
+        data={students}
         loading={loading}
         filterRow={{
           rollNo: (
@@ -184,8 +197,8 @@ const StudentsHome = () => {
           class: (
             <TextField
               placeholder="Search Class"
-              name="class"
-              value={search.class}
+              name="classId"
+              value={search.classId}
               onChange={handleChange}
               size="small"
               fullWidth
@@ -194,12 +207,27 @@ const StudentsHome = () => {
           section: (
             <TextField
               placeholder="Search Section"
-              name="section"
-              value={search.section}
+              name="sectionId"
+              value={search.sectionId}
               onChange={handleChange}
               size="small"
               fullWidth
             />
+          ),
+          isActive: (
+            <TextField
+              select
+              placeholder="Search Status"
+              name="isActive"
+              value={search.isActive}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="true">Active</MenuItem>
+              <MenuItem value="false">Inactive</MenuItem>
+            </TextField>
           ),
         }}
         customRowActions={(row) => (
@@ -209,7 +237,7 @@ const StudentsHome = () => {
                 <IconButton
                   color="primary"
                   onClick={() => {
-                    navigate("/create-student", { state: { studentData: row } });
+                    navigate(`/editStudent/${row._id}`, { state: { studentData: row } });
                   }}
                 >
                   <Edit />

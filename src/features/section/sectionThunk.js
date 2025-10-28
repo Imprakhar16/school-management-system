@@ -24,6 +24,17 @@ export const createSectionThunk = createAsyncThunk(
   }
 );
 
+export const getSectionDetailThunk = createAsyncThunk(
+  "sections/getById",
+  async (sectionId, { rejectWithValue }) => {
+    try {
+      const data = await sectionService.getSectionDetail(sectionId);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
 export const deleteSectionThunk = createAsyncThunk(
   "sections/deleteSection",
   async (sectionId, { rejectWithValue }) => {

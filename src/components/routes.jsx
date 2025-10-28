@@ -12,8 +12,12 @@ import StudentForm from "../pages/students/createStudents.jsx";
 import ClassList from "../pages/class/classList.jsx";
 import AddClass from "../pages/class/addClass.jsx";
 import SectionHome from "../pages/section/sectionsHome.jsx";
-import SectionForm from "../pages/section/createSection.jsx";
+import SectionForm from "../pages/section/sectionForm.jsx";
 import Home from "../pages/dashboard/dashboard.jsx";
+import About from "../pages/about/about.jsx";
+import ExamTypeList from "../pages/examination/examTypeList.jsx";
+import CreateExamType from "../pages/examination/createExamType.jsx";
+import CreateExam from "../pages/examination/createExam.jsx";
 
 export const privateRoutes = [
   {
@@ -31,6 +35,12 @@ export const privateRoutes = [
   {
     name: "CreateStudents",
     path: "/create-student",
+    element: <StudentForm />,
+    showInSidebar: false,
+  },
+  {
+    name: "EditStudent",
+    path: "/editStudent/:id",
     element: <StudentForm />,
     showInSidebar: false,
   },
@@ -65,14 +75,26 @@ export const privateRoutes = [
     showInSidebar: false,
   },
   {
+    name: "EditClass",
+    path: "/editClass/:id",
+    element: <AddClass />,
+    showInSidebar: false,
+  },
+  {
     name: "Section",
     path: "/sections",
     element: <SectionHome />,
     showInSidebar: true,
   },
   {
-    name: "Section",
-    path: "/sections/form",
+    name: "Section-add",
+    path: "/sections/add",
+    element: <SectionForm />,
+    showInSidebar: false,
+  },
+  {
+    name: "Section-edit",
+    path: "/sections/edit/:id",
     element: <SectionForm />,
     showInSidebar: false,
   },
@@ -83,9 +105,21 @@ export const privateRoutes = [
     showInSidebar: false,
   },
   {
+    name: "Examination Type",
+    path: "/exam-type",
+    element: <ExamTypeList />,
+    showInSidebar: true,
+  },
+  {
+    name: "CreateExam Type",
+    path: "/createExam-type",
+    element: <CreateExamType />,
+    showInSidebar: false,
+  },
+  {
     name: "About",
     path: "/about",
-    element: <h1>About</h1>,
+    element: <About />,
     showInSidebar: true,
   },
   {
@@ -95,12 +129,23 @@ export const privateRoutes = [
     showInSidebar: false,
   },
   {
+    name: "Update-Teacher",
+    path: "/updateTeacher/:id",
+    element: <TeacherRegistration />,
+    showInSidebar: false,
+  },
+  {
     name: "Add-Subject",
     path: "/addSubject",
     element: <AddSubject />,
     showInSidebar: false,
   },
-  // Add other private routes here as needed
+  {
+    name: "Update-Subject",
+    path: "/updateSubject/:id",
+    element: <AddSubject />,
+    showInSidebar: false,
+  },
 ];
 
 export const publicRoutes = [
