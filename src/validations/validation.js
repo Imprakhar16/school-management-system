@@ -99,6 +99,21 @@ export const studentSchema = Yup.object().shape({
     .required("Contact is required"),
 });
 
+export const editStudentSchema = Yup.object().shape({
+  firstname: Yup.string().required("First name is required"),
+  lastname: Yup.string().required("Last name is required"),
+  parentname: Yup.string().required("Father name is required"),
+  email: Yup.string().email("Invalid email"),
+  rollNo: Yup.number().required("Roll number is required"),
+  gender: Yup.string().required("Gender is required"),
+  class: Yup.string().required("Class is required"),
+  section: Yup.string().required("Section is required"),
+  phoneNumber: Yup.string()
+    .min(10, "Min 10 numbers required")
+    .max(10, "Max 10 numbers")
+    .required("Contact is required"),
+});
+
 export const examTypeSchema = Yup.object().shape({
   name: Yup.string().required("Name is required"),
 });

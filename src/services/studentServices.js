@@ -1,12 +1,22 @@
-import React from "react";
 import { axiosInstance } from "../helper/axiosInterceptors";
 import API_PATHS from "./apiEndpoints";
 import { showToast } from "../components/toaster";
 
-export const fetchStudent = async (page, limit) => {
-  const response = await axiosInstance.get(
-    `${API_PATHS.STUDENT.ALL_STUDENTS}?page=${page}&limit=${limit}`
-  );
+export const fetchStudent = async (page, limit, filters = {}) => {
+  const params = { page, limit, ...filters };
+
+  Object.keys(params).forEach((key) => {
+    if (params[key] === "" || params[key] === undefined) {
+      delete params[key];
+    }
+  });
+
+  const response = await axiosInstance.get(`${API_PATHS.STUDENT.ALL_STUDENTS}`, { params });
+  return response.data;
+};
+
+export const fetchStudentById = async (id) => {
+  const response = await axiosInstance.get(`${API_PATHS.STUDENT.STUDENTS_BY_ID}/${id}`);
   return response.data;
 };
 

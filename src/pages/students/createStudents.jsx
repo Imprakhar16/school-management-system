@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { showToast } from "../../components/toaster";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Button,
@@ -21,40 +21,77 @@ import {
   InputLabel,
 } from "@mui/material";
 import { classListThunk } from "../../features/class/classThunk";
-import { createStudentThunk, editStudentThunk } from "../../features/students/studentsThunk";
+import {
+  createStudentThunk,
+  editStudentThunk,
+  fetchStudentByIdThunk,
+} from "../../features/students/studentsThunk";
 import ButtonComp from "../../components/button";
-import { studentSchema } from "../../validations/validation";
+import { editStudentSchema, studentSchema } from "../../validations/validation";
 
 const genderOptions = ["male", "female", "other"];
 
 const StudentForm = () => {
+  const [studentData, setStudentData] = useState(null);
   const { classes } = useSelector((state) => state.class);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const location = useLocation();
-  const studentData = location.state?.studentData;
-  const [aadharFile, setAadharFile] = useState(studentData?.identityVerification || null);
-  const [photoFile, setPhotoFile] = useState(studentData?.photoUrl || null);
+  const { id } = useParams();
+  const [aadharFile, setAadharFile] = useState();
+  const [photoFile, setPhotoFile] = useState();
+
+  useEffect(() => {
+    if (studentData) {
+      setAadharFile(studentData.identityVerification || null);
+      setPhotoFile(studentData.photoUrl || null);
+    }
+  }, [studentData]);
 
   useEffect(() => {
     dispatch(classListThunk({ page: 1, limit: 100 }));
   }, [dispatch]);
 
+  useEffect(() => {
+    const getData = async () => {
+      if (id) {
+        const response = await dispatch(fetchStudentByIdThunk(id));
+        const data = response.payload?.studentDetails;
+        if (data) setStudentData(data);
+      }
+    };
+    getData();
+  }, [id, dispatch]);
+
+  const initialValues = id
+    ? {
+        firstname: studentData?.firstname || "",
+        lastname: studentData?.lastname || "",
+        parentname: studentData?.parentname || "",
+        email: studentData?.email || "",
+        rollNo: studentData?.rollNo || null,
+        gender: studentData?.gender || "",
+        class: studentData?.class || "",
+        section: studentData?.section || "",
+        phoneNumber: studentData?.phoneNumber || "",
+        isActive: studentData?.isActive ?? true,
+      }
+    : {
+        firstname: "",
+        lastname: "",
+        parentname: "",
+        email: "",
+        rollNo: "",
+        gender: "",
+        password: "",
+        class: "",
+        section: "",
+        phoneNumber: "",
+        isActive: true,
+      };
+
   const formik = useFormik({
-    initialValues: {
-      firstname: studentData?.firstname || "",
-      lastname: studentData?.lastname || "",
-      parentname: studentData?.parentname || "",
-      email: studentData?.email || "",
-      rollNo: studentData?.rollNo || null,
-      gender: studentData?.gender || "",
-      password: studentData?.password || "",
-      class: studentData?.class?._id || "",
-      section: studentData?.section?._id || "",
-      phoneNumber: studentData?.phoneNumber || "",
-      isActive: true,
-    },
-    validationSchema: studentSchema,
+    initialValues,
+    validationSchema: id ? editStudentSchema : studentSchema,
     validateOnChange: true,
     validateOnBlur: true,
     enableReinitialize: true,
@@ -72,14 +109,19 @@ const StudentForm = () => {
       if (photoFile instanceof File) formData.append("photoUrl", photoFile);
       if (aadharFile instanceof File) formData.append("identityVerification", aadharFile);
 
-      if (studentData) {
-        await dispatch(editStudentThunk({ id: studentData._id, update: formData })).then(() => {
-          (navigate("/students"),
-            showToast({
-              status: "success",
-              message: "Student updated successfully!",
-            }));
-        });
+      if (id) {
+        await dispatch(editStudentThunk({ id, update: formData }))
+          .unwrap()
+          .then(() => {
+            (navigate("/students"),
+              showToast({
+                status: "success",
+                message: "Student updated successfully!",
+              }));
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       } else {
         await dispatch(createStudentThunk(formData))
           .unwrap()
@@ -89,6 +131,12 @@ const StudentForm = () => {
                 status: "success",
                 message: "Student created successfully!",
               }));
+          })
+          .catch(() => {
+            showToast({
+              status: "error",
+              message: "Failed to create student!",
+            });
           });
       }
     },
@@ -273,7 +321,10 @@ const StudentForm = () => {
                   label="Class"
                   name="class"
                   value={formik.values.class}
-                  onChange={formik.handleChange}
+                  onChange={(e) => {
+                    formik.setFieldValue("class", e.target.value);
+                    formik.setFieldValue("section", "");
+                  }}
                   onBlur={formik.handleBlur}
                   error={formik.touched.class && Boolean(formik.errors.class)}
                   helperText={formik.touched.class && formik.errors.class}
@@ -351,18 +402,20 @@ const StudentForm = () => {
                   helperText={formik.touched.email && formik.errors.email}
                 />
 
-                <TextField
-                  fullWidth
-                  label="Password"
-                  name="password"
-                  type="password"
-                  placeholder="Minimum 6 characters"
-                  value={formik.values.password}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.password && Boolean(formik.errors.password)}
-                  helperText={formik.touched.password && formik.errors.password}
-                />
+                {!id && (
+                  <TextField
+                    fullWidth
+                    label="Password"
+                    name="password"
+                    type="password"
+                    placeholder="Minimum 6 characters"
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.password && Boolean(formik.errors.password)}
+                    helperText={formik.touched.password && formik.errors.password}
+                  />
+                )}
               </Box>
             </Box>
 

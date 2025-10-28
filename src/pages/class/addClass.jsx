@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import {
   Box,
@@ -16,9 +16,13 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ButtonComp from "../../components/button";
-import { createClassThunk, editClassThunk } from "../../features/class/classThunk";
+import {
+  classDetailThunk,
+  createClassThunk,
+  editClassThunk,
+} from "../../features/class/classThunk";
 import { fetchSectionsThunk } from "../../features/section/sectionThunk";
 import { fetchAllSubjectsThunk } from "../../features/subjects/subjectThunk";
 import { fetchAllTeachersThunk } from "../../features/teachers/teacherThunk";
@@ -27,19 +31,30 @@ import { addClassSchema } from "../../validations/validation";
 export default function AddClass() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
-  const classData = location.state?.classData; //For edit
+  const { id } = useParams();
+  const [classData, setClassData] = useState(null);
 
   const { sections } = useSelector((state) => state.sections);
   const { data } = useSelector((state) => state.subject);
   const { teachers } = useSelector((state) => state.teacher);
 
+  useEffect(() => {
+    const getData = async () => {
+      if (id) {
+        const response = await dispatch(classDetailThunk(id));
+        const data = response.payload?.classDetails;
+        if (data) setClassData(data);
+      }
+    };
+    getData();
+  }, [id, dispatch]);
+
   const formik = useFormik({
     initialValues: {
       name: classData?.name || "",
-      subjects: classData?.subjects?.map((s) => s._id) || [],
-      sections: classData?.sections?.map((s) => s._id) || [],
-      classincharge: classData?.classincharge?._id || "",
+      subjects: classData?.subjects?.map((s) => s) || [],
+      sections: classData?.sections?.map((s) => s) || [],
+      classincharge: classData?.classincharge || "",
     },
     validationSchema: addClassSchema,
     enableReinitialize: true,
