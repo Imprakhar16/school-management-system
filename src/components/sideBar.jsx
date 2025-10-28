@@ -16,7 +16,6 @@ import {
   Dashboard,
   School,
   People,
-  Book,
   Assignment,
   EventNote,
   Settings,
@@ -30,7 +29,6 @@ import {
 
 const drawerWidth = 280;
 
-// Icon mapping for routes
 const iconMap = {
   home: <Home />,
   dashboard: <Dashboard />,
@@ -91,11 +89,20 @@ export default function SideBar({ open, onClose }) {
           },
         }}
       >
-        <IconButton onClick={onClose} sx={{ color: "#fff", alignSelf: "flex-end", m: 1 }}>
-          <Close />
-        </IconButton>
-        {/* Navigation Links */}
-        <List sx={{ px: 2, pt: 3 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            pr: 1,
+            pt: 1,
+          }}
+        >
+          <IconButton onClick={onClose} sx={{ color: "#fff" }}>
+            <Close />
+          </IconButton>
+        </Box>
+
+        <List sx={{ px: 2, pt: 1 }}>
           {privateRoutes
             .filter((route) => route.showInSidebar)
             .map((route) => {
