@@ -87,7 +87,7 @@ const SectionForm = () => {
             id="name"
             name="name"
             label="Section Name"
-            value={loading ? "" : formik.values.name}
+            value={loading ? "" : isEditMode ? formik.values.name : ""}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             error={formik.touched.name && Boolean(formik.errors.name)}

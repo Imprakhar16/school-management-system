@@ -30,8 +30,8 @@ export default function AddSubject() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: subjectDetails?.name || "",
-      code: subjectDetails?.code || "",
+      name: loading ? "" : isEdit ? subjectDetails?.name : "",
+      code: loading ? "" : isEdit ? subjectDetails?.code : "",
     },
     validationSchema: loading ? null : subjectSchema,
     onSubmit: (values) => {
