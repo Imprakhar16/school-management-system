@@ -118,9 +118,6 @@ const StudentForm = () => {
                 status: "success",
                 message: "Student updated successfully!",
               }));
-          })
-          .catch((err) => {
-            console.log(err);
           });
       } else {
         await dispatch(createStudentThunk(formData))

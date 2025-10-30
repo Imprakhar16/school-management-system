@@ -201,7 +201,7 @@ const TeacherRegistration = () => {
                 fullWidth
                 label="First Name"
                 name="firstname"
-                value={formik.values.firstname}
+                value={loading ? "" : isEdit ? formik.values.firstname : ""}
                 onChange={formik.handleChange}
                 error={!!formik.errors.firstname}
                 helperText={formik.errors.firstname}
@@ -211,7 +211,7 @@ const TeacherRegistration = () => {
                 fullWidth
                 label="Last Name"
                 name="lastname"
-                value={formik.values.lastname}
+                value={loading ? "" : isEdit ? formik.values.lastname : ""}
                 onChange={formik.handleChange}
                 error={!!formik.errors.lastname}
                 helperText={formik.errors.lastname}
@@ -221,7 +221,7 @@ const TeacherRegistration = () => {
                 fullWidth
                 label="Employee ID"
                 name="EmpId"
-                value={formik.values.EmpId}
+                value={loading ? "" : isEdit ? formik.values.EmpId : ""}
                 onChange={formik.handleChange}
                 error={!!formik.errors.EmpId}
                 helperText={formik.errors.EmpId}
@@ -233,7 +233,7 @@ const TeacherRegistration = () => {
               <RadioGroup
                 row
                 name="gender"
-                value={formik.values.gender}
+                value={loading ? "" : isEdit ? formik.values.gender : ""}
                 onChange={formik.handleChange}
               >
                 <FormControlLabel value="male" control={<Radio />} label="Male" />
@@ -256,7 +256,7 @@ const TeacherRegistration = () => {
                 <Select
                   labelId="subjects-label"
                   multiple
-                  value={formik.values.subjects}
+                  value={loading ? [] : isEdit ? formik.values.subjects : []}
                   onChange={(e) => formik.setFieldValue("subjects", e.target.value)}
                   input={<OutlinedInput label="Select Subjects" />}
                   renderValue={(selected) => (
@@ -293,7 +293,7 @@ const TeacherRegistration = () => {
                 fullWidth
                 label="Email"
                 name="email"
-                value={formik.values.email}
+                value={loading ? "" : isEdit ? formik.values.email : ""}
                 onChange={formik.handleChange}
                 error={!!formik.errors.email}
                 helperText={formik.errors.email}
@@ -304,7 +304,7 @@ const TeacherRegistration = () => {
                 fullWidth
                 label="Phone Number"
                 name="phoneNumber"
-                value={formik.values.phoneNumber}
+                value={loading ? "" : isEdit ? formik.values.phoneNumber : ""}
                 onChange={formik.handleChange}
                 error={!!formik.errors.phoneNumber}
                 helperText={formik.errors.phoneNumber}
@@ -316,7 +316,7 @@ const TeacherRegistration = () => {
                   label="Password"
                   name="password"
                   type="password"
-                  value={formik.values.password}
+                  value={loading ? "" : isEdit ? formik.values.password : ""}
                   onChange={formik.handleChange}
                   error={!!formik.errors.password}
                   helperText={formik.errors.password}
@@ -351,7 +351,7 @@ const TeacherRegistration = () => {
                 label="Experience Start"
                 name="experienceStart"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.experienceStart}
+                value={loading ? "" : isEdit ? formik.values.experienceStart : ""}
                 onChange={formik.handleChange}
                 error={!!formik.errors.experienceStart}
                 helperText={formik.errors.experienceStart}
@@ -363,7 +363,7 @@ const TeacherRegistration = () => {
                 label="Experience End"
                 name="experienceEnd"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.experienceEnd}
+                value={loading ? "" : isEdit ? formik.values.experienceEnd : ""}
                 onChange={formik.handleChange}
                 error={!!formik.errors.experienceEnd}
                 helperText={formik.errors.experienceEnd}
@@ -375,7 +375,7 @@ const TeacherRegistration = () => {
                 rows={3}
                 label="Experience Details"
                 name="experienceDetails"
-                value={formik.values.experienceDetails}
+                value={loading ? "" : isEdit ? formik.values.experienceDetails : ""}
                 onChange={formik.handleChange}
                 error={!!formik.errors.experienceDetails}
                 helperText={formik.errors.experienceDetails}
