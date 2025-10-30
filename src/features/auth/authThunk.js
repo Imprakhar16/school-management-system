@@ -8,7 +8,7 @@ export const loginThunk = createAsyncThunk("auth/login", async (body, { rejectWi
   } catch (error) {
     return rejectWithValue(error.response?.data || error.message || "Login Failed");
   }
-});
+}); 
 
 export const forgotPasswordThunk = createAsyncThunk(
   "auth/forgot-password",
