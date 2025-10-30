@@ -19,7 +19,7 @@ const StudentsHome = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(5);
 
   const { students, loading, totalPages, totalStudents } = useSelector((state) => state.student);
   const { classes } = useSelector((state) => state.class);

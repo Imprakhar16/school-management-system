@@ -19,7 +19,6 @@ export const useAbortController = () => {
       return result;
     } catch (err) {
       if (err.name === "CanceledError" || err.name === "AbortError") {
-        console.log("Request Cancelled");
         return null;
       }
       setError(err);
